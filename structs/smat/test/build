@@ -1,1 +1,0 @@
-gcc test_smat_physics.c ../smat_physics.c -I../ -I../../../debug/include/ -I../../../include/ ../../../tokens/tokens.c -I../../../tokens ../../../debug/*.c
