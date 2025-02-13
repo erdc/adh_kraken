@@ -77,7 +77,7 @@ int squad_segment_alloc_init(SQUAD **quad_seg) {
     }
     
 #ifdef _DEBUG
-    tl_check_all_pickets(__FILE__,__LINE__);
+    if (DEBUG) tl_check_all_pickets(__FILE__,__LINE__);
 #endif
     
     return 0;

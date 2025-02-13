@@ -36,19 +36,15 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // allocate the grid
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    char grid_filename[80];
-    strcpy(grid_filename,root_filename);
-    strcat(grid_filename, ".geo");
     (*pgrid) = (SGRID *) tl_alloc(sizeof(SGRID), 1);
     SGRID *g = *pgrid; // alias
-    strcpy(g->filename,grid_filename);
+
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // allocate MPI on this grid
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     g->smpi = (SMPI *) tl_alloc(sizeof(SMPI), 1);
     g->part_smpi = NULL;
     g->part_map = NULL;
-    g->inv_per_node = NULL;
     smpi_defaults(g->smpi);
 #ifndef _MESSG
     smpi_init(g->smpi);
@@ -63,21 +59,20 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // open the grid file
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#ifdef _DEBUG
-    if (myid == 0) printf("\n-- Opening Grid File: %s\n",grid_filename);
-#endif
+    SFILE gf;
+    char fn[MAXLINE], mode[MAXLINE] = "r";
+    if (ext_match(root_filename,".geo")) {strcpy(fn,root_filename);} 
+    else {strcpy(fn,concat(root_filename,".geo"));}
+    sfile_open(&gf,fn,NULL,NULL,NULL,mode,TRUE);
+    strcpy(g->filename,fn);
+    FILE *fp = gf.fp;
     
-    // Check to see if grid file exists
-    FILE *fp = NULL;
-    if (doesFileExist(grid_filename)) {
-        fp = fopen(grid_filename, "r");
-    } else {
-        tl_error("ERROR: Geo file does not exist!\n");
-    }
-    
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Does the grid have a columnar component?
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     g->columnar = false;
     g->ndim = 2; // default to 2D grid
+    strcpy(g->type,"UNSTRUCTURED");
     while ((read = getline(&line, &len, fp)) != -1) {
         token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
         if (strcmp(token, "GRID") == 0) {
@@ -123,7 +118,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         } else if (strcmp(token, "ELEMS_TET") == 0) {
             sscanf(line_save, "%s %d",cdum,&(g->macro_nTets));
         } else if (strcmp(token, "ELEMS_PRISM") == 0) {
-            sscanf(line_save, "%s %d",cdum,&(g->macro_nQuads));
+            sscanf(line_save, "%s %d",cdum,&(g->macro_nPrisms));
         }
     }
 
@@ -132,8 +127,10 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->macro_nelems3d = g->macro_nTets + g->macro_nPrisms;
 
     assert(g->macro_nnodes > 0);
-    assert(g->macro_nnodes_sur > 0);
-    assert(g->macro_nnodes_bed > 0);
+    if (g->macro_nTets > 0 || g->macro_nPrisms > 0) {
+        assert(g->macro_nnodes_sur > 0);
+        assert(g->macro_nnodes_bed > 0);
+    }
     assert(g->macro_nelems1d + g->macro_nelems2d + g->macro_nelems3d > 0);
     rewind(fp);
     
@@ -402,7 +399,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->my_nnodes_sur = 0; g->nnodes_sur = 0;
     g->my_nnodes_bed = 0; g->nnodes_bed = 0;
     for (i=0; i<g->nnodes; i++) {
-        if (myid==0) printf("PE: %d || bflag: %d || gid: %d || node PE: %d\n",myid,g->node[i].bflag,g->node[i].gid,g->node[i].resident_pe);
+        //if (myid==0) printf("PE: %d || bflag: %d || gid: %d || node PE: %d\n",myid,g->node[i].bflag,g->node[i].gid,g->node[i].resident_pe);
         if (g->node[i].bflag == SURFACE) {
             g->nnodes_sur++;
             if (g->node[i].resident_pe == myid) {
@@ -426,7 +423,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->max_nnodes_bed = g->nnodes_bed;
     g->nnodes_sur_old = g->nnodes_sur;
     g->nnodes_bed_old = g->nnodes_bed;
-    printf("PE: %d || g->my_nnodes_sur: %d || g->my_nnodes_bed: %d \n",myid,g->my_nnodes_sur,g->my_nnodes_bed);
+    //printf("PE: %d || g->my_nnodes_sur: %d || g->my_nnodes_bed: %d \n",myid,g->my_nnodes_sur,g->my_nnodes_bed);
     
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // calculate total grid length, area, and/or volume over all PEs
@@ -461,7 +458,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     }
     
 #ifdef _DEBUG
-    if (myid == 0) printf("\n-- Finished reading geo file: %s\n",grid_filename);
+    if (DEBUG && myid == 0) printf("\n-- Finished reading geo file: %s\n",root_filename);
 #endif
 }
 
@@ -690,4 +687,3 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
     
     return 1;
 }
-

@@ -56,12 +56,12 @@ FILE * io_fopen(const char *filename, const char *mode, const int abort)
  */
 FILE * io_fopen_prep_ds(SMODEL_SUPER *mod, const char *filename, const int ps_flag, const int grid_flag)
 {
-  FILE *fp = NULL;
+  // FILE *fp = NULL;
   
-  assert(filename);
-  fp = io_fopen(filename, "w", TRUE);
-  print_header(mod, fp, ps_flag);
-  return fp;
+  // assert(filename);
+  // fp = io_fopen(filename, "w", TRUE);
+  // print_header(mod, fp, ps_flag);
+  // return fp;
 }
 
 /*!
@@ -77,13 +77,13 @@ FILE * io_fopen_prep_ds(SMODEL_SUPER *mod, const char *filename, const int ps_fl
  */
 FILE * io_fopen_prep_ds_index(SMODEL_SUPER *mod, const char *filename, const int ps_flag, const int index, const int grid_flag)
 {
-  FILE *fp = NULL;
+  // FILE *fp = NULL;
   
-  assert(filename);
-  fp = io_fopen(filename, "w", TRUE);
-  mod->itrns = index;
-  print_header(mod, fp, ps_flag);
-  return fp;
+  // assert(filename);
+  // fp = io_fopen(filename, "w", TRUE);
+  // mod->itrns = index;
+  // print_header(mod, fp, ps_flag);
+  // return fp;
 }
 
 /*!
@@ -189,34 +189,34 @@ char * build_filename3(char *res, const int buffer_size, const char *base,
                 otherwise continue on and hope for the best.
    \return TRUE on success
  */
-int io_read_error(SIO io, const char *msg, const int abort)
-{ 
-  int myid;
-#ifdef _MESSG
-  myid = messg_comm_rank(cstorm_comm); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD);
-#else
-  myid = 0;
-#endif
+// int io_read_error(SIO io, const char *msg, const int abort)
+// { 
+//   int myid;
+// #ifdef _MESSG
+//   myid = messg_comm_rank(cstorm_comm); // cjt :: only works for 1 grid in CSTORM :: MPI_COMM_WORLD);
+// #else
+//   myid = 0;
+// #endif
 
-  assert(strlen(msg));
-  if (myid <= 0)
-    {
-      if (strlen(io.cur_filename) && strlen(io.cur_line))
-        {
-          fprintf(stderr, " %s\n The file line (in \"%s\") was:\n   %s", msg, io.cur_filename, io.cur_line);
-        }
-      else
-        {
-          /* the filename and line were not saved prior to calling this error */
-          fprintf(stderr, " %s", msg);
-        }
-    }
-  if (abort)
-    {
-      exit(0);
-    }
-  return TRUE;
-}
+//   assert(strlen(msg));
+//   if (myid <= 0)
+//     {
+//       if (strlen(io.cur_filename) && strlen(io.cur_line))
+//         {
+//           fprintf(stderr, " %s\n The file line (in \"%s\") was:\n   %s", msg, io.cur_filename, io.cur_line);
+//         }
+//       else
+//         {
+//           /* the filename and line were not saved prior to calling this error */
+//           fprintf(stderr, " %s", msg);
+//         }
+//     }
+//   if (abort)
+//     {
+//       exit(0);
+//     }
+//   return TRUE;
+// }
 
 /*!
    \brief Copy the file name and file line being processed.
@@ -229,38 +229,38 @@ int io_read_error(SIO io, const char *msg, const int abort)
    \param[in] line The current line
    \return TRUE on success
  */
-int io_save_line(SIO *io, FILE *fp, const char *filename, const char *line)
-{
-  if (filename)
-    {
-      strncpy(io->cur_filename, filename, MAXLINE);
-    }
-  else
-    {
-      sprintf(io->cur_filename, " "); /* cjt */
-    }
-  if (line)
-    {
-      strncpy(io->cur_line, line, MAXLINE);
-    }
-  else
-    {
-      sprintf(io->cur_line, " "); /* cjt */
-    }
+// int io_save_line(SIO *io, FILE *fp, const char *filename, const char *line)
+// {
+//   if (filename)
+//     {
+//       strncpy(io->cur_filename, filename, MAXLINE);
+//     }
+//   else
+//     {
+//       sprintf(io->cur_filename, " "); /* cjt */
+//     }
+//   if (line)
+//     {
+//       strncpy(io->cur_line, line, MAXLINE);
+//     }
+//   else
+//     {
+//       sprintf(io->cur_line, " "); /* cjt */
+//     }
 
-  /* perform a check to ensure that the buffer was big enough to get the
-     entire file line */
-  if (fp && !feof(fp) && line && strlen(line) && !strchr(line, '\n'))
-    {
-      /* MAXLINE should be increased if file is valid and we reach this */
-      char msg[MAXLINE];
-      sprintf(msg, "File line is longer than the internal buffer; Can only read "
-        "first %d characters of line.", MAXLINE);
-      io_read_error(*io, msg, TRUE);
-      return FALSE;
-    }
-  return TRUE;
-}
+//   /* perform a check to ensure that the buffer was big enough to get the
+//      entire file line */
+//   if (fp && !feof(fp) && line && strlen(line) && !strchr(line, '\n'))
+//     {
+//       /* MAXLINE should be increased if file is valid and we reach this */
+//       char msg[MAXLINE];
+//       sprintf(msg, "File line is longer than the internal buffer; Can only read "
+//         "first %d characters of line.", MAXLINE);
+//       io_read_error(*io, msg, TRUE);
+//       return FALSE;
+//     }
+//   return TRUE;
+// }
 
 /*!
    \brief Strip comments from file line
@@ -273,13 +273,13 @@ int io_save_line(SIO *io, FILE *fp, const char *filename, const char *line)
  */
 int strip_comments(char *fileline)
 {
-  char *ptr = strpbrk(fileline, COMMENT_CHARACTERS);
+  // char *ptr = strpbrk(fileline, COMMENT_CHARACTERS);
   
-  if (ptr)
-    {
-      *ptr = '\0';
-    }
-  return strlen(fileline);
+  // if (ptr)
+  //   {
+  //     *ptr = '\0';
+  //   }
+  // return strlen(fileline);
 }
 
 /*!

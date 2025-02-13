@@ -105,10 +105,15 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         nnodes = grid->elem3d[j].nnodes;
         //pull all global information to local memory
         mat_id = elem3d_physics_mat_id[j];
+
+        // cjt -- changed
         //Get stuff from physics mat
-        nvars_elem = elem3d_physics_mat[mat_id].nvar;
+        nvars_elem = elem3d_physics_mat[mat_id].ivars.n;
+
+        // cjt -- will need to be fixex
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, elem3d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, elem3d_physics_mat[mat_id].vars, nvars_elem);
+
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -152,10 +157,15 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         nnodes = grid->elem2d[j].nnodes;
         //pull all global information to local memory
         mat_id = elem2d_physics_mat_id[j];
+
+        // cjt -- changed
         //Get stuff from physics mat
-        nvars_elem = elem2d_physics_mat[mat_id].nvar;
+        nvars_elem = elem2d_physics_mat[mat_id].ivars.n;
+
+        // cjt -- will need to be fixed
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, elem2d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, elem2d_physics_mat[mat_id].vars, nvars_elem);
+
         //printf("elemental variables copied\n");
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
@@ -200,10 +210,15 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         nnodes = grid->elem1d[j].nnodes;
         //pull all global information to local memory
         mat_id = elem1d_physics_mat_id[j];
+
+        // cjt -- changed
         //Get stuff from physics mat
-        nvars_elem = elem1d_physics_mat[mat_id].nvar;
+        nvars_elem = elem1d_physics_mat[mat_id].ivars.n;
+
+        // cjt -- will need to be fixed
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, elem1d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, elem1d_physics_mat[mat_id].vars, nvars_elem);
+
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -275,9 +290,16 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         //pull all global information to local memory
         mat_id = elem3d_physics_mat_id[j];
         //Get stuff from physics mat
-        nvars_elem = elem3d_physics_mat[mat_id].nvar;
+
+
+        // cjt -- had to jack with
+        nvars_elem = elem3d_physics_mat[mat_id].ivars.n;
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, elem3d_physics_mat[mat_id].vars, nvars_elem);
+        
+        // cjt -- this will need to be changed!
+        //sarray_copy_int(elem_vars, elem3d_physics_mat[mat_id].vars, nvars_elem);
+
+
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -322,10 +344,16 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         nnodes = grid->elem2d[j].nnodes;
         //pull all global information to local memory
         mat_id = elem2d_physics_mat_id[j];
+        
         //Get stuff from physics mat
-        nvars_elem = elem2d_physics_mat[mat_id].nvar;
+        // cjt -- changed
+        nvars_elem = elem2d_physics_mat[mat_id].ivars.n;
+        
+        // cjt -- will need to be fixed
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, elem2d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, elem2d_physics_mat[mat_id].vars, nvars_elem);
+        
+
         //printf("elemental variables copied\n");
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
@@ -371,10 +399,16 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         nnodes = grid->elem1d[j].nnodes;
         //pull all global information to local memory
         mat_id = elem1d_physics_mat_id[j];
+
+        // cjt -- changed
         //Get stuff from physics mat
-        nvars_elem = elem1d_physics_mat[mat_id].nvar;
+        nvars_elem = elem1d_physics_mat[mat_id].ivars.n;
+        
+        // cjt -- will need to be fixed
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, elem1d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, elem1d_physics_mat[mat_id].vars, nvars_elem);
+        
+
         ndofs_ele = nnodes*nvars_elem;
         //for residual we only need dof numbers local to process (including ghost nodes)
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine

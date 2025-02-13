@@ -108,12 +108,12 @@ int advance_time(SMODEL_DESIGN *dm, int nsuper){
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int update_dt(SMODEL_DESIGN *dm){
 	//advances time
-	dm->t_prev+=dm->dt;
+	dm->ts.t_prev+=dm->ts.dt;
 
 	//need to add a check and swap to new dt if necessary
 	//dm->dt_old = dm->dt
 
-	if(dm->t_prev >= dm->t_final){
+	if(dm->ts.t_prev >= dm->ts.t_final){
 		return FALSE;
 	}
 

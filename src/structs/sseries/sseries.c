@@ -43,6 +43,72 @@ void sseries_init(SSERIES *series) {
 
 /***********************************************************/
 /***********************************************************/
+SSERIES *sseries_read_allocate(SSERIES *head, SSERIES *curr, int type, char **token, int nnodes) {
+
+  int ientry, ivalue;
+  double sx = 0.0, sy = 0.0;
+
+  int id = get_next_token_int(token); // series ID
+  int nentries = get_next_token_int(token); // # of series entries
+
+  // get 2D station location if needed
+  if (type == WAVE_SERIES || type == WIND_SERIES) {
+    sx = get_next_token_dbl(token);
+    sy = get_next_token_dbl(token);
+  };
+
+  // get input and output units
+  int in_units = get_next_token_int(token); // input units
+  int out_units = get_next_token_int(token); // output units
+  sdt_check_units(in_units,out_units);
+
+  SSERIES *s;
+  sseries_alloc(&s, nentries, type, nnodes);
+  s->id = id;
+  s->nnodes = nnodes;
+  s->size = nentries;
+  if (type == WAVE_SERIES || type == WIND_SERIES) {
+    s->station->x = sx;
+    s->station->y = sy;
+  };
+
+  for (ientry=0; ientry < s->size; ientry++) {
+    s->entry[ientry].time  = get_next_token_dbl(token);
+    s->entry[ientry].time *= sdt_get_conversion_factor(in_units,TO);
+
+    for (ivalue=0; ivalue < s->nvalues; ivalue++) {
+      s->entry[ientry].value[ivalue] = get_next_token_dbl(token);
+    } 
+  }
+
+  sdt_check_units(in_units,out_units); // sanity check
+
+  for (ivalue=0; ivalue < s->nvalues; ivalue++) {
+    // Calculate slopes
+    for (ientry=1; ientry < s->size; ientry++) {
+      s->entry[ientry - 1].slope[0] = 
+      (s->entry[ientry].value[0] - s->entry[ientry - 1].value[0]) / 
+      (s->entry[ientry].time     - s->entry[ientry - 1].time);
+    } 
+    // Calculate areas
+    for (ientry=0; ientry < s->size-1; ientry++) {
+      s->entry[ientry].area[0] = tc_trap_area(s->entry[ientry].value[0], 
+        s->entry[ientry +  1].value[0], s->entry[ientry].time, s->entry[ientry + 1].time);
+    }
+  }
+
+  if (type != DT_SERIES && type != OUTPUT_SERIES) {
+    // if not a specialized list add to linked list
+    sseries_add(s, &(head), &(curr), TRUE);
+    return NULL;
+  } else {
+    return s;
+  }
+
+}
+
+/***********************************************************/
+/***********************************************************/
 /* series allocation */
 void sseries_alloc(SSERIES **series, int nentries, int type, int nnodes) {
   int i = 0, j = 0;
@@ -58,10 +124,10 @@ void sseries_alloc(SSERIES **series, int nentries, int type, int nnodes) {
   // allocate the entries of the time-series
   (*series)->nvalues = 1;
   if(type == WIND_SERIES) {
-    (*series)->nvalues = 2;	// tauX, tauY
+    (*series)->nvalues = 2; // tauX, tauY
   }
   else if (type == WAVE_SERIES) {
-    (*series)->nvalues = 3;	// Sxx, Sxy, Syy
+    (*series)->nvalues = 3; // Sxx, Sxy, Syy
   }
 
   // allocate interpolated value
@@ -188,13 +254,6 @@ void sseries_check(SSERIES series) {
 
   int ientry;
 
-  // cjt :: since series is passed by copy, it is never null
-  //if(&series == NULL) {
-  //  printf("\nSERIES %d ERROR\n", series.id);	//sseries_print(series);
-  //  printf("Error (file:line) %s:%d\n", __FILE__, __LINE__);
-  //  tl_error(">> trying to initialize a series that is not allocated!");
-  //}
-
   if(series.size <= 0) {
     printf("\nSERIES %d ERROR\n", series.id);
     sseries_printScreen(series, 0);
@@ -209,21 +268,6 @@ void sseries_check(SSERIES series) {
     tl_error(">> series type is not supported!");
   }
 
-/*  if(series.infact < SECONDS || series.infact > WEEKS) {
-    printf("\nSERIES %d ERROR\n", series.id);
-    sseries_printScreen(series, 0);
-    printf("Error (file:line) %s:%d\n", __FILE__, __LINE__);
-    printf("series.infact is %f but must be between %d and %d \n", series.infact, SECONDS, WEEKS);
-    tl_error(">> series input time units are invalid!");
-  }
-
-  if(series.outfact < SECONDS || series.outfact > WEEKS) {
-    printf("\nSERIES %d ERROR\n", series.id);
-    sseries_printScreen(series, 0);
-    printf("Error (file:line) %s:%d\n", __FILE__, __LINE__);
-    tl_error(">> series output time units are invalid!");
-  }
-*/
   if(series.nvalues < 1 || series.nvalues > 3) {
     printf("\nSERIES %d ERROR\n", series.id);
     sseries_printScreen(series, 0);
@@ -660,31 +704,29 @@ SSERIES *sseries_extract(SSERIES *head, int id) {
     return series_new;
 }
 
-/***********************************************************/
-/***********************************************************/
-int sseries_read_id(SIO io, char **data, int nseries) {
-  /* gets and checks the series number */
-  int isers = read_int_field_custom(io, data, NULL, "series ID", UNSET_INT, TRUE);
-  if (isers > nseries || isers < 1) {
-    io_read_error(io, "The specified series does not exist.", TRUE);
-  }
-  isers--;
+// /***********************************************************/
+// /***********************************************************/
+// int sseries_read_id(SIO io, char **data, int nseries) {
+//   /* gets and checks the series number */
+//   int isers = read_int_field_custom(io, data, NULL, "series ID", UNSET_INT, TRUE);
+//   if (isers > nseries || isers < 1) {
+//     io_read_error(io, "The specified series does not exist.", TRUE);
+//   }
+//   isers--;
 
-  return (isers);
-}
+//   return (isers);
+// }
 
 /***********************************************************/
 /***********************************************************/
-int sseries_set_type(SMODEL_SUPER *mod, char **subdata, int type) {
+void sseries_set_type(SSERIES *series_head, int iseries, char **subdata, int type) {
     SSERIES *sers = NULL;
-    int iseries = sseries_read_id(*(mod->io), subdata, mod->nseries);
-    sers = sseries_search(iseries, NULL, mod->series_head);
+    sers = sseries_search(iseries, NULL, series_head);
     if (sers == NULL) {
         printf("Error (file:line) %s:%d\n", __FILE__, __LINE__);
         tl_error(">> cannot find series id! (Check series numbers in BC strings - AWRITE is not included in list) \n");
     }
     sers->type = type;
-    return iseries;
 }
 
 /***********************************************************/

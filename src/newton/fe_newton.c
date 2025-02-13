@@ -308,7 +308,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //    if(myid==0)printf("\n%s_%d TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0],index, sm->t_prev, sm->dt, (100.0 * (sm->t_prev - sm->t_init) / (sm->t_final - sm->t_init)), it + 1);} /* gkc warning come back later and fix use of submodel[0]. */
         //else{
             if(myid==0){
-                printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0], *(sm->t_prev), *(sm->dt), (100.0 * (*(sm->t_prev) - *(sm->t_init)) / (*(sm->t_final) - *(sm->t_init))), it + 1);
+                printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0], sm->ts->t_prev, sm->ts->dt, (100.0 * (sm->ts->t_prev - sm->ts->t_init) / (sm->ts->t_final - sm->ts->t_init)), it + 1);
             }
         //}
         
@@ -877,7 +877,7 @@ int fe_newton(SMODEL_SUPER* sm)
         /* we are forcing it to accept the result at the max nonlinear iteration */
         if (sm->force_nonlin_it == YES) return (TRUE);
         
-        tc_scale(sm->dt
+        tc_scale(&sm->ts->dt
 #ifdef _MESSG
                  , supersmpi->ADH_COMM
 #endif

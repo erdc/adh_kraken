@@ -75,7 +75,7 @@ int newton_test(int argc, char **argv) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
+	smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
 	//printf("NDOFS %d\n",dm.ndofs[0]);
 	//printf("Supermodel no read complete\n");
 	//sketch_csr_sparsity(dm.lin_sys);
@@ -130,7 +130,7 @@ int newton_test(int argc, char **argv) {
 	printf("SETTING UP BCMASK\n");
 
 	// intialize dirichlet and old sol (initial guess)
-	for (int local_index=0; local_index<dm.ndofs[0]; local_index++){
+	for (int local_index=0; local_index<sm->ndofs[0]; local_index++){
 
 		dm.superModel[0].dirichlet_data[local_index] = 0.0;
 		dm.superModel[0].sol_old[local_index] = 20.0;
@@ -204,7 +204,9 @@ int newton_test(int argc, char **argv) {
 
 	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
 	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
-	global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat);
+	
+	// cjt -- commented out for now
+	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat);
 
 //	for(int i=0; i<nnodes;i++){
 //		printf("before perm sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);

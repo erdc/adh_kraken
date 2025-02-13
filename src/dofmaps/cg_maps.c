@@ -24,61 +24,61 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS **node_physics_mat){
 
-    int i,j,k,save_k,ctr, nodeID, current_nodal_nvars,offset, temp_nodal_var;
-    int current_var;
-#ifdef _DEBUG
-    bool isFound;
-#endif
-    ctr =0;
-    save_k=-1;
-    //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
+//     int i,j,k,save_k,ctr, nodeID, current_nodal_nvars,offset, temp_nodal_var;
+//     int current_var;
+// #ifdef _DEBUG
+//     bool isFound;
+// #endif
+//     ctr =0;
+//     save_k=-1;
+//     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
 
-    //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
+//     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
 
-    for (i=0; i<nnodes; i++){
-        offset=0;
-        nodeID=local_node_ids[i];
-        //may need to adjust in parallel? shouldnt if node ids local to process
-//        for(l=0;l<nodeID;l++){
-//            nodal_mat_ID = nodal_physics_mat_id[l];
-//            offset+=node_physics_mat[nodal_mat_ID].nvar;
-//        }
-        offset=fmaplocal[nodeID];
-        //now for current node
-        //nodal_mat_ID = nodal_physics_mat_id[nodeID];
-        //on this node get nodal vars
-        //need to iron this out, this is a 2d array of ints , nnodes x nvar
-        //int current_nodal_vars = *nodal_vars[local_node_ids[i]];
-        //current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
-        current_nodal_nvars = node_physics_mat[nodeID]->nvar;
-        for (j=0; j<elem_nvars; j++){
-            //map the current var from the residual to the correct var number in global residual
-#ifdef _DEBUG
-            isFound=FALSE;
-#endif
-            current_var = elem_vars[j];
+//     for (i=0; i<nnodes; i++){
+//         offset=0;
+//         nodeID=local_node_ids[i];
+//         //may need to adjust in parallel? shouldnt if node ids local to process
+// //        for(l=0;l<nodeID;l++){
+// //            nodal_mat_ID = nodal_physics_mat_id[l];
+// //            offset+=node_physics_mat[nodal_mat_ID].nvar;
+// //        }
+//         offset=fmaplocal[nodeID];
+//         //now for current node
+//         //nodal_mat_ID = nodal_physics_mat_id[nodeID];
+//         //on this node get nodal vars
+//         //need to iron this out, this is a 2d array of ints , nnodes x nvar
+//         //int current_nodal_vars = *nodal_vars[local_node_ids[i]];
+//         //current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
+//         current_nodal_nvars = node_physics_mat[nodeID]->nvar;
+//         for (j=0; j<elem_nvars; j++){
+//             //map the current var from the residual to the correct var number in global residual
+// #ifdef _DEBUG
+//             isFound=FALSE;
+// #endif
+//             current_var = elem_vars[j];
 
-            //loop through the nodal vars to look for match
-            for(k=0;k<current_nodal_nvars;k++){
-                temp_nodal_var = node_physics_mat[nodeID]->vars[k];
-                //note current_nodal_vars depends on i
-                if(current_var == temp_nodal_var){
-#ifdef _DEBUG
-                    isFound=TRUE;
-#endif
-                    save_k = k;
-                    break;
-                }
+//             //loop through the nodal vars to look for match
+//             for(k=0;k<current_nodal_nvars;k++){
+//                 temp_nodal_var = node_physics_mat[nodeID]->vars[k];
+//                 //note current_nodal_vars depends on i
+//                 if(current_var == temp_nodal_var){
+// #ifdef _DEBUG
+//                     isFound=TRUE;
+// #endif
+//                     save_k = k;
+//                     break;
+//                 }
 
-            }
-            //for debugging
-#ifdef _DEBUG
-            assert(isFound);
-#endif
-            local_dofs[ctr] =  offset + save_k;
-            ctr+=1;
-        }
-    }
+//             }
+//             //for debugging
+// #ifdef _DEBUG
+//             assert(isFound);
+// #endif
+//             local_dofs[ctr] =  offset + save_k;
+//             ctr+=1;
+//         }
+//     }
 
 }
 
@@ -104,56 +104,56 @@ void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
 
-    int i,j,k,l,save_k,ctr,nodal_mat_ID, nodeID, current_var,current_nodal_nvars,offset, temp_nodal_var;
-#ifdef _DEBUG
-    bool isFound;
-#endif
-    ctr =0;
+//     int i,j,k,l,save_k,ctr,nodal_mat_ID, nodeID, current_var,current_nodal_nvars,offset, temp_nodal_var;
+// #ifdef _DEBUG
+//     bool isFound;
+// #endif
+//     ctr =0;
     
 
-    //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
+//     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
 
-    for (i=0; i<nnodes; i++){
-        offset=0;
-        nodeID=local_node_ids[i];
-        //may need to adjust in parallel? shouldnt if node ids local to process
-        for(l=0;l<nodeID;l++){
-            nodal_mat_ID = nodal_physics_mat_id[l];
-            offset+=node_physics_mat[nodal_mat_ID].nvar;
-        }
-        //now for current node
-        nodal_mat_ID = nodal_physics_mat_id[nodeID];
-        //on this node get nodal vars
-        //need to iron this out, this is a 2d array of ints , nnodes x nvar
-        //int current_nodal_vars = *nodal_vars[local_node_ids[i]];
-        current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
-        for (j=0; j<elem_nvars; j++){
-            //map the current var from the residual to the correct var number in global residual
-#ifdef _DEBUG
-            isFound=FALSE;
-#endif
-            current_var = elem_vars[j];
+//     for (i=0; i<nnodes; i++){
+//         offset=0;
+//         nodeID=local_node_ids[i];
+//         //may need to adjust in parallel? shouldnt if node ids local to process
+//         for(l=0;l<nodeID;l++){
+//             nodal_mat_ID = nodal_physics_mat_id[l];
+//             offset+=node_physics_mat[nodal_mat_ID].nvar;
+//         }
+//         //now for current node
+//         nodal_mat_ID = nodal_physics_mat_id[nodeID];
+//         //on this node get nodal vars
+//         //need to iron this out, this is a 2d array of ints , nnodes x nvar
+//         //int current_nodal_vars = *nodal_vars[local_node_ids[i]];
+//         current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
+//         for (j=0; j<elem_nvars; j++){
+//             //map the current var from the residual to the correct var number in global residual
+// #ifdef _DEBUG
+//             isFound=FALSE;
+// #endif
+//             current_var = elem_vars[j];
 
-            //loop through the nodal vars to look for match
-            for(k=0;k<current_nodal_nvars;k++){
-                temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
-                //note current_nodal_vars depends on i
-                if(current_var == temp_nodal_var){
-#ifdef _DEBUG
-                    isFound=TRUE;
-#endif
-                    save_k = k;
-                    break;
-                }
+//             //loop through the nodal vars to look for match
+//             for(k=0;k<current_nodal_nvars;k++){
+//                 temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
+//                 //note current_nodal_vars depends on i
+//                 if(current_var == temp_nodal_var){
+// #ifdef _DEBUG
+//                     isFound=TRUE;
+// #endif
+//                     save_k = k;
+//                     break;
+//                 }
 
-            }
-#ifdef _DEBUG
-            assert(isFound);
-#endif
-            local_dofs[ctr] =  offset + save_k;
-            ctr+=1;
-        }
-    }
+//             }
+// #ifdef _DEBUG
+//             assert(isFound);
+// #endif
+//             local_dofs[ctr] =  offset + save_k;
+//             ctr+=1;
+//         }
+//     }
 
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -177,39 +177,39 @@ void get_cell_dofs_2(int *local_dofs, int nnodes, int *local_node_ids ,int elem_
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS **node_physics_mat){
 
-    int k,save_k, current_nodal_nvars, temp_nodal_var;
-#ifdef _DEBUG
-    bool isFound;
-#endif
-    int offset=0;
-    save_k=-1;
+//     int k,save_k, current_nodal_nvars, temp_nodal_var;
+// #ifdef _DEBUG
+//     bool isFound;
+// #endif
+//     int offset=0;
+//     save_k=-1;
     
-    //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
+//     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
     
-    //may need to adjust in parallel? shouldnt if node ids local to process
-    offset=fmaplocal[NodeID];
-    //now current node
-    current_nodal_nvars = node_physics_mat[NodeID]->nvar;
-    //map the current var and node to the correct equation number in global residual
-#ifdef _DEBUG
-    isFound=FALSE;
-#endif
-    //loop through the nodal vars to look for match
-    for(k=0;k<current_nodal_nvars;k++){
-        temp_nodal_var = node_physics_mat[NodeID]->vars[k];
-        if(var == temp_nodal_var){
-#ifdef _DEBUG
-            isFound=TRUE;
-#endif
-            save_k = k;
-            break;
-        }
+//     //may need to adjust in parallel? shouldnt if node ids local to process
+//     offset=fmaplocal[NodeID];
+//     //now current node
+//     current_nodal_nvars = node_physics_mat[NodeID]->nvar;
+//     //map the current var and node to the correct equation number in global residual
+// #ifdef _DEBUG
+//     isFound=FALSE;
+// #endif
+//     //loop through the nodal vars to look for match
+//     for(k=0;k<current_nodal_nvars;k++){
+//         temp_nodal_var = node_physics_mat[NodeID]->vars[k];
+//         if(var == temp_nodal_var){
+// #ifdef _DEBUG
+//             isFound=TRUE;
+// #endif
+//             save_k = k;
+//             break;
+//         }
 
-    }
-#ifdef _DEBUG
-    assert(isFound);
-#endif
-    return offset + save_k;
+//     }
+// #ifdef _DEBUG
+//     assert(isFound);
+// #endif
+//     return offset + save_k;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -231,43 +231,43 @@ int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS **node_physics_
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int get_cg_dof_2(int var, int NodeID, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id){
 
-    int k,l,save_k, nodal_mat_ID, current_nodal_nvars, temp_nodal_var;
-#ifdef _DEBUG
-    bool isFound;
-#endif
-    int offset=0;
-    save_k=-1;
+//     int k,l,save_k, nodal_mat_ID, current_nodal_nvars, temp_nodal_var;
+// #ifdef _DEBUG
+//     bool isFound;
+// #endif
+//     int offset=0;
+//     save_k=-1;
     
-    //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
+//     //fmap will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
     
-    //may need to adjust in parallel? shouldnt if node ids local to process
-    for(l=0;l<NodeID;l++){
-        nodal_mat_ID = nodal_physics_mat_id[l];
-        offset+=node_physics_mat[nodal_mat_ID].nvar;
-    }
-    //now current node
-    nodal_mat_ID = nodal_physics_mat_id[NodeID];
-    current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
-    //map the current var and node to the correct equation number in global residual
-#ifdef _DEBUG
-    isFound=FALSE;
-#endif
-    //loop through the nodal vars to look for match
-    for(k=0;k<current_nodal_nvars;k++){
-        temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
-        if(var == temp_nodal_var){
-#ifdef _DEBUG
-            isFound=TRUE;
-#endif
-            save_k = k;
-            break;
-        }
+//     //may need to adjust in parallel? shouldnt if node ids local to process
+//     for(l=0;l<NodeID;l++){
+//         nodal_mat_ID = nodal_physics_mat_id[l];
+//         offset+=node_physics_mat[nodal_mat_ID].nvar;
+//     }
+//     //now current node
+//     nodal_mat_ID = nodal_physics_mat_id[NodeID];
+//     current_nodal_nvars = node_physics_mat[nodal_mat_ID].nvar;
+//     //map the current var and node to the correct equation number in global residual
+// #ifdef _DEBUG
+//     isFound=FALSE;
+// #endif
+//     //loop through the nodal vars to look for match
+//     for(k=0;k<current_nodal_nvars;k++){
+//         temp_nodal_var = node_physics_mat[nodal_mat_ID].vars[k];
+//         if(var == temp_nodal_var){
+// #ifdef _DEBUG
+//             isFound=TRUE;
+// #endif
+//             save_k = k;
+//             break;
+//         }
 
-    }
-#ifdef _DEBUG
-    assert(isFound);
-#endif
-    return offset + save_k;
+//     }
+// #ifdef _DEBUG
+//     assert(isFound);
+// #endif
+//     return offset + save_k;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

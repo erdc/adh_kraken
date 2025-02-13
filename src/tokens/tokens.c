@@ -5,24 +5,26 @@
 
 #include "adh.h"
 
-static char delim[] = " ";
+static char delim[] = " \t\n";
 
 void get_token(char *line, char **token) {
     (*token) = strtok(line,delim);
     if (*token == NULL) return;
-    token[strcspn((*token), "\r\n")] = 0;
+    //token[strcspn((*token), "\r\n")] = 0;
 }
+
 
 void get_next_token(char **token) {
     (*token) = strtok(NULL,delim);
     if (*token == NULL) return;
-    token[strcspn((*token), "\r\n")] = 0;
+    //token[strcspn((*token), "\r\n")] = 0;
 }
+
 
 int get_next_token_int(char **token) {
     (*token) = strtok(NULL,delim);
     if (*token == NULL) return -999;
-    token[strcspn((*token), "\r\n")] = 0;
+    //token[strcspn((*token), "\r\n")] = 0;
     int itmp;
     sscanf((*token), "%d", &itmp);
     return itmp;
@@ -31,7 +33,7 @@ int get_next_token_int(char **token) {
 double get_next_token_dbl(char **token) {
     (*token) = strtok(NULL,delim);
     if (*token == NULL) return -999;
-    token[strcspn((*token), "\r\n")] = 0;
+    //token[strcspn((*token), "\r\n")] = 0;
     double dtmp;
     sscanf((*token), "%lf", &dtmp);
     return dtmp;

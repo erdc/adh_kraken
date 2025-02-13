@@ -1,6 +1,8 @@
 //#ifndef H_SADH_
 //#define H_SADH_
 
+void print_build_info();
+
 /* standard header files */
 #include <stdio.h>
 #include <math.h>
@@ -23,6 +25,7 @@
 #ifdef _MPI
 #include <mpi.h>
 #endif
+#include "messg.h"
 
 #include "define.h"
 #include "macro.h"
@@ -41,6 +44,8 @@
 //#include "constants.h"
 
 // STRUCTURES
+#include "sdt.h"
+#include "scoverage.h"
 #include "svect2d.h"
 #include "svect.h"
 #include "snode.h"
@@ -57,10 +62,8 @@
 #include "sstr_value.h"
 #include "sgrid.h"
 #include "sarray.h"
-
-
-//Mark adding
 #include "tokens.h"
+#include "sivar_position.h"
 #include "smat_grid.h"
 #include "smat_sw.h"
 #include "smat_gw.h"
@@ -70,19 +73,16 @@
 #include "dofmaps.h"
 #include "sdvar.h"
 #include "ssw.h"
-
-
-//
-//Mark, not sure if this goes here?
-#include "messg.h"
-
-#include "sio.h"
+#include "sfile.h"
 #include "sseries.h"
+#include "smodel.h"
 #include "smodel_super.h"
 #include "smodel_design.h"
 
 #include "model_codes.h"
 #include "models.h"
+
+#include "bc.h"
 
 //Mark added
 #include "residual.h"

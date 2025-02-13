@@ -5,7 +5,7 @@ void tc_init(SMODEL_DESIGN *mod)
 {
   int interval;                 /* the interval of the new time step */
 
-  mod->old_dt = mod->dt;
+  mod->ts.dt_old = mod->ts.dt;
 
   //need to fix this, Mark
 

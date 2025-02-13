@@ -74,16 +74,16 @@ int sw2_wd_test(int argc, char **argv) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
-	printf("NDOFS %d\n",dm.ndofs[0]);
+	smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
+	printf("NDOFS %d\n",dm.superModel[0].ndofs);
 
 	//OVER WRITE TO SW2
-	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_resid = SW2;
-	dm.superModel[0].elem2d_physics_mat[0].model[0].fe_init = SW2;
-	dm.superModel[0].elem2d_physics_mat[0].model[0].nvar = 3;
-    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[0] = PERTURB_H;
-    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[1] = PERTURB_U;
-    dm.superModel[0].elem2d_physics_mat[0].model[0].physics_vars[2] = PERTURB_V;
+	dm.superModel[0].mat_physics_elem[0].model[0].physics = SW2;
+	dm.superModel[0].mat_physics_elem[0].model[0].physics_init = SW2;
+	dm.superModel[0].mat_physics_elem[0].model[0].nvar = 3;
+    dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[0] = PERTURB_H;
+    dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[1] = PERTURB_U;
+    dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[2] = PERTURB_V;
     dm.superModel[0].LINEAR_PROBLEM = NO;
 
     //hack together the sw2 structure
@@ -113,7 +113,7 @@ int sw2_wd_test(int argc, char **argv) {
     printf("dvar?? %d\n",sw->dvar.n_dvar_elem_int);
     //initial conditions and things
     // intialize dirichlet and old sol (initial guess)
-	for (int local_index=0; local_index<dm.ndofs[0]; local_index++){
+	for (int local_index=0; local_index<dm.superModel[0].ndofs; local_index++){
 		dm.superModel[0].dirichlet_data[local_index] = 0.0;
 		dm.superModel[0].sol_old[local_index] = 0.0;
 		dm.superModel[0].sol[local_index] = 0.0;
@@ -291,7 +291,7 @@ double write_testcase_error_wet_dry(SMODEL_SUPER *mod, double initial_grid_mass)
     	vel[inode].y = mod->sol[inode*3+2];
     }
     SFLAGS dummy;
-    double grid_mass_error = tl_find_grid_mass_error_elem2d(mod->density, head, vel, mod->grid, dummy, initial_grid_mass, NULL, NULL, *(mod->dt), &total_time_mass_flux);
+    double grid_mass_error = tl_find_grid_mass_error_elem2d(mod->density, head, vel, mod->grid, dummy, initial_grid_mass, NULL, NULL, mod->ts->dt, &total_time_mass_flux);
     
     printf("Grid mass error %6.4e\n", grid_mass_error);
 

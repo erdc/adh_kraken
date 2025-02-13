@@ -58,13 +58,15 @@ void sseries_setall_ts_values(SSERIES *, double);
 void sseries_set_values_average(SSERIES *, double, double);
 void sseries_setall_ts_valuesAVG(SSERIES *, double, double);
 SSERIES *sseries_extract(SSERIES *, int);
-int sseries_read_id(SIO io, char **data, int);
+//int sseries_read_id(SIO io, char **data, int);
 //int sseries_set_type(SMODEL_SUPER *, char **, int);
+void sseries_set_type(SSERIES *series_head, int iseries, char **subdata, int type);
 int sseries_get_interval(SSERIES, double);
 int series_get_type_count(SSERIES *, int);
 void sseries_set_meteor_stations(SSERIES *, SGRID *, int);
 void series_list_update_values(SSERIES *series_head, double t_prev);
 double series_list_get_value_from_mat(SSERIES *, int);
+SSERIES *sseries_read_allocate(SSERIES *head, SSERIES *curr, int type, char **token, int nnodes);
 
 /***********************************************************/
 /***********************************************************/

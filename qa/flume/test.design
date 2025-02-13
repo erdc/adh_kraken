@@ -1,0 +1,22 @@
+#--------------------
+GRID test.geo
+#--------------------
+COVERAGE test.cover
+#--------------------
+# Time Controls
+#--------------------
+TC T0 0 0
+TC TF 100 0
+
+SERIES DT 1 2 0 0
+0 100
+100 100
+
+SERIES AWRITE 1 1 0 0
+0 86400 .1 0
+#--------------------
+# Coupled Model Setup
+#--------------------
+MONO 1 test_sm1
+MONO 2 test_sm2
+COUPLE 1 2 LAG

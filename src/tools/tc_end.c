@@ -8,7 +8,7 @@ int tc_end(SMODEL_DESIGN *mod)
     double dt_new;              /* the new delta t */
 
     /* check if we are done then return a YES */
-    mod->t_prev += mod->dt;
+    mod->ts.t_prev += mod->ts.dt;
     //mod->t_prev = messg_dmin(t_prev);
 
 //    if (STEADY_STATE) {

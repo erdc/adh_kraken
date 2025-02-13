@@ -1,5 +1,8 @@
+#ifndef H_SFLAGS_
+#define H_SFLAGS_
 
-/* datatype for all model flags */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 typedef struct {
 
@@ -123,4 +126,34 @@ typedef struct {
 
   int FLUX_WEIGHTED_NORMALS; /* Gajanan gkc adding. ON/OFF. Default OFF. Triggered using "NB FLXNML" in bc file. */
 
+  // file output flags
+  int fout_bed_velocity;
+  int fout_surface_velocity;
+  int fout_depth_avg_velocity;
+  int fout_pressure;
+  int fout_grid_speed;
+  int fout_wind;
+  int fout_wave;
+  int fout_hyd_vis; /* GSAVANT */
+  int fout_trn_dif; /* GSAVANT */
+  int fout_chop;
+  int fout_grid2dm;
+  int fout_adaption;
+  int fout_adapt_grid;
+  int fout_adapt_sw;
+  int fout_adapt_ns;
+  int fout_adapt_con;
+  int fout_adapt_sed;
+  int fout_adapt_gw;
+
 } SFLAGS;
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+// Methods
+void sflags_init(SFLAGS *f);
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+#endif
+

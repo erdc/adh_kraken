@@ -21,7 +21,10 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
     //maybe think about this
     //we want/need a local and global mapping (local as in local to PE)
     //maybe encapsulate as a function instead of hardcoding as vector?
-    int* fmap = sm->dof_map_local;
+
+    int* fmap = NULL; //sm->dof_map_local; // cjt -- for now
+    
+
     //zero out stuff
     sarray_init_dbl(sm->lin_sys->residual, *(sm->ndofs));
     //printf("zeroed residual structure\n");
@@ -59,10 +62,12 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         nnodes = grid->elem3d[j].nnodes;
         //maybe this just comes from mat instead
         //nvars_elem = sm->elem3d_nvars[j];
-        mat_id = sm->elem3d_physics_mat_id[j];
-        nvars_elem = sm->elem3d_physics_mat[mat_id].nvar;
-        nphysics_models = sm->elem3d_physics_mat[mat_id].nSubmodels;
-        sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem);
+
+        // cjt -- started jacking with this
+        mat_id = sm->elem3d_physics_mat[j];
+        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
+        //sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem); // cjt -- commented for now
 
         //pull out nodal variables
         //only necessary for CG i believe
@@ -79,9 +84,9 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         for (k=0;k<nphysics_models;k++){
             sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
             
-            nvar_pde = sm->elem3d_physics_mat[mat_id].model[k].nvar;
+            nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
             sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, sm->elem3d_physics_mat[mat_id].model[k].physics_vars,nvar_pde);
+            sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
 
@@ -89,7 +94,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
             //maybe model comes from mat as well? instead of elem number, get mat number
             //var_code = sm->elem3d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->elem3d_physics_mat[mat_id].model[k].fe_resid]);
+            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->mat_physics_elem[mat_id].model[k].physics]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
             add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes,-1.0);
@@ -100,7 +105,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
         //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //get_cell_dofs_2(dofs,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->mat_physics_node);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);
     }
@@ -117,12 +122,17 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //nvars_elem = sm->elem3d_nvars[j];
 
 
-        mat_id = sm->elem2d_physics_mat_id[j];
+        // cjt -- started jacking with this
+        mat_id = sm->elem2d_physics_mat[j];
+        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
+        //sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem); // cjt -- commented for now
 
-        nvars_elem = sm->elem2d_physics_mat[mat_id].nvar;
-        //printf("NVARS ELEM %d\n",nvars_elem);
-        nphysics_models = sm->elem2d_physics_mat[mat_id].nSubmodels;
-        sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem);
+        // mat_id = sm->elem2d_physics_mat_id[j];
+        // nvars_elem = sm->elem2d_physics_mat[mat_id].nvar;
+        // //printf("NVARS ELEM %d\n",nvars_elem);
+        // nphysics_models = sm->elem2d_physics_mat[mat_id].nSubmodels;
+        // sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem);
         //pull out nodal variables
         //only necessary for CG i believe
 
@@ -139,16 +149,16 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         for (k=0;k<nphysics_models;k++){
             sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
             
-            nvar_pde = sm->elem2d_physics_mat[mat_id].model[k].nvar;
+            nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
             sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, sm->elem2d_physics_mat[mat_id].model[k].physics_vars,nvar_pde);
+            sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
             //either modify resid routines to return int or add an argument, can decide later
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
             //maybe model comes from mat as well? instead of elem number, get mat number
             //var_code = sm->elem2d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->elem2d_physics_mat[mat_id].model[k].fe_resid]);
+            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->mat_physics_elem[mat_id].model[k].physics]);
             //printf("Element: %d, Physics module: %d, Physics Residual = {%f,%f,%f,%f,%f,%f,%f,%f,%f}\n",j,k,eq_rhs[0],eq_rhs[1],eq_rhs[2],eq_rhs[3],eq_rhs[4],eq_rhs[5],eq_rhs[6],eq_rhs[7],eq_rhs[8]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
@@ -160,7 +170,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
         //get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->mat_physics_node);
         //alternative, computes fmaplocal instead of storing
         //get_cell_dofs_2(dofs, nnodes, grid->elem2d[j].nodes ,nvars_elem, elem_vars, sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
@@ -173,10 +183,14 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         nnodes = grid->elem1d[j].nnodes;
         //maybe this just comes from mat instead
         //nvars_elem = sm->elem3d_nvars[j];
-        mat_id = sm->elem1d_physics_mat_id[j];
-        nvars_elem = sm->elem1d_physics_mat[mat_id].nvar;
-        nphysics_models = sm->elem1d_physics_mat[mat_id].nSubmodels;
-        sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem);
+
+        // cjt -- started jacking with
+        mat_id = sm->elem1d_physics_mat[j];
+        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
+        //sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem); // cjt -- commented for now
+        
+
         //pull out nodal variables
         //only necessary for CG i believe
 //        for (l=0;l<nnodes;l++){
@@ -191,9 +205,9 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         for (k=0;k<nphysics_models;k++){
             sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
             
-            nvar_pde = sm->elem1d_physics_mat[mat_id].model[k].nvar;
+            nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
             sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, sm->elem1d_physics_mat[mat_id].model[k].physics_vars,nvar_pde);
+            sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
 
@@ -201,7 +215,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             //var_code will contain ordered digits of each equation, same codes used in elem*_vars[]
             //maybe model comes from mat as well? instead of elem number, get mat number
             //var_code = sm->elem1d_physics_mat[mat_id].model[k].fe_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->elem1d_physics_mat[mat_id].model[k].fe_resid]);
+            var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->mat_physics_elem[mat_id].model[k].physics]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
             add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,elem_vars,nvar_pde,physics_vars,nnodes,-1.0);
@@ -211,7 +225,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
         //usually would take the local cell number and compute the associated dofs
         //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
         //get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->mat_physics_node);
         //get_cell_dofs_2(dofs,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //puts elem_rhs into global residual, applies Dirichlet conditions too?
         load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);

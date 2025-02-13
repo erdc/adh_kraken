@@ -33,10 +33,10 @@ void initialize_system(SMODEL_SUPER *sm) {
         sm->sol[i] = sm->sol_old[i];
     }
     //then loop through for any initialization routines
-    for(i=0;i<sm->nphysics_mat_1d;i++){
-        nmods = sm->elem1d_physics_mat[i].nSubmodels;
+    for(i=0;i<sm->nmat_physics;i++){
+        nmods = sm->mat_physics_elem[i].nSubmodels;
         for (j=0;j<nmods;j++){
-            inc_index = sm->elem1d_physics_mat[i].model[j].fe_init;
+            inc_index = sm->mat_physics_elem[i].model[j].physics_init;
             //call wrapper for init function
             //as long as it is not unset
             if (inc_index!=UNSET_INT){
@@ -44,30 +44,30 @@ void initialize_system(SMODEL_SUPER *sm) {
             }
         }
     }
-    //then loop through for any initialization routines
-    for(i=0;i<sm->nphysics_mat_2d;i++){
-        nmods = sm->elem2d_physics_mat[i].nSubmodels;
-        for (j=0;j<nmods;j++){
-            inc_index = sm->elem2d_physics_mat[i].model[j].fe_init;
-            //call wrapper for init function
-            //as long as it is not unset
-            if (inc_index!=UNSET_INT){
-                fe_init[inc_index](sm);
-            }
-        }
-    }
-    //then loop through for any initialization routines
-    for(i=0;i<sm->nphysics_mat_3d;i++){
-        nmods = sm->elem3d_physics_mat[i].nSubmodels;
-        for (j=0;j<nmods;j++){
-            inc_index = sm->elem3d_physics_mat[i].model[j].fe_init;
-            //call wrapper for init function
-            //as long as it is not unset
-            if (inc_index!=UNSET_INT){
-                fe_init[inc_index](sm);
-            }
-        }
-    }
+    // //then loop through for any initialization routines
+    // for(i=0;i<sm->nphysics_mat_2d;i++){
+    //     nmods = sm->elem2d_physics_mat[i].nSubmodels;
+    //     for (j=0;j<nmods;j++){
+    //         inc_index = sm->elem2d_physics_mat[i].model[j].fe_init;
+    //         //call wrapper for init function
+    //         //as long as it is not unset
+    //         if (inc_index!=UNSET_INT){
+    //             fe_init[inc_index](sm);
+    //         }
+    //     }
+    // }
+    // //then loop through for any initialization routines
+    // for(i=0;i<sm->nphysics_mat_3d;i++){
+    //     nmods = sm->elem3d_physics_mat[i].nSubmodels;
+    //     for (j=0;j<nmods;j++){
+    //         inc_index = sm->elem3d_physics_mat[i].model[j].fe_init;
+    //         //call wrapper for init function
+    //         //as long as it is not unset
+    //         if (inc_index!=UNSET_INT){
+    //             fe_init[inc_index](sm);
+    //         }
+    //     }
+    // }
     //for (i = 0; i < sm->nhead ; i ++){
 //        sm->head[i] = sm->old_head[i]; 
 //    }//

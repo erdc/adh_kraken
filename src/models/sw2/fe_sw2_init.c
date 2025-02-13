@@ -26,22 +26,22 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 //needs to be called inside an init routine
 int fe_sw2_init(SMODEL_SUPER *sm) {
-    fe_sw2_wdflag_legacy(sm);
-    // update Dirchlet condition for nodes with depth less than zero
-    //how are mappings going to look??
-    //this should work for now
-    int i,temp,tempu,tempv;
-    //only want to loop over active nodes here not all nodes!!!! Will lead to bug
-    for (i=0; i<sm->grid->nnodes; i++) {
-        temp = get_cg_dof(PERTURB_H, i, sm->dof_map_local, sm->node_physics_mat);
-        if (sm->sol_old[temp] <= 0.) {
-            //get the two corresponding u and v entries
-            tempu = get_cg_dof(PERTURB_U, i, sm->dof_map_local, sm->node_physics_mat);
-            tempv = get_cg_dof(PERTURB_V, i, sm->dof_map_local, sm->node_physics_mat);
-            sm->bc_mask[tempu] = YES;
-            sm->bc_mask[tempv] = YES;
-        }
-    }
+    // fe_sw2_wdflag_legacy(sm);
+    // // update Dirchlet condition for nodes with depth less than zero
+    // //how are mappings going to look??
+    // //this should work for now
+    // int i,temp,tempu,tempv;
+    // //only want to loop over active nodes here not all nodes!!!! Will lead to bug
+    // for (i=0; i<sm->grid->nnodes; i++) {
+    //     temp = get_cg_dof(PERTURB_H, i, sm->dof_map_local, sm->node_physics_mat);
+    //     if (sm->sol_old[temp] <= 0.) {
+    //         //get the two corresponding u and v entries
+    //         tempu = get_cg_dof(PERTURB_U, i, sm->dof_map_local, mod->mat_physics_node;
+    //         tempv = get_cg_dof(PERTURB_V, i, sm->dof_map_local, mod->mat_physics_node);
+    //         sm->bc_mask[tempu] = YES;
+    //         sm->bc_mask[tempv] = YES;
+    //     }
+    // }
 
     
     return 0;

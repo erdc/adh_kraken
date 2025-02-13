@@ -21,7 +21,7 @@ static int DEBUG = OFF;
 void assemble_jacobian(SMODEL_SUPER *sm) {
     SGRID *grid = sm->grid;
     int j,k;
-    int* fmap = sm->dof_map_local;
+    int* fmap = NULL; //sm->dof_map_local; // cjt -- for now
     int* ghosts = sm->lin_sys->ghosts;
     int ndofs_ele;
     int nnodes, var_code;
@@ -78,13 +78,13 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
     for (j=0;j<grid->nelems3d;j++){
 
         //pull all global information to local memory
-        mat_id = sm->elem3d_physics_mat_id[j];
+        mat_id = sm->elem3d_physics_mat[j];
         //Get stuff from physics mat
-        nvars_elem = sm->elem3d_physics_mat[mat_id].nvar;
+        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem); // cjt -- comment for now
         //number of phyics routines on element
-        nphysics_models = sm->elem3d_physics_mat[mat_id].nSubmodels;
+        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
         //allows for mixed geometry quad/tri mesh
         nnodes = grid->elem3d[j].nnodes;
         ndofs_ele = nvars_elem*nnodes;
@@ -110,13 +110,13 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem3d_physics_mat[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
         //get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->mat_physics_node);
         //get_cell_dofs_2(dofs,nnodes,grid->elem3d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -134,13 +134,14 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
     for (j=0;j<grid->nelems2d;j++){
         //printf("Assembling element %d\n",j);
         //pull all global information to local memory
-        mat_id = sm->elem2d_physics_mat_id[j];
+        //pull all global information to local memory
+        mat_id = sm->elem2d_physics_mat[j];
         //Get stuff from physics mat
-        nvars_elem = sm->elem2d_physics_mat[mat_id].nvar;
+        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem); // cjt -- comment for now
         //number of phyics routines on element
-        nphysics_models = sm->elem2d_physics_mat[mat_id].nSubmodels;
+        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
         //allows for mixed geometry quad/tri mesh
         nnodes = grid->elem2d[j].nnodes;
         ndofs_ele = nvars_elem*nnodes;
@@ -173,14 +174,14 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem2d_physics_mat[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
             //printf("perturb var called\n");
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
         //get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->mat_physics_node);
         //get_cell_dofs_2(dofs,nnodes,grid->elem2d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -194,13 +195,13 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
     for (j=0;j<grid->nelems1d;j++){
 
         //pull all global information to local memory
-        mat_id = sm->elem1d_physics_mat_id[j];
+        mat_id = sm->elem1d_physics_mat[j];
         //Get stuff from physics mat
-        nvars_elem = sm->elem1d_physics_mat[mat_id].nvar;
+        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
         //get array of variables specified on element
-        sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem);
+        //sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem); // cjt -- comment for now
         //number of phyics routines on element
-        nphysics_models = sm->elem1d_physics_mat[mat_id].nSubmodels;
+        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
         //allows for mixed geometry quad/tri mesh
         nnodes = grid->elem1d[j].nnodes;
         ndofs_ele = nvars_elem*nnodes;
@@ -226,13 +227,13 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
-            perturb_var(elem_mat, sm, sm->elem1d_physics_mat[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
         //this gets dofs local to process
         //get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
-        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat);
+        get_cell_dofs(dofs,fmap,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->mat_physics_node);
         //get_cell_dofs_2(dofs,nnodes,grid->elem1d[j].nodes,nvars_elem,elem_vars,sm->node_physics_mat, sm->node_physics_mat_id);
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -449,7 +450,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
 
         //temp_sol = sm->sol[get_cg_dof_2(perturb_var_code, NodeID, sm->node_physics_mat, sm->node_physics_mat_id)];
         //temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id)];
-        temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat)];
+        //temp_sol = sm->sol[get_cg_dof(perturb_var_code, NodeID, sm->dof_map_local, sm->node_physics_mat)]; // cjt -- comment out for now
         NUM_DIFF_EPSILON(epsilon, epsilon2, temp_sol, perturbation);    // calculates epsilon and 2*epsilon
         
         //epsilon = 1.0;
@@ -471,7 +472,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
             sarray_init_int(physics_vars, nvar_pde);
             sarray_copy_int(physics_vars, model[j].physics_vars,nvar_pde);
             //eq_var_code = model[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
-            eq_var_code = smodel_super_resid(sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG, fe_resid[model[j].fe_resid]);
+            eq_var_code = smodel_super_resid(sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG, fe_resid[model[j].physics]);
             add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
@@ -481,7 +482,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
             //should always be same as var_code
             //eq_var_code2 = model[j].fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
-            eq_var_code2 = smodel_super_resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG, fe_resid[model[j].fe_resid]);
+            eq_var_code2 = smodel_super_resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG, fe_resid[model[j].physics]);
             add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

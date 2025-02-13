@@ -69,7 +69,7 @@ int jacobian_test(int argc, char **argv) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 	//printf("GRID NELEMS2D = %d\n",grid.nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf,0, 1, 0, elemVarCode, grid);
+	smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
 	//printf("NDOFS %d\n",dm->ndofs[0]);
 	assemble_jacobian(&(dm.superModel[0]));
 

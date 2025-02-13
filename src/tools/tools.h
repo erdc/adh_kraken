@@ -2,7 +2,18 @@
 #define H_STOOLS_
 
 
-int doesFileExist(const char *fname);
+// strings.c
+char* concat(const char *s1, const char *s2);
+bool ext_match(const char *name, const char *ext);
+
+int **allocate_dptr_int(int rows, int cols);
+void free_dptr_int(int **ptr, int rows, int cols);
+double **allocate_dptr_dbl(int rows, int cols);
+void free_dptr_dbl(double **ptr, int rows, int cols);
+
+//const char *get_filename_ext(const char *filename);
+//FILE* openFileFromBase(const char* filebase, const char* mode, char *filename, const char *fext);
+//bool doesFileExist(const char *fname);
 
 // time-stepping tools
 int tc_end(SMODEL_DESIGN *);
@@ -26,18 +37,18 @@ char * build_filename(char *, const int, const char *, const char *);
 char * build_filename2(char *, const int, const char *, const char *, const int, const char *, const int);
 char * build_filename3(char *, const int, const char *, const char *, const int, const char *, const int, const char *, const int);
 FILE * io_fopen(const char *filename, const char *mode, const int abort);
-int read_int_field(SIO io, char **data);
-int read_query_int_field(SIO io, char **data, int *query);
-int read_int_field_custom(SIO io, char **data, int *query, char *field_name,int field_idx, int abort);
+//int read_int_field(SIO io, char **data);
+//int read_query_int_field(SIO io, char **data, int *query);
+//int read_int_field_custom(SIO io, char **data, int *query, char *field_name,int field_idx, int abort);
 
-int io_read_error(SIO io, const char *msg, const int abort);
-int io_save_line(SIO *io, FILE *fp, const char *filename, const char *line);
+//int io_read_error(SIO io, const char *msg, const int abort);
+//int io_save_line(SIO *io, FILE *fp, const char *filename, const char *line);
 int strip_comments(char *fileline);
 int strip_white(char **string);
 int get_index_as_text(const int index, char *text);
 char * convert_to_uppercase(char *text);
 void pdata(char *proj_name, char *run_name, FILE *fp_out, int o_flag, char *title, char *initials, char *begtype, char *meshdim, int lnodes, int lnelems);
-void pdata_index(SIO *io, FILE *fp_out, int o_flag, char *title, char *initials, char *begtype, char *meshdim, int lnodes, int lnelems, int index);
+//void pdata_index(SIO *io, FILE *fp_out, int o_flag, char *title, char *initials, char *begtype, char *meshdim, int lnodes, int lnelems, int index);
 void phot(FILE *fp_out, char *title, char *begtype, char *meshdim, int lnodes, int lelems);
 void phot_index(FILE *fp_out, char *title, char *begtype, char *meshdim, int lnodes, int lelems, int index);
 void print_header_sw2d(SMODEL_SUPER *mod, FILE * fp_out,  int ps_flag);

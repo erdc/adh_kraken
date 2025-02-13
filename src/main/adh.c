@@ -1,55 +1,178 @@
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \file  This file containers the stand-alone driver to AdH
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"
-int main(int argc, char **argv) {
-
-    //SMODEL_SUPER sm;
-
-    //set resid routines and inc routines
-    set_models(fe_resid, fe_init);
-
-#ifdef _MPI
-    printf("HERE\n");
-    MPI_Init(NULL, NULL);
-    printf("MPI INITIALIZED");
-    int i,j;
-    i=inhouse_test(argc, argv);
-    j=petsc_test(argc, argv);
-    MPI_Finalize();
-#endif
-#ifdef _DEBUG
-        debug_initialize();
-#endif
-#ifdef _PETSC
-    printf("Calling PETSC Initialize\n");
-    PetscCall(PetscInitialize(&argc,&argv,NULL,
-    "Compute e in parallel with PETSc.\n\n"));
-     printf("Called PETSC Initialize\n");
-#endif
-
-    int ierr = 0;
-    residual_test(argc,argv);
-    printf(">>>>>>>>>>>>>>>Residual test complete<<<<<<<<<<<<<<<<<<<<<\n");
-    //try an assembly
-    jacobian_test(argc,argv);
-    printf(">>>>>>>>>>>>>>>Jacobian test complete<<<<<<<<<<<<<<<<<<<<<\n");
-    //try a newton solve
-    ierr = newton_test(argc,argv);
-    assert(ierr==0);
-    printf(">>>>>>>>>>>>>>>Newton test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
-    ////try a nonlinear newton solve
-    ierr = nonlinear_newton_test(argc,argv);
-    assert(ierr==0);
-    printf(">>>>>>>>>>>>>>>Nonlinear Newton test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
-    //try a time step
-    ierr = timeloop_test(argc,argv);
-    assert(ierr==0);
-   printf(">>>>>>>>>>>>>>>TIMELOOP test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
-    //try a time step
-    ierr = sw2_wd_test(argc, argv);
-    assert(ierr==0);
-    printf(">>>>>>>>>>>>>>>SW2 WD test complete<<<<<<<<<<<<<<<<<<<<<<<<\n");
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     The stand-alone driver for AdH
+ *  \author    Corey Trahan, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ * @param[in] argc           (int)  # of command line arguements
+ * @param[in] argv           (char **)  command line arguements
+ *
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+static time_t time1, time2, time_start;        /* for run-time calculation */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/\
+int main(int argc, char *argv[]) {
     
+    bool input_check = false;
 
-    free_bcgstab();
-    //not returning 0 will result in MPI error
-    return 0;
+#ifdef _DEBUG
+    debug_initialize();
+#endif
+    
+    int i;
+    for (i=0; i<argc; i++) {
+        printf("command line argument[%d]: %s\n",i,argv[i]);
+    }
+    
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Check command line arguments
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    if (argc < 2 || argc > 5) {
+        fprintf(stderr, "\n Missing argument.\n Usage:\n" "   To run a simulation:\n     adh file_base -s (optional)\n" "   Or,\n   For version information:\n      adh -v\n");
+        exit(0);
+        
+    } else if (strcmp(argv[1], "-t") == AGREE) {
+        // maybe create a file for all the testing to not bloat this routine? - CJT
+        printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        printf("+++++++++++++++++++++ TESTING ADH BUILD +++++++++++++++++++++\n");
+        printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+#ifdef _MPI
+        MPI_Init(NULL, NULL);
+        int i,j;
+        //i=inhouse_test(argc, argv);
+        //j=petsc_test(argc, argv);
+        MPI_Finalize();
+#endif
+        printf("+++++++++ TESTING RESIDUAL +++++++++\n");
+        //residual_test(argc,argv);
+        printf("+++++++++ TESTING JACOBIAN +++++++++\n");
+        //jacobian_test(argc,argv);
+        exit(0);
+        
+    } else if (strcmp(argv[1], "-v") == AGREE) {
+        printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        printf("++++++++++++++++ ADH VERSION AND BUILD DATA +++++++++++++++++\n");
+        printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        print_build_info();
+        printf("\n");
+        exit(0);
+    } else if (strcmp(argv[1], "-s") == AGREE) {
+        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        printf("++++++++++++++ CHECKING ADH INPUT FILES ONLY +++++++++++++++\n");
+        printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+        input_check = true;
+    }
+    
+    char filename[30];
+    strcpy(filename,argv[1]); printf("filename: %s\n",filename);
+    
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // allocate an AdH design model
+    SMODEL_DESIGN dmod; smodel_design_defaults(&dmod);
+    int ierr = 0;
+
+    // start calculation time
+    time(&time_start);
+    
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // AdH initialization
+    time(&time1);
+#ifdef _MESSG
+    MPI_Comm comm_world = MPI_COMM_WORLD;
+    ierr = smodel_design_init(&dmod, filename, input_check, &comm_world);
+#else
+    ierr = smodel_design_init(&dmod, filename, input_check);
+#endif
+
+    time(&time2);
+    double time_initial = difftime(time2, time1);
+    
+//    // AdH execution
+//    time(&time1);
+//    ierr = adh_run_func_(superModel, superinterface, nsupermodels, nsuperinterfaces, &run_time);
+//    time(&time2);
+//    double time_run = difftime(time2, time1);
+//
+//    int ierr_code, myid=0;
+//#ifdef _MESSG
+//    ierr_code = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+//#endif
+//    if (myid <= 0) {
+//        printf("\n");
+//#ifdef _DEBUG
+//        printf("**********************************************************************\n");
+//        printf("Timings: \n");
+//        printf("-- Total initialization time: %lf seconds\n", time_initial);
+//        for (i=0; i<nsupermodels; i++) {
+//            for (j=0; j<superModel[i].nsubmodels; j++) {
+//                if (superModel[i].submodel[j].flag.SW2_FLOW) {
+//                    printf("SW 2D TIMINGS\n");
+//                    printf("---- HYD RESID runtime: %lf seconds\n", TIME_IN_2D_SW_RESID);
+//                    printf("---- HYD LOAD runtime: %lf seconds\n", TIME_IN_2D_SW_LOAD);
+//                    printf("------ HYD 2D ELEM RESID runtime: %lf seconds\n", TIME_IN_2D_SW_BODY_RESID);
+//                    printf("------ HYD 1D ELEM RESID runtime: %lf seconds\n", TIME_IN_2D_SW_BOUNDARY_RESID);
+//                } else if (superModel[i].submodel[j].flag.SW3_FLOW) {
+//                    printf("SW 3D TIMINGS\n");
+//                    printf("---- HVEL RESID runtime: %lf seconds\n", TIME_IN_HVEL_RESID);
+//                    printf("---- HVEL LOAD runtime: %lf seconds\n", TIME_IN_HVEL_LOAD);
+//                    printf("------ HVEL 3D ELEM RESID runtime: %lf seconds\n", TIME_IN_HVEL_BODY_RESID);
+//                    printf("------ HVEL 2D ELEM RESID runtime: %lf seconds\n", TIME_IN_HVEL_BOUNDARY_RESID);
+//                    printf("---- WVEL RESID runtime: %lf seconds\n", TIME_IN_WVEL_RESID);
+//                    printf("---- WVEL LOAD runtime: %lf seconds\n", TIME_IN_WVEL_LOAD);
+//                    printf("------ WVEL 3D ELEM RESID runtime: %lf seconds\n", TIME_IN_WVEL_BODY_RESID);
+//                    printf("------ WVEL 2D ELEM RESID runtime: %lf seconds\n", TIME_IN_WVEL_BOUNDARY_RESID);
+//                } else if (superModel[i].submodel[j].flag.GW_FLOW) {
+//                    printf("---- GW RESID runtime: %lf seconds\n", TIME_IN_GW_RESID);
+//                    printf("---- GW LOAD runtime: %lf seconds\n", TIME_IN_GW_LOAD);
+//                    printf("------ GW 3D ELEM RESID runtime: %lf seconds\n", TIME_IN_GW_BODY_RESID);
+//                    printf("------ GW 2D ELEM RESID runtime: %lf seconds\n", TIME_IN_GW_BOUNDARY_RESID);
+//
+//                }
+//            }
+//        }
+//#endif
+//    }
+//
+//    // AdH finalization
+//    time(&time1);
+//    ierr = adh_finalize_func_(&superModel, &superinterface, nsupermodels, nsuperinterfaces);
+//    time(&time2);
+//    double time_final = difftime(time2, time1);
+//
+//    /*******************************************************/
+//    /*******************************************************/
+//    /* getting calculation time */
+//    time(&time2);
+//    double t2 = difftime(time2, time_start);
+//
+//    if (myid <= 0) {
+//#ifdef _DEBUG
+//        printf("-- Total execution time: %lf seconds\n", time_run);
+//        printf("-- Total finalization time: %lf seconds\n", time_final);
+//#endif
+//        printf("Total simulation runtime is %lf seconds\n", t2);
+//    }
+
+//#ifdef _PETSC
+//    ierr = PetscFinalize();
+//#endif
+//#ifdef _MESSG
+//    MPI_Finalize();
+//#endif
+    return ierr;
 }
+
+/*******************************************************/
+/*******************************************************/
+/*******************************************************/
