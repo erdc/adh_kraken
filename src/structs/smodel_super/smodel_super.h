@@ -35,12 +35,13 @@ typedef struct {
 
     // SuperModel Degrees of Freedom
     // Local to process, this should be same as local_range[1]-local_range[0]
-    int *my_ndofs;      //pointers to design model, not arrays
-    int *my_ndofs_old;
-    int *ndofs;         // local number of degrees of freedom
-    int *ndofs_old;     //local numer of solution variables the processor is in charge of
-    int *macro_ndofs;
-    int *macro_ndofs_old;
+    //no longer pointers, each super model will keep their own copy
+    int my_ndofs;      //pointers to design model, not arrays
+    int my_ndofs_old;
+    int ndofs;         // local number of degrees of freedom + ghost
+    int ndofs_old;     //local numer of solution variables the processor is in charge of
+    int macro_ndofs;
+    int macro_ndofs_old;
 
     // linear systems solution arrays [ndofs]
     double *sol;

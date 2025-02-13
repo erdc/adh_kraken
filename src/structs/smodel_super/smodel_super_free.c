@@ -95,10 +95,10 @@ void smodel_super_free(SMODEL_SUPER *sm) {
         //if (sm->str_values != NULL) {sstr_value_free(sm->str_values,ntransport,nlayer,nsed);}
 
     if(sm->bc_mask!=NULL){
-        sm->bc_mask = (int *) tl_free(sizeof(int), *(sm->ndofs), sm->bc_mask);
+        sm->bc_mask = (int *) tl_free(sizeof(int), (sm->ndofs), sm->bc_mask);
     }
     if(sm->dirichlet_data!=NULL){
-        sm->dirichlet_data = (double *) tl_free(sizeof(double), *(sm->ndofs), sm->dirichlet_data);
+        sm->dirichlet_data = (double *) tl_free(sizeof(double), (sm->ndofs), sm->dirichlet_data);
     }
 
 }

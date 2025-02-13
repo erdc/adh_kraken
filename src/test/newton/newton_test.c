@@ -130,7 +130,7 @@ int newton_test(int argc, char **argv) {
 	printf("SETTING UP BCMASK\n");
 
 	// intialize dirichlet and old sol (initial guess)
-	for (int local_index=0; local_index<sm->ndofs[0]; local_index++){
+	for (int local_index=0; local_index<sm->ndofs; local_index++){
 
 		dm.superModel[0].dirichlet_data[local_index] = 0.0;
 		dm.superModel[0].sol_old[local_index] = 20.0;

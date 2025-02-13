@@ -69,12 +69,12 @@ void smodel_super_alloc_init(SMODEL_SUPER **superModel, int nSuperModels) {
         sm->nonlinear_it_total = 0;
         //++++++++++++++++++++++++++++++++++++++++
 
-        sm->my_ndofs = NULL;
-        sm->my_ndofs_old = NULL;
-        sm->ndofs = NULL;
-        sm->ndofs_old = NULL;
-        sm->macro_ndofs = NULL;
-        sm->macro_ndofs_old = NULL;
+        sm->my_ndofs = UNSET_INT;
+        sm->my_ndofs_old = UNSET_INT;
+        sm->ndofs = UNSET_INT;
+        sm->ndofs_old = UNSET_INT;
+        sm->macro_ndofs = UNSET_INT;
+        sm->macro_ndofs_old = UNSET_INT;
         sm->sol = NULL;
         sm->sol_old = NULL;
         sm->sol_older = NULL;

@@ -29,7 +29,7 @@ void initialize_system(SMODEL_SUPER *sm) {
 
     //For now, update sol with old_sol. we can pull out specific things later
     //using dof maps
-    for(i=0;i< *(sm->ndofs);i++){
+    for(i=0;i< (sm->ndofs);i++){
         sm->sol[i] = sm->sol_old[i];
     }
     //then loop through for any initialization routines
@@ -128,7 +128,7 @@ void initialize_dirichlet_bc(SMODEL_SUPER *sm) {
 
     //printf("Initializing Dirichlet B.C. \n");
     int idof;
-    int ndofs = *(sm->ndofs);
+    int ndofs = (sm->ndofs);
     
     for(idof = 0; idof<ndofs; idof++){
         //need to use sseries strings to set dirichlet_data
@@ -255,7 +255,7 @@ void increment_function(SMODEL_SUPER *sm){
     int i;
 
 
-    for (i = 0; i < *(sm->ndofs); i++) {
+    for (i = 0; i < (sm->ndofs); i++) {
         sm->sol[i] += sm->lin_sys->dsol[i];
     }
 

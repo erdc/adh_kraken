@@ -101,9 +101,9 @@ int fe_newton(SMODEL_SUPER* sm)
     double *residual = lin_sys->residual;
 
     int ndofs, my_ndofs, macro_ndofs;
-    ndofs = *(sm->ndofs);
-    my_ndofs = *(sm->my_ndofs);
-    macro_ndofs = *(sm->macro_ndofs);
+    ndofs = (sm->ndofs);
+    my_ndofs = (sm->my_ndofs);
+    macro_ndofs = (sm->macro_ndofs);
 #ifdef _PETSC
     int ierr = 0; // SAM HERE
     int its;

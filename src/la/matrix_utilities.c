@@ -49,7 +49,7 @@ void apply_Dirichlet_BC(SMODEL_SUPER *sm){
     //Method 2: assumes solution already has dirichlet condition values set
 
     //brute force for now, can find better way later
-    int my_ndof = *(sm->my_ndofs);
+    int my_ndof = (sm->my_ndofs);
     int row, row_start, row_end, row_entry,local_col_no;
     //Required for method 1 only
     //double temp;
@@ -127,7 +127,7 @@ void check_diag(SMODEL_SUPER *sm){
     //Method 2: assumes solution already has dirichlet condition values set
 
     //brute force for now, can find better way later
-    int my_ndof = *(sm->my_ndofs);
+    int my_ndof = (sm->my_ndofs);
     int row, row_start, row_end, index;
     //Required for method 1 only
     //double temp;
