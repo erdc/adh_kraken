@@ -461,11 +461,11 @@ void sgrid_read(SGRID **pgrid, char *root_filename
 #ifdef _HDF5
 #ifdef _DEBUG
     if (DEBUG && myid == 0) printf("\n-- Writing grid XDMF/HDF5\n");
+#endif
     // cjt -- do this only if AdH cannot find it already
     init_hdf5_file(g);
     sgrid_write_xdmf(g);
     sgrid_write_hdf5(g);
-#endif
 #endif
     
 #ifdef _DEBUG
