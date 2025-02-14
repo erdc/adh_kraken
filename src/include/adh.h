@@ -18,7 +18,7 @@ void print_build_info();
 #include <umfpack.h>
 #include <scotch.h>
 
-#ifdef _ADH_HDF5
+#ifdef _HDF5
 #include <hdf5.h>
 #endif
 

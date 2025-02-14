@@ -3,6 +3,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"
+static int DEBUG = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -23,39 +24,43 @@ static time_t time1, time2, time_start;        /* for run-time calculation */
 int main(int argc, char *argv[]) {
     
     bool input_check = false;
+    int i, myid = 0, npes = 1, ierr_code = UNSET_INT;
 
-#ifdef _DEBUG
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Initialize the AdH memory debugger
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef _MESSG
+    debug_initialize(cstorm_comm);
+#else
     debug_initialize();
 #endif
     
-    int i;
-    for (i=0; i<argc; i++) {
-        printf("command line argument[%d]: %s\n",i,argv[i]);
-    }
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Initialize MPI
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef _MESSG
+    MPI_Comm comm_world = MPI_COMM_WORLD;
+    int ierr_code = MPI_Init(argc, argv);
+    if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
+    ierr_code = MPI_Comm_rank(cstorm_comm, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
+    ierr_code = MPI_Comm_size(cstorm_comm, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
+#endif
     
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Check command line arguments
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    if (DEBUG) {
+        for (i=0; i<argc; i++) {printf("command line argument[%d]: %s\n",i,argv[i]);}
+    }
     if (argc < 2 || argc > 5) {
         fprintf(stderr, "\n Missing argument.\n Usage:\n" "   To run a simulation:\n     adh file_base -s (optional)\n" "   Or,\n   For version information:\n      adh -v\n");
         exit(0);
         
     } else if (strcmp(argv[1], "-t") == AGREE) {
-        // maybe create a file for all the testing to not bloat this routine? - CJT
         printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
         printf("+++++++++++++++++++++ TESTING ADH BUILD +++++++++++++++++++++\n");
         printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-#ifdef _MPI
-        MPI_Init(NULL, NULL);
-        int i,j;
-        //i=inhouse_test(argc, argv);
-        //j=petsc_test(argc, argv);
-        MPI_Finalize();
-#endif
-        printf("+++++++++ TESTING RESIDUAL +++++++++\n");
-        //residual_test(argc,argv);
-        printf("+++++++++ TESTING JACOBIAN +++++++++\n");
-        //jacobian_test(argc,argv);
+        //engine_tests();
         exit(0);
         
     } else if (strcmp(argv[1], "-v") == AGREE) {
@@ -89,7 +94,6 @@ int main(int argc, char *argv[]) {
     // AdH initialization
     time(&time1);
 #ifdef _MESSG
-    MPI_Comm comm_world = MPI_COMM_WORLD;
     ierr = smodel_design_init(&dmod, filename, input_check, &comm_world);
 #else
     ierr = smodel_design_init(&dmod, filename, input_check);

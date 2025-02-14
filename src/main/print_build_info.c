@@ -48,7 +48,7 @@ void print_build_info() {
 #endif
 
   /* output */
-#ifdef _ADH_HDF5
+#ifdef _HDF5
   printf(" Built with XDMF (*.xml with *.h5) output file format\n");
 #elif defined _ADH_BINARY
   printf(" Built with XMDF (XMS binary) output file format\n");

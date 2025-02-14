@@ -216,7 +216,7 @@ void sgrid_write_nodal_pe(SGRID *g){
 
 
 
-#ifdef _ADH_HDF5
+#ifdef _HDF5
 
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
     hid_t     grp1,grp2;
@@ -357,7 +357,7 @@ void sgrid_write_elemental_pe(SGRID *g){
 
 
 
-#ifdef _ADH_HDF5
+#ifdef _HDF5
 
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
     hid_t     grp1,grp2;

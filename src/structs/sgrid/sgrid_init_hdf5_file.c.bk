@@ -3,7 +3,7 @@ static int DEBUG = OFF;
 static int DEBUG_WITH_PICKETS = OFF;
 void init_hdf5_file(SGRID *g)
 {
-    #ifdef _ADH_HDF5
+    #ifdef _HDF5
     //this function should do the following
     // 1. Create HDf5 File for the simulation
     // 2. Create all necessary data groups for the run

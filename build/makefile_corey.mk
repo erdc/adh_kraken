@@ -165,7 +165,7 @@ OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
 CFLAGS              += -g -pedantic -std=c99 -O3
-CFLAGS              += -D_PETSC -D_ADH_HDF5 -D_DEBUG #-D_MPI
+CFLAGS              += -D_PETSC -D_HDF5 -D_DEBUG #-D_MPI
 CFLAGS              += -L/usr/local/Cellar/suite-sparse/7.7.0/lib -lumfpack -I/usr/local/Cellar/suite-sparse/7.7.0/include/suitesparse
 CFLAGS              += -L/usr/local/Cellar/scotch/7.0.6/lib -lscotch -I/usr/local/Cellar/scotch/7.0.6/include/
 CFLAGS              += -I/${PETSC_DIR}/${PETSC_ARCH}/lib/include/petsc

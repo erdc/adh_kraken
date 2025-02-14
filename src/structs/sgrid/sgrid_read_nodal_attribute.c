@@ -24,7 +24,7 @@ void sgrid_read_nodal_attribute(SGRID *g){
 
 
 
-#ifdef _ADH_HDF5
+#ifdef _HDF5
 
     int i,j=0;
     int nsurf=0;

@@ -119,7 +119,7 @@ typedef struct {
   /* CStorm WSID flag */
   int CSTORM_WSID;
 
-#ifdef _ADH_HDF5
+#ifdef _HDF5
   /* Parallel XDMF output */
   int PC_FILE_XDMF;
 #endif
