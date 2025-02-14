@@ -1,6 +1,6 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \file  This file containers the stand-alone driver to AdH
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"
 static int DEBUG = OFF;
@@ -84,7 +84,6 @@ int main(int argc, char *argv[]) {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // allocate an AdH design model
     SMODEL_DESIGN dmod; smodel_design_defaults(&dmod);
-    int ierr = 0;
 
     // start calculation time
     time(&time_start);
@@ -93,6 +92,7 @@ int main(int argc, char *argv[]) {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // AdH initialization
     time(&time1);
+    int ierr = 0;
 #ifdef _MESSG
     ierr = smodel_design_init(&dmod, filename, input_check, &comm_world);
 #else

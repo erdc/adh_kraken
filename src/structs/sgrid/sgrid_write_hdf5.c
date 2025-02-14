@@ -26,7 +26,7 @@ static int DEBUG_WITH_PICKETS = OFF;
 
 void sgrid_write_hdf5(SGRID *g){
 
-#ifdef _HDF5
+#ifdef _ADH_HDF5
 
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
     hid_t     grp1,grp2;
@@ -68,9 +68,6 @@ void sgrid_write_hdf5(SGRID *g){
 
     // declare global sizes of data set nodes first. This is local data.
     double (*xyz)[SPATIAL_DIM] = malloc(sizeof(double[g->my_nnodes][SPATIAL_DIM]));
-
-
-
 
     // create a dataspace.  This is a global quantity
     dims[0]  = g->macro_nnodes;
