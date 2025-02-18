@@ -13,7 +13,7 @@ void free_dptr_dbl(double **ptr, int rows, int cols);
 
 //const char *get_filename_ext(const char *filename);
 //FILE* openFileFromBase(const char* filebase, const char* mode, char *filename, const char *fext);
-//bool doesFileExist(const char *fname);
+bool doesFileExist(const char *fname);
 
 // time-stepping tools
 int tc_end(SMODEL_DESIGN *);

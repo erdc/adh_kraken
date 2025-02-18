@@ -456,16 +456,23 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     }
     
 
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Write grid in HD5/XDMF format for paraview
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _HDF5
+    if (!doesFileExist(g->filename)) { // only if it hasn't been written already
 #ifdef _DEBUG
-    if (DEBUG && myid == 0) printf("\n-- Writing grid XDMF/HDF5\n");
+        if (DEBUG && myid == 0) printf("\n-- Writing grid XDMF/HDF5\n");
 #endif
-    // cjt -- do this only if AdH cannot find it already
-    init_hdf5_file(g);
-    sgrid_write_xdmf(g);
-    sgrid_write_hdf5(g);
+        init_hdf5_file(g);
+        sgrid_write_xdmf(g);
+        sgrid_write_hdf5(g);
+    }
 #endif
     
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Done reading and storing grid
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
     if (DEBUG && myid == 0) printf("\n-- Finished reading geo file: %s\n",root_filename);
 #endif

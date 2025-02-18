@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-int doesFileExist(const char *fname) {
+bool doesFileExist(const char *fname) {
     FILE *file;
     if ((file = fopen(fname, "r")))
     {
         fclose(file);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
