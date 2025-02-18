@@ -55,8 +55,6 @@ void init_hdf5_file(SGRID *g)
     grp8 = H5Gcreate(grp1, "XY", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     grp9 = H5Gcreate(grp1, "Elements", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-
-
     H5Gclose(grp1);
     H5Gclose(grp2);
     H5Gclose(grp3);

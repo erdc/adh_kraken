@@ -17,7 +17,8 @@ typedef struct {
 typedef struct {
 
     int id;             /* current 1d element number */
-    int gid;
+    int gid;            /* the elements global ID */
+    int resident_pe;    /* the processor the element is residential to */
     int id_orig;        /* original 1d element number (every 1d element should have a value) */
     int nnodes;         /* total # of nodes on element */
     int elem2d;         /* this is the 2d element that has an edge that matches this 1d element */

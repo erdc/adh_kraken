@@ -95,7 +95,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->macro_nelems1d = 0;
     g->macro_nnodes_sur = 0;
     g->macro_nnodes_bed = 0;
-    //Mark added
+    g->macro_nSegs = 0;
     g->macro_nTets = 0;
     g->macro_nPrisms = 0;
     g->macro_nQuads = 0;
@@ -110,7 +110,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         } else if (strcmp(token, "NODES_BED") == 0) {
             sscanf(line_save, "%s %d",cdum,&(g->macro_nnodes_bed));
         } else if (strcmp(token, "ELEMS_SEG") == 0) {
-            sscanf(line_save, "%s %d",cdum,&(g->macro_nelems1d));
+            sscanf(line_save, "%s %d",cdum,&(g->macro_nSegs));
         } else if (strcmp(token, "ELEMS_TRI") == 0) {
             sscanf(line_save, "%s %d",cdum,&(g->macro_nTris));
         } else if (strcmp(token, "ELEMS_QUAD") == 0) {
@@ -123,6 +123,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     }
 
     //use element types to compute totals
+    g->macro_nelems1d = g->macro_nSegs;
     g->macro_nelems2d = g->macro_nTris + g->macro_nQuads;
     g->macro_nelems3d = g->macro_nTets + g->macro_nPrisms;
 
@@ -316,7 +317,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     g->nelems1d = 0; g->nelems2d = 0; g->nelems3d = 0;
     g->my_nelems1d=0; g->my_nelems2d=0; g->my_nelems3d=0;
-    g->my_nTris=0; g->my_nQuads=0; g->my_nTets=0; g->my_nPrisms=0;
+    g->my_nSegs=0; g->my_nTris=0; g->my_nQuads=0; g->my_nTets=0; g->my_nPrisms=0;
     g->haveSegs = false; g->haveTets = false;
     g->havePrisms = false; g->haveQuads = false;
     int temp=0;
@@ -327,8 +328,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
             g->haveSegs = true;
             temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,2,1,false);
             g->nelems1d += temp;
-            //Mark fix later
-            if(false){g->my_nelems1d+=temp;}
+            if(g->elem1d[g->nelems1d-1].resident_pe == myid){g->my_nSegs+=temp;}
         } else if (strcmp(token, "TRI") == 0) {
             g->haveTris = true;
             temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,3,2,false);
@@ -352,9 +352,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         }
         //tl_check_all_pickets(__FILE__,__LINE__);
     }
-    
-
-    //Mark add at end to get totals
+    g->my_nelems1d = g->my_nSegs;
     g->my_nelems2d = g->my_nTris + g->my_nQuads;
     g->my_nelems3d = g->my_nTets + g->my_nPrisms;
     
@@ -656,7 +654,7 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
         }
     }
 
-    // if the element has some ghost nodes, arbitrarily assing its resident element PE to the lowest resident node PE
+    // if the element has some ghost nodes, arbitrarily assign its resident element PE to the lowest resident node PE
     int lowest_pe = 99999999;
     for (i=0; i<nnodes_on_elem; i++) {
         if (g->node[local_id[i]].resident_pe < lowest_pe) lowest_pe = g->node[local_id[i]].resident_pe;
@@ -668,6 +666,7 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
     if (elem_dim == 1)      {
         selem1d_init(&g->elem1d[g->nelems1d]);
         selem1d_load(&(g->elem1d[g->nelems1d]),id,g->nelems1d,nnodes_on_elem,local_id,bflag,nds,mat);
+        if (elem_resid_on_myid) g->elem1d[g->nelems1d].resident_pe = myid;
         if ( (g->elem1d[g->nelems1d].bflag == BODY) && elem_resid_on_myid) {
             g->my_mesh_length += g->elem1d[g->nelems1d].length;
         }

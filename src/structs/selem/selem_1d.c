@@ -87,6 +87,7 @@ void selem1d_init(SELEM_1D *elem1d) {
     int i = 0;
     elem1d->id = UNSET_INT;
     elem1d->gid = UNSET_INT;
+    elem1d->resident_pe = UNSET_INT;
     elem1d->id_orig = UNSET_INT;
     elem1d->elem2d = UNSET_INT;
     elem1d->djac = UNSET_FLT;

@@ -66,6 +66,7 @@ typedef struct {
     int macro_nPrisms;         // total # of prism elements in global mesh
     int macro_nQuads;          // total # of quadrilateral elements in global mesh
     int macro_nTris;           // total # of triangle elements in global mesh
+    int macro_nSegs;
     int orig_macro_nnodes;     // total number of original nodes in the global mesh
     int orig_macro_nnodes_sur; // total number of original surface nodes in the global mesh
     int orig_macro_nnodes_bed; // total number of original bed nodes in the global mesh
@@ -78,6 +79,7 @@ typedef struct {
     int my_nelems3d;        // total # of residential only 3d elements in the global mesh
     int my_nelems2d;        // total # of residential only 2d elements in the global mesh
     int my_nelems1d;        // total # of residential only 1d elements in the global mesh
+    int my_nSegs;           // total # of residential only segments in the global mesh
     int my_nTets;           // total # of residential only tetrahedron elements in global mesh
     int my_nPrisms;         // total # of residential only prism elements in global mesh
     int my_nQuads;          // total # of residential only quadrilateral elements in global mesh

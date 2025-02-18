@@ -22,12 +22,14 @@ static int DEBUG_WITH_PICKETS = OFF;
 #define VECTOR_RANK 1 // Always be 1
 #define SPATIAL_DIM 3 // Always be 3
 
-
-
 void sgrid_write_hdf5(SGRID *g){
+    
+    char *error[100];
 
-#ifdef _ADH_HDF5
+#ifdef _HDF5
 
+    tag();
+    
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
     hid_t     grp1,grp2;
     char      fname[50];
@@ -35,7 +37,6 @@ void sgrid_write_hdf5(SGRID *g){
     herr_t    status;
     hsize_t   count[MATRIX_RANK],offset[MATRIX_RANK];
     int nt=0;
-
 
     // for adaptive grid writing
     char number[50] = "";
@@ -51,7 +52,6 @@ void sgrid_write_hdf5(SGRID *g){
         MPI_Info info  = MPI_INFO_NULL;
         H5Pset_fapl_mpio(plist_id, g->smpi->ADH_COMM, info);
     #endif
-
 
     // open file
     strcpy(fname,g->filename);
@@ -117,8 +117,6 @@ void sgrid_write_hdf5(SGRID *g){
 
         }
     }
-    
-
     assert(l==g->my_nnodes);
     H5Sselect_elements(filespace, H5S_SELECT_SET,g->my_nnodes * SPATIAL_DIM,(const hsize_t *)&coord1);
     
@@ -152,10 +150,10 @@ void sgrid_write_hdf5(SGRID *g){
     grp2 = H5Gopen(file_id, "/Mesh/Elements", H5P_DEFAULT);
 
     //global attributes
-    int nentry = g->macro_nQuads * 5 + g->macro_nTris * 4 + g->macro_nTets * 5 + g->macro_nPrisms * 7;
+    int nentry = g->macro_nSegs * 3 +  g->macro_nQuads * 5 + g->macro_nTris * 4 + g->macro_nTets * 5 + g->macro_nPrisms * 7;
 
     //local data, different on each PE
-    int nentry_local = g->my_nQuads * 5 + g->my_nTris * 4 + g->my_nTets * 5 + g->my_nPrisms * 7;
+    int nentry_local = g->my_nSegs * 3 + g->my_nQuads * 5 + g->my_nTris * 4 + g->my_nTets * 5 + g->my_nPrisms * 7;
     connectivity = (int *)malloc(sizeof(int) * nentry_local);
     count[0] = nentry_local; // local dim[0]
     count[1] = 0; // ignores for elemental since just dim 1 array
@@ -163,6 +161,8 @@ void sgrid_write_hdf5(SGRID *g){
 
     int ie;
     k = 0;
+    printf("my_nelems1d: %d\n",g->my_nelems1d);
+    printf("g->nelems3d: %d || g->nelems2d: %d || g->nelems1d: %d\n", g->nelems3d,g->nelems2d,g->nelems1d);
     for (ie=0; ie<g->nelems3d; ie++) {
 #ifdef _MESSG
         if (g->elem3d[ie].resident_pe == g->smpi->myid) 
@@ -178,7 +178,7 @@ void sgrid_write_hdf5(SGRID *g){
             }
         }
     }
-
+    printf("k: %d\n",k);
 
 
     for (ie=0; ie<g->nelems2d; ie++) {
@@ -197,7 +197,7 @@ void sgrid_write_hdf5(SGRID *g){
         }
     }
 
-
+    printf("k: %d\n",k);
 
     //add 1d element too
      for (ie=0; ie<g->nelems1d; ie++) {
@@ -212,9 +212,13 @@ void sgrid_write_hdf5(SGRID *g){
             }
         }
     }
-
-
-    assert(k == nentry_local);
+    
+    printf("k: %d\n",k);
+    if (k != nentry_local) {
+        sprintf(error,"ERROR: k: %d || nentry_local: %d\n",k,nentry_local);
+        tl_error(error);
+    }
+    //assert(k == nentry_local);
 
     // create dataspace and add
     //give global size
@@ -269,8 +273,6 @@ void sgrid_write_hdf5(SGRID *g){
         } 
 
     }
-
-
 
     for (ie=0; ie<g->nelems2d; ie++){
         gid = g->elem2d[ie].gid;
