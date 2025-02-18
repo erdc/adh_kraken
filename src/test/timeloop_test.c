@@ -1,16 +1,18 @@
-/*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
+/*! \file timeloop_test.c This file tests the timeloop via heat equation */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 100;//700;
-static int NEWTON_TEST_NY = 100;//700;
-static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
+static int NEWTON_TEST_NX = 100;//150;
+static int NEWTON_TEST_NY = 100;//150;
+static double alpha = 3;
+static double beta = 1.2;
+static void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t);
 static void permute_array(double *arr,int *p, int n);
-static void sketch_csr_sparsity(SLIN_SYS *lin_sys);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function tests the Newton solvet using a Poisson equation with analytic
+ *  \brief     This function tests the time looper and Newton solver
+ *  using a heat equation with analytic
  *  solution
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
@@ -19,16 +21,16 @@ static void sketch_csr_sparsity(SLIN_SYS *lin_sys);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int newton_test(int argc, char **argv) {
+int timeloop_test(void) {
 	//create a grid
 	SGRID *grid;
 	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
 	//let's just do something simple
 	//3x3 triangular element grid
 	double xmin = 0.0;
-	double xmax = 2.0;
+	double xmax = 1.0;
 	double ymin = 0.0;
-	double ymax = 2.0;
+	double ymax = 1.0;
 	int npx = NEWTON_TEST_NX;
 	int npy = NEWTON_TEST_NY;
 	double theta = 0.0;
@@ -65,9 +67,9 @@ int newton_test(int argc, char **argv) {
 	//sm.grid = &grid;
     SMODEL_DESIGN dm;
 	//specify elemental physics and other properties in super model
-	double dt = 1.0;
+	double dt = 2.0/20.0;
 	double t0 = 0.0;
-	double tf = 1.0;
+	double tf = 2.0;
 
 	char elemVarCode[4]; 
 	strcpy(&elemVarCode[0],"2");//SW2D
@@ -76,9 +78,11 @@ int newton_test(int argc, char **argv) {
 	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
 	smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
-	//printf("NDOFS %d\n",dm.ndofs[0]);
+	printf("NDOFS %d\n",dm.superModel[0].ndofs);
+
+	//OVER WRITE TO HEAT
+	dm.superModel[0].mat_physics_elem[0].model[0].physics = HEAT;
 	//printf("Supermodel no read complete\n");
-	//sketch_csr_sparsity(dm.lin_sys);
 
 
 	//allocate linear system
@@ -139,30 +143,27 @@ int newton_test(int argc, char **argv) {
 		dm.superModel[0].bc_mask[local_index] = YES;
 	}
 
-	//overwrite some of the boundary
+	//overwrite intial condition
 	double x_coord, y_coord;
 	int id;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
 		x_coord = grid->node[i].x;
 		y_coord = grid->node[i].y;
-		id = i;
 		//id = grid->node[i].id;
-		//better, but then permtab always has to be there
-		//id = grid->node[grid->permtab[i]].id;
-		//printf("x %f, y %f, ID = %d\n",x_coord,y_coord,id);
-
+		id=i;
+		//need to set IC
+		dm.superModel[0].sol[id*3+1] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
-			dm.superModel[0].dirichlet_data[id*3+1] = 1 + x_coord*x_coord + 2 * y_coord*y_coord;
+			continue;
 		}else{
 			dm.superModel[0].bc_mask[id*3+1]=NO;
 		}
+		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
 	printf("BCMASK COMPLETE\n");
 	//set up bc mask
-//	for (int i=0; i<nnodes; i++){
-//		printf("Dirichlet data node[%d] = %f\n", i, dm.superModel[0].dirichlet_data[i*3+1]);
-//	}
+
 //	for (int i=0;i<sm.ndofs;i++){
 //		printf("sm bc mask[%d] = %d\n",i,sm.bc_mask[i]);
 //	}
@@ -181,13 +182,14 @@ int newton_test(int argc, char **argv) {
 //	increment_function(&sm);
 	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
-	//call fe_newton
-	fe_newton(sm); 
+	//set forward_step and call timeloop
+	time_loop(&dm); 
+
 	//compare with analytic solution
 	//it is a scalar
 	double *u_exact;
 	u_exact = (double*) tl_alloc(sizeof(double),nnodes);
-	compute_exact_solution_poisson(u_exact, nnodes, grid);
+	compute_exact_solution_heat(u_exact, nnodes, grid,tf);
 //	for(int i=0;i<nnodes;i++){
 //		printf("Exact solution[%d] = %f\n",i,u_exact[i]);
 //	}
@@ -207,21 +209,11 @@ int newton_test(int argc, char **argv) {
 	
 	// cjt -- commented out for now
 	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat);
-
-//	for(int i=0; i<nnodes;i++){
-//		printf("before perm sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
-//		printf("Node[%d]. id = %d, original id = %d\n",i,grid->node[i].id,grid->node[i].original_id);
-//		printf("Permtab[%d] = %d, peritab[%d] = %d\n",i,grid->per_node[i], i, grid->inv_per_node[i]);
-//	}
-//Nodes reordered so not necessary
+//not needed anymore since nodes are reordered
 //if (grid->inv_per_node!=NULL){
 //	permute_array(uh,grid->inv_per_node,nnodes);
 //}
 //	printf("Final solution:\n");
-//	for(int i=0; i<nnodes;i++){
-//		printf("node id[%d] = %d, peritab[%d] = %d\n",i,grid->node[i].id,i,grid->inv_per_node[i]);
-//	} //
-
 //	for(int i=0; i<nnodes;i++){
 //		printf("sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
 //	} 
@@ -233,12 +225,12 @@ int newton_test(int argc, char **argv) {
 	printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
 
 	//plot grid in h5?
-//    strcpy(sm->grid->filename, "residtest");
-//    init_hdf5_file(sm->grid);
+//    strcpy(sm.grid->filename, "residtest");
+//    init_hdf5_file(sm.grid);
 //    printf("hdf5 initialized\n");
-//    sgrid_write_hdf5(sm->grid);
+//    sgrid_write_hdf5(sm.grid);
 //    printf("hdf5 written\n");
-//    sgrid_write_xdmf(sm->grid);
+//    sgrid_write_xdmf(sm.grid);
 //    printf("xmf written\n");
 
 	//return -1 if failed, 0 if good
@@ -272,26 +264,26 @@ int newton_test(int argc, char **argv) {
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid){
+void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t){
 
 	//test case comes from
-	//https://jsdokken.com/dolfinx-tutorial/chapter1/fundamentals.html
+	//https://jsdokken.com/dolfinx-tutorial/chapter2/heat_code.html
 
-	//problem is -/\u = f on Omega
-	//f = -6
+	//problem is du/dt - /\u + f = 0 on Omega
+	//f = beta - 2 - 2*alpha
+	// beta = 1.2
+	// alpha = 3.0
 	//u_D = u_exact on dOmega
-	//u_exact = 1 + x^2 + 2y^2
+	//u_exact = 1 + x^2 + alpha*y^2+beta*t
 
 	//works for cg only at the moment, would need cell by cell loop for dg
 	for(int i =0; i<ndof ; i++){
-		u_exact[i] = 1.0 + grid->node[i].x*grid->node[i].x + 2*grid->node[i].y*grid->node[i].y;
+		u_exact[i] = 1.0 + grid->node[i].x*grid->node[i].x + alpha*grid->node[i].y*grid->node[i].y + beta*t;
 	}
 
 
 
 }
-
-
 void permute_array(double *arr,int *p, int n){
 	double *temp;
 	temp = (double *) tl_alloc(sizeof(double),n);
@@ -303,42 +295,4 @@ void permute_array(double *arr,int *p, int n){
         arr[i] = temp[i];
     }
 	temp = (double *) tl_free(sizeof(double),n,temp);
-}
-
-void sketch_csr_sparsity(SLIN_SYS *lin_sys){
-	// File name
-    char filename[] = "my_file_reorder.txt";
-
-    // Open the file in write mode ("w")
-    FILE *fp = fopen(filename, "w");
-
-    // Check if the file was opened successfully
-    if (fp == NULL) {
-        printf("Error opening file!\n");
-        return; // Exit with an error code
-    }
-
-    // Write some text to the file
-    int nrows = *(lin_sys->local_size);
-    int start_row;
-    int end_row;
-    int indx;
-    for (int i=0;i<nrows;i++){
-    	start_row = lin_sys->indptr_diag[i];
-    	end_row = lin_sys->indptr_diag[i+1];
-    	indx = start_row;
-    	for (int j=0;j<nrows;j++){
-    		if(j==lin_sys->cols_diag[indx]){
-    			fprintf(fp, "x");
-    			indx+=1;
-    		}else{
-    			fprintf(fp, " ");
-    		}
-    	}
-    	//end of row
-    	fprintf(fp,"\n");
-    }
-
-    // Close the file
-    fclose(fp);
 }

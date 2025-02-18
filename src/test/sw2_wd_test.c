@@ -18,7 +18,7 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int sw2_wd_test(int argc, char **argv) {
+int sw2_wd_test(void) {
 	//create a grid
 	SGRID *grid;
 	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);

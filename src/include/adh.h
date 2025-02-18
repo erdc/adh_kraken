@@ -106,12 +106,5 @@ void print_build_info();
 #include "fr_defs.h"
 
 //Mark added
-#include "testla.h"
-#include "testresidual.h"
-#include "testjacobian.h"
-#include "testnewton.h"
-#include "testnonlinearnewton.h"
-#include "testtimeloop.h"
-#include "testsw2_wd.h"
-#include "run_tests.h"
+#include "test.h"
 //#endif

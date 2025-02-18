@@ -12,7 +12,7 @@
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int jacobian_test(int argc, char **argv) {
+int jacobian_test(void) {
 	//create a grid
 	SGRID *grid;
 	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
