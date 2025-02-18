@@ -19,9 +19,10 @@ static int DEBUG_WITH_PICKETS = OFF;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void sgrid_printScreen(SGRID *g) {
     int i;
-
-    int npes = g->smpi->npes; // alias
-    int myid = g->smpi->myid; // alias
+    int myid=0;
+    int npes = 0;
+    //int npes = g->smpi->npes; // alias
+    //int myid = g->smpi->myid; // alias
     int buffer1[npes],buffer2[npes],buffer3[npes];
     double dbuffer1[npes],dbuffer2[npes],dbuffer3[npes];
 

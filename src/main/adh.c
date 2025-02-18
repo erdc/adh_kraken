@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
         printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
         printf("+++++++++++++++++++++ TESTING ADH BUILD +++++++++++++++++++++\n");
         printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-        //engine_tests();
+        run_tests();
         exit(0);
         
     } else if (strcmp(argv[1], "-v") == AGREE) {

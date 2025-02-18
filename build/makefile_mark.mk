@@ -84,6 +84,7 @@ $(wildcard $(MASTER_SRC_DIR)/test/newton) \
 $(wildcard $(MASTER_SRC_DIR)/test/nonlinear_newton) \
 $(wildcard $(MASTER_SRC_DIR)/test/sw2_wd) \
 $(wildcard $(MASTER_SRC_DIR)/test/timeloop) \
+$(wildcard $(MASTER_SRC_DIR)/test) \
 $(wildcard $(MASTER_SRC_DIR)/bc) \
 $(wildcard $(MASTER_SRC_DIR)/main)
 
@@ -142,6 +143,7 @@ $(MASTER_SRC_DIR)/test/newton \
 $(MASTER_SRC_DIR)/test/nonlinear_newton \
 $(MASTER_SRC_DIR)/test/sw2_wd \
 $(MASTER_SRC_DIR)/test/timeloop \
+$(MASTER_SRC_DIR)/test \
 $(MASTER_SRC_DIR)/bc
 
 OBJ_MK = $(addprefix $(OBJECTS_DIR)/, $(SOURCE_DIR))
@@ -165,7 +167,7 @@ OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
 CFLAGS              += -g -pedantic -std=c99 -O3
-CFLAGS              += -D_PETSC -D_ADH_HDF5 -D_DEBUG #-D_MPI
+CFLAGS              += -D_PETSC -D_HDF5 -D_DEBUG #-D_MPI
 #CFLAGS              += -L/opt/homebrew/Cellar/suite-sparse/7.8.3/lib -lumfpack -I/opt/homebrew/Cellar/suite-sparse/7.8.3/include/suitesparse
 #CFLAGS              += -L/opt/homebrew/Cellar/scotch/7.0.6/lib -lscotch -I/opt/homebrew/Cellar/scotch/7.0.6/include/
 CFLAGS              += -I/${PETSC_DIR}/${PETSC_ARCH}/include

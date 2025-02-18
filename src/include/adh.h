@@ -113,4 +113,5 @@ void print_build_info();
 #include "testnonlinearnewton.h"
 #include "testtimeloop.h"
 #include "testsw2_wd.h"
+#include "run_tests.h"
 //#endif
