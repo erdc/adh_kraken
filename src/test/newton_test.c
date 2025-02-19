@@ -94,7 +94,7 @@ int linear_newton_test(void) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
+	//smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
 	//printf("NDOFS %d\n",dm.ndofs[0]);
 	//printf("Supermodel no read complete\n");
 	//sketch_csr_sparsity(dm.lin_sys);
@@ -383,7 +383,7 @@ int nonlinear_newton_test(void) {
 	strcpy(&elemVarCode[2],"0"); //Transport
 	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
 	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
+	//smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
 	printf("NDOFS %d\n",dm.superModel[0].ndofs);
 	//printf("Supermodel no read complete\n");
 	//overwrite from linear to nonlinear

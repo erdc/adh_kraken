@@ -32,16 +32,16 @@ typedef struct {
 
     SCOVERAGE *params;   // superModel shared parameter coverage
 
-    // the number of unique sparsity patterns and which superModel has them
-    int nUnique;    // number of unique supermodels, leading to unique sparsity structure
-                    // a Unique supermodel is one that is either monolithically coupled or
-                    // unique sparsity
-    int *unique_id; // integer array of size nUnique, saves index of first Unique super model for each sparsity pattern
 
     // only allocate memory for linear systems of each sparsity pattern
-    int nlin_sys;
+    int nlin_sys; // number of unique supermodels, leading to unique sparsity structure
+                    // a Unique supermodel is one that is either monolithically coupled or
+                    // unique sparsity
     int *lin_sys_id; // array of [nSuperModels] that gives the index of the linear system it belongs to
-    SLIN_SYS *lin_sys; // array of [nUnique] systems
+                     //likely unnecessary   
+    int *unique_id; // integer array of size nlin_sys, saves index of first Unique super model for each sparsity pattern
+
+    SLIN_SYS *lin_sys; // array of [nlin_sys] systems
 
     // int *nFluxInterfaces; // total # of flux interfaces between supermodesl
     // SINTERFACE_FLUX  will hold all data for interfacing between supermodels
@@ -61,7 +61,8 @@ int smodel_design_init(SMODEL_DESIGN *dmod, char *filename, bool input_check, MP
 int smodel_design_init(SMODEL_DESIGN *dmod, char *filename, bool input_check);
 #endif
 void smodel_design_read(SMODEL_DESIGN *dmod, char *filename);
-void smodel_design_no_read_simple(SMODEL_DESIGN *dm, double dt_in, double t_init, double t_final, int nphysics_mat, char elemVarCode[4] ,SGRID *grid);
+void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init, double t_final,
+    int nSuperModels, int nphysics_mats[], char *elemVarCode[][10], int **coverage_arrays);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

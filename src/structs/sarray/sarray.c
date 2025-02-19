@@ -89,6 +89,13 @@ void sarray_init_double_2d(double **to, int nrows, int ncols) {
     }
 }
 //----------------------------------------------------//
+//*****************************************************//
+void sarray_init_range_int(int *array, int size) {
+    for (int i=0; i<size; i++) {
+        array[i] = i;
+    }
+}
+//----------------------------------------------------//
 //Mark, is memcpy faster??
 //void sarray_copy_dbl(double *to, double *from, int nsize) {
 //    int i;

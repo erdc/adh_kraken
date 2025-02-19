@@ -27,7 +27,7 @@ void smodel_design_defaults(SMODEL_DESIGN *dm) {
     dm->series_dt = NULL;
     dm->series_out= NULL;
     dm->params = NULL;
-    dm->nUnique = UNSET_INT;
+    dm->nlin_sys = UNSET_INT;
     dm->unique_id = NULL;
     dm->lin_sys_id = NULL;
     dm->lin_sys = NULL;

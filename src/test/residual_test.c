@@ -52,7 +52,7 @@ int residual_test(void) {
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Fill in a simple design model
     //++++++++++++++++++++++++++++++++++++++++++++++
-    
+    //smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
 	////specify elemental physics and other properties in super model
 //	double dt = 1.0;
 //	double t0 = 0.0;
