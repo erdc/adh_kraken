@@ -98,8 +98,8 @@ void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no) {
         
         // nodal depth
         if (ip->h != UNSET_INT) {
-            data_extract(sol,ivars,ip->h,n,data); // TAKE OUT JUST FOR TESTING!!!!
-            if (dm->ts.nt > 0) sarray_scale_replace_dbl(data, dm->ts.nt * 10, 3*n);
+            data_extract(sol,ivars,ip->h,n,data);
+            //if (dm->ts.nt > 0) sarray_scale_replace_dbl(data, dm->ts.nt * 10, 3*n); // JUST TESTING
             xmf_write_ts_attribute(g, dm->xmf, dm->filebase, ip->name.h,1,dm->ts.nt,true);
             hdf5_write_data(g, dm->filebase, ip->name.h, data, 1, true, dm->ts.nt);
             sarray_init_dbl(data,3*n);

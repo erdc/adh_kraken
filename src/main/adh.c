@@ -111,9 +111,9 @@ int main(int argc, char *argv[]) {
     smodel_design_xmf_write(&dmod,0); // write intial data
     
     // TESTING -- write a second time-step
-    dmod.ts.nt = 1;
-    dmod.ts.time = 100.0;
-    smodel_design_xmf_write(&dmod,0);
+    //dmod.ts.nt = 1;
+    //dmod.ts.time = 100.0;
+    //smodel_design_xmf_write(&dmod,0);
 #endif
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
