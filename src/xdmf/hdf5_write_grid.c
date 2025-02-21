@@ -12,7 +12,7 @@ static int DEBUG_WITH_PICKETS = OFF;
  *  \warning   none
  *  \copyright AdH
  *
- * @param[inout] g           (SGRID *)  pointer to an AdH grid
+ * @param[in] g           (SGRID *)  pointer to an AdH grid
  *
  * \note
  */
@@ -22,73 +22,70 @@ static int DEBUG_WITH_PICKETS = OFF;
 #define VECTOR_RANK 1 // Always be 1
 #define SPATIAL_DIM 3 // Always be 3
 
-void sgrid_write_hdf5(SGRID *g){
+void hdf5_write_grid(SGRID *g, char *fbase) {
     
-    char *error[100];
-
 #ifdef _HDF5
-
-    tag();
-    
+    char *error[100];
     hid_t     file_id, plist_id, filespace, dset_id, memspace;
     hid_t     grp1,grp2;
-    char      fname[50];
     hsize_t   dims[MATRIX_RANK];
     herr_t    status;
     hsize_t   count[MATRIX_RANK],offset[MATRIX_RANK];
     int nt=0;
-
+    
     // for adaptive grid writing
     char number[50] = "";
     sprintf(number, "%d", nt);
-
+    
     // mesh properties
     int *connectivity;
-
+    
     // create object to store h5 config
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
-
-    #ifdef _MESSG
-        MPI_Info info  = MPI_INFO_NULL;
-        H5Pset_fapl_mpio(plist_id, g->smpi->ADH_COMM, info);
-    #endif
-
+    
+#ifdef _MESSG
+    MPI_Info info  = MPI_INFO_NULL;
+    H5Pset_fapl_mpio(plist_id, g->smpi->ADH_COMM, info);
+#endif
+    
     // open file
-    strcpy(fname,g->filename);
+    char fname[50];
+    strcpy(fname,fbase);
     strcat(fname, ".h5");
     file_id = H5Fopen(fname, H5F_ACC_RDWR, plist_id);
+    //file_id = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
     H5Pclose(plist_id);
-
+    
     // group 1 is anything with mesh nodes
     grp1 = H5Gopen(file_id, "/Mesh/XY", H5P_DEFAULT); // a group is like a folder
-
+    
     //++++++++++++++++++++++++++++++++++++++
     // Writing Nodes
     //++++++++++++++++++++++++++++++++++++++
-
+    
     // declare global sizes of data set nodes first. This is local data.
     double (*xyz)[SPATIAL_DIM] = malloc(sizeof(double[g->my_nnodes][SPATIAL_DIM]));
-
+    
     // create a dataspace.  This is a global quantity
     dims[0]  = g->macro_nnodes;
     dims[1]  = SPATIAL_DIM;
     filespace = H5Screate_simple(MATRIX_RANK, dims, NULL);
-
+    
     //create a parallel dataset object and close filespace
-    dset_id = H5Dcreate(grp1, number, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate(grp1, number, H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(filespace);
-
+    
     //create a local dataspace where each process has a few of the rows
     count[0]  = g->my_nnodes;
     count[1]  = dims[1];
     //offset[0] = g->node[0].gid;
     //offset[1] = 0;
-
+    
     // give the part that each processor will give
     // this one assumes each process is the same
     // there is way to specify each count per process
     memspace  = H5Screate_simple(MATRIX_RANK, count, NULL);
-
+    
     // determine the hyperslabs in the file
     filespace = H5Dget_space(dset_id);
     
@@ -103,18 +100,18 @@ void sgrid_write_hdf5(SGRID *g){
         if(g->node[i].resident_pe == g->smpi->myid)
 #endif
         {
-            xyz[l][0] = g->node[i].x; 
+            xyz[l][0] = g->node[i].x;
             xyz[l][1] = g->node[i].y;
             xyz[l][2] = g->node[i].z;
             l+=1;
-
+            
             for(j=0;j<SPATIAL_DIM;j++) {
                 coord1[k] = g->node[i].gid;
                 coord1[k+1] = j;
                 k += MATRIX_RANK;
                 
             }
-
+            
         }
     }
     assert(l==g->my_nnodes);
@@ -122,10 +119,10 @@ void sgrid_write_hdf5(SGRID *g){
     
     // Create property list for collective dataset write.
     // declare collextive data file writing
-
+    
     plist_id = H5Pcreate(H5P_DATASET_XFER);
 #ifdef _MESSG
-        H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
+    H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
 #endif
     //collective write
     status = H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, plist_id, xyz);
@@ -138,37 +135,30 @@ void sgrid_write_hdf5(SGRID *g){
     // +++++++++++++++++++++++++++++++++++++++
     // Nodal write complete
     // +++++++++++++++++++++++++++++++++++++++
-
-
+    
+    
     // +++++++++++++++++++++++++++++++++++++++
     // Now write elemental data
     // +++++++++++++++++++++++++++++++++++++++
-
+    int nentry = g->macro_nSegs * 3 +  g->macro_nQuads * 5 + g->macro_nTris * 4 + g->macro_nTets * 5 + g->macro_nPrisms * 7;
+    int nentry_local = g->my_nSegs * 3 + g->my_nQuads * 5 + g->my_nTris * 4 + g->my_nTets * 5 + g->my_nPrisms * 7;
+    
     // Connectivity data
     //size of array should be numQuad*(4+1) + numTri*(3+1) + numTet*(4+1) + numPrism*(6+1)
     //+1 is for element code
     grp2 = H5Gopen(file_id, "/Mesh/Elements", H5P_DEFAULT);
-
-    //global attributes
-    int nentry = g->macro_nSegs * 3 +  g->macro_nQuads * 5 + g->macro_nTris * 4 + g->macro_nTets * 5 + g->macro_nPrisms * 7;
-
-    //local data, different on each PE
-    int nentry_local = g->my_nSegs * 3 + g->my_nQuads * 5 + g->my_nTris * 4 + g->my_nTets * 5 + g->my_nPrisms * 7;
     connectivity = (int *)malloc(sizeof(int) * nentry_local);
     count[0] = nentry_local; // local dim[0]
     count[1] = 0; // ignores for elemental since just dim 1 array
     
-
     int ie;
     k = 0;
-    printf("my_nelems1d: %d\n",g->my_nelems1d);
-    printf("g->nelems3d: %d || g->nelems2d: %d || g->nelems1d: %d\n", g->nelems3d,g->nelems2d,g->nelems1d);
     for (ie=0; ie<g->nelems3d; ie++) {
 #ifdef _MESSG
-        if (g->elem3d[ie].resident_pe == g->smpi->myid) 
+        if (g->elem3d[ie].resident_pe == g->smpi->myid)
 #endif
         {
-
+            
             if      (g->elem3d[ie].nnodes == 4) {connectivity[k] = 6;} // XDMF CODE
             else if (g->elem3d[ie].nnodes == 6) {connectivity[k] = 7;} // XDMF CODE
             k += 1;
@@ -178,15 +168,13 @@ void sgrid_write_hdf5(SGRID *g){
             }
         }
     }
-    printf("k: %d\n",k);
-
-
+    
     for (ie=0; ie<g->nelems2d; ie++) {
         //if (g->elem2d[ie].bflag == BODY) { // only body elements??  // MAKE SURE THEY ARE RESIDENTIAL!!!
 #ifdef _MESSG
         if (g->elem2d[ie].resident_pe == g->smpi->myid)
 #endif
-         {
+        {
             if      (g->elem2d[ie].nnodes == 3) {connectivity[k] = 4;} // XDMF CODE
             else if (g->elem2d[ie].nnodes == 4) {connectivity[k] = 5;} // XDMF CODE
             k += 1;
@@ -196,16 +184,20 @@ void sgrid_write_hdf5(SGRID *g){
             }
         }
     }
-
-    printf("k: %d\n",k);
-
+    
     //add 1d element too
-     for (ie=0; ie<g->nelems1d; ie++) {
+    for (ie=0; ie<g->nelems1d; ie++) {
         //if (g->elem2d[ie].bflag == BODY) { // only body elements??  // MAKE SURE THEY ARE RESIDENTIAL!!!
-        //should be g->elem1d[ie].resident_pe == g->smpi->myid
-        if (true) {
-            if      (g->elem1d[ie].nnodes == 2) {connectivity[k] = 2;} // XDMF CODE
+#ifdef _MESSG
+        if (g->elem1d[ie].resident_pe == g->smpi->myid)
+#endif
+        {
+            connectivity[k] = 2; // XDMF CODE
             k += 1;
+            
+//            connectivity[k] = 1; // # of nodes on the segment?
+//            k += 1;
+            
             for (i=0; i<g->elem1d[ie].nnodes; i++) {
                 connectivity[k] = g->node[g->elem1d[ie].nodes[i]].gid;
                 k++;
@@ -213,13 +205,12 @@ void sgrid_write_hdf5(SGRID *g){
         }
     }
     
-    printf("k: %d\n",k);
     if (k != nentry_local) {
         sprintf(error,"ERROR: k: %d || nentry_local: %d\n",k,nentry_local);
         tl_error(error);
     }
     //assert(k == nentry_local);
-
+    
     // create dataspace and add
     //give global size
     dims[0] = nentry;
@@ -233,7 +224,7 @@ void sgrid_write_hdf5(SGRID *g){
     // this one assumes each process is the same
     // there is way to specify each count per process
     memspace  = H5Screate_simple(VECTOR_RANK, count, NULL);
-
+    
     //determine the hyperslabs in the file
     filespace = H5Dget_space(dset_id);
     //H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL); // only contiguous arrays
@@ -250,30 +241,30 @@ void sgrid_write_hdf5(SGRID *g){
     k=0;
     int gid,nnodes;
     for (ie=0; ie<g->nelems3d; ie++){
-
+        
         if (g->elem3d[ie].resident_pe == g->smpi->myid) {
-        gid = g->elem3d[ie].gid;
-        nnodes = g->elem3d[ie].nnodes;
-        //use gid to calculate global coord numbers
-
-        //Prisms first
-        if(nnodes == 6) {
-            for(j=0;j<nnodes+1;j++){
-                coord2[k] = gid*(nnodes+1) + j;
-                k+=1;
+            gid = g->elem3d[ie].gid;
+            nnodes = g->elem3d[ie].nnodes;
+            //use gid to calculate global coord numbers
+            
+            //Prisms first
+            if(nnodes == 6) {
+                for(j=0;j<nnodes+1;j++){
+                    coord2[k] = gid*(nnodes+1) + j;
+                    k+=1;
+                }
+            //Tets second
+            }else if(nnodes == 4){
+                for(j=0;j<nnodes+1;j++){
+                    coord2[k] = g->macro_nPrisms*(7) + (gid-g->macro_nPrisms)*(nnodes+1) + j;
+                    k+=1;
+                }
+                
             }
-        //Tets second
-        }else if(nnodes == 4){
-            for(j=0;j<nnodes+1;j++){
-                coord2[k] = g->macro_nPrisms*(7) + (gid-g->macro_nPrisms)*(nnodes+1) + j;
-                k+=1;
-            }
-
         }
-        } 
-
+        
     }
-
+    
     for (ie=0; ie<g->nelems2d; ie++){
         gid = g->elem2d[ie].gid;
         nnodes = g->elem2d[ie].nnodes;
@@ -282,69 +273,66 @@ void sgrid_write_hdf5(SGRID *g){
         if (g->elem2d[ie].resident_pe == g->smpi->myid)
 #endif
         {
-        //Quads first
-        if(nnodes == 4) {
-            for(j=0;j<nnodes+1;j++){
-                coord2[k] = g->macro_nPrisms*7 + g->macro_nTets*5 + (gid)*(nnodes+1) + j;
-                k+=1;
+            //Quads first
+            if(nnodes == 4) {
+                for(j=0;j<nnodes+1;j++){
+                    coord2[k] = g->macro_nPrisms*7 + g->macro_nTets*5 + (gid)*(nnodes+1) + j;
+                    k+=1;
+                }
+            //Tris second
+            }else if(nnodes == 3){
+                for(j=0;j<nnodes+1;j++){
+                    coord2[k] = g->macro_nPrisms*7 + g->macro_nTets*5 + g->macro_nQuads*5 + (gid-g->macro_nQuads)*(nnodes+1) + j;
+                    k+=1;
+                }
+                
             }
-        //Tris second
-        }else if(nnodes == 3){
-            for(j=0;j<nnodes+1;j++){
-                coord2[k] = g->macro_nPrisms*7 + g->macro_nTets*5 + g->macro_nQuads*5 + (gid-g->macro_nQuads)*(nnodes+1) + j;
-                k+=1;
-            }
-
-        } 
         }
-
+        
     }
-
-    //add 1d here
+    
     for (ie=0; ie<g->nelems1d; ie++){
         gid = g->elem1d[ie].gid;
         nnodes = g->elem1d[ie].nnodes;
-        //use gid to calculate global coord numbers
-        //RN no mpi infor for 1d elements, need to fix
-        //should be g->elem1d[ie].resident_pe == g->smpi->myid
-        if (true) {
-        //line seg only
-        if(nnodes == 2) {
+#ifdef _MESSG
+        if (g->elem1d[ie].resident_pe == g->smpi->myid)
+#endif
+        {
             for(j=0;j<nnodes+1;j++){
                 coord2[k] = g->macro_nPrisms*7 + g->macro_nTets*5 + g->macro_nQuads*5 + g->macro_nTris*4 + (gid)*(nnodes+1) + j;
                 k+=1;
             }
-        //Tris second
         }
-        }
-
+        
     }
-
+    
     //put into appropriate part of global array
     H5Sselect_elements(filespace, H5S_SELECT_SET,nentry_local,(const hsize_t *)&coord2);
-
-
+    
+    
     //Create property list for collective dataset write.
     //declare collextive data file weiting
     plist_id = H5Pcreate(H5P_DATASET_XFER);
-    #ifdef _MESSG
-        H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
-    #endif    
+#ifdef _MESSG
+    H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
+#endif
     //collective write
     status = H5Dwrite(dset_id, H5T_NATIVE_INT, memspace, filespace, plist_id, connectivity);
     free(connectivity);
-
+    
     H5Dclose(dset_id);
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
     H5Gclose(grp2);
-    ////////////////////////////////////
-    ///Elemental connections complete///
-
+    //++++++++++++++++++++++++++++++++++++++
+    //Elemental connections complete
+    //++++++++++++++++++++++++++++++++++++++
+    
     //close mesh file
     H5Fclose(file_id);
     
 #endif
-
+    
 }
+

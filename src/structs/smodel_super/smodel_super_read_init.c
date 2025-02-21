@@ -28,7 +28,8 @@ void read_1col(double *sol, int **ivars, int nnodes, char **line, int varcode, F
         //printf("varcode: %d || inode: %d ||  ivars[varcode][inode]: %d\n",varcode,inode,ivars[varcode][inode]);   
         if (ivars[varcode][inode] == UNSET_INT) continue;
         //printf("varcode: %d || inode: %d ||  ivars[varcode][inode]: %d\n",varcode,inode,ivars[varcode][inode]);   
-        sscanf(line, "%lf", &sol[ivars[varcode][inode]]);
+        sscanf(*line, "%lf", &sol[ivars[varcode][inode]]);
+        //printf("varcode: %d || inode: %d || ivars[varcode][inode] %d || sol: %f || line: %s\n",varcode,inode,ivars[varcode][inode],sol[ivars[varcode][inode]], *line);
 	}
 }
 void read_2col(double *sol, int **ivars, int nnodes, char **line, int varcode1, int varcode2, FILE *fp, size_t *len) {
@@ -38,9 +39,10 @@ void read_2col(double *sol, int **ivars, int nnodes, char **line, int varcode1, 
         if (ivars[varcode1][inode] == UNSET_INT || 
             ivars[varcode2][inode] == UNSET_INT) continue;
         //printf("inode: %d || varcodes: [%d,%d] || ivars1[varcode1][inode]: %d || ivars2[varcode2][inode]: %d\n",
-        //            inode,varcode1,varcode2,ivars[varcode1][inode],ivars[varcode2][inode]); 
+        //            inode,varcode1,varcode2,ivars[varcode1][inode],ivars[varcode2][inode]);
 
-        sscanf(line, "%lf %lf", &sol[ivars[varcode1][inode]],&sol[ivars[varcode2][inode]]);
+        sscanf(*line, "%lf %lf", &sol[ivars[varcode1][inode]],&sol[ivars[varcode2][inode]]);
+        //printf("sol1: %f || sol2: %f \n",sol[ivars[varcode1][inode]],sol[ivars[varcode2][inode]]);
 	}
 }
 void read_3col(double *sol, int **ivars, int nnodes, char **line, int varcode1, int varcode2, int varcode3, FILE *fp, size_t *len) {
@@ -50,7 +52,7 @@ void read_3col(double *sol, int **ivars, int nnodes, char **line, int varcode1, 
             ivars[varcode2][inode] == UNSET_INT ||
             ivars[varcode3][inode] == UNSET_INT) continue;
 		//read = getline(line, len, fp);
-		sscanf(line, "%lf %lf %lf", &sol[ivars[varcode1][inode]],&sol[ivars[varcode2][inode]],&sol[ivars[varcode3][inode]]);
+		sscanf(*line, "%lf %lf %lf", &sol[ivars[varcode1][inode]],&sol[ivars[varcode2][inode]],&sol[ivars[varcode3][inode]]);
 	}
 }
 
@@ -182,7 +184,14 @@ void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase) {
         	read_1col(s_older,sm->ivars,nnodes,&line,ivar_pos->con[conID-1],fp,&len);
         } 
     }
+    
+    //for (int i=0; i<sm->grid->my_nnodes; i++) {
+        //printf("INIT || sol[%d]: %f\n",i,s[i]);
+        //printf("node: %d || uda: %f || vda: %f \n",i,s[sm->ivars[ivar_pos->uda][i]],s[sm->ivars[ivar_pos->vda][i]]);
+    //}
 
+    
+    
     //tl_check_all_pickets(__FILE__,__LINE__);
     //exit(1);
 

@@ -75,15 +75,7 @@ $(wildcard $(MASTER_SRC_DIR)/newton) \
 $(wildcard $(MASTER_SRC_DIR)/timeloop) \
 $(wildcard $(MASTER_SRC_DIR)/la) \
 $(wildcard $(MASTER_SRC_DIR)/fe) \
-$(wildcard $(MASTER_SRC_DIR)/sw2) \
-$(wildcard $(MASTER_SRC_DIR)/poisson) \
-$(wildcard $(MASTER_SRC_DIR)/test/la) \
-$(wildcard $(MASTER_SRC_DIR)/test/residual) \
-$(wildcard $(MASTER_SRC_DIR)/test/jacobian) \
-$(wildcard $(MASTER_SRC_DIR)/test/newton) \
-$(wildcard $(MASTER_SRC_DIR)/test/nonlinear_newton) \
-$(wildcard $(MASTER_SRC_DIR)/test/sw2_wd) \
-$(wildcard $(MASTER_SRC_DIR)/test/timeloop) \
+$(wildcard $(MASTER_SRC_DIR)/test) \
 $(wildcard $(MASTER_SRC_DIR)/bc) \
 $(wildcard $(MASTER_SRC_DIR)/main)
 
@@ -133,15 +125,7 @@ $(MASTER_SRC_DIR)/newton \
 $(MASTER_SRC_DIR)/timeloop \
 $(MASTER_SRC_DIR)/la \
 $(MASTER_SRC_DIR)/fe \
-$(MASTER_SRC_DIR)/sw2 \
-$(MASTER_SRC_DIR)/poisson \
-$(MASTER_SRC_DIR)/test/la \
-$(MASTER_SRC_DIR)/test/residual \
-$(MASTER_SRC_DIR)/test/jacobian \
-$(MASTER_SRC_DIR)/test/newton \
-$(MASTER_SRC_DIR)/test/nonlinear_newton \
-$(MASTER_SRC_DIR)/test/sw2_wd \
-$(MASTER_SRC_DIR)/test/timeloop \
+$(MASTER_SRC_DIR)/test \
 $(MASTER_SRC_DIR)/bc
 
 OBJ_MK = $(addprefix $(OBJECTS_DIR)/, $(SOURCE_DIR))

@@ -84,6 +84,7 @@ int main(int argc, char *argv[]) {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // allocate an AdH design model
     SMODEL_DESIGN dmod; smodel_design_defaults(&dmod);
+    strcpy(dmod.filebase,filename);
 
     // start calculation time
     time(&time_start);
@@ -98,9 +99,31 @@ int main(int argc, char *argv[]) {
 #else
     ierr = smodel_design_init(&dmod, filename, input_check);
 #endif
+    
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Initialize HDF5/XDMF file output
+#ifdef _HDF5
+    char domain_name[50] = "adh sim";
+    smodel_design_xmf_init(&dmod, filename, domain_name);
 
+    // Write initial time-step ata
+    smodel_design_xmf_write(&dmod,0); // write intial data
+    
+    // TESTING -- write a second time-step
+    dmod.ts.nt = 1;
+    dmod.ts.time = 100.0;
+    smodel_design_xmf_write(&dmod,0);
+#endif
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // End AdH initialization
     time(&time2);
     double time_initial = difftime(time2, time1);
+    
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     
 //    // AdH execution
 //    time(&time1);
@@ -174,6 +197,11 @@ int main(int argc, char *argv[]) {
 //#ifdef _MESSG
 //    MPI_Finalize();
 //#endif
+//
+#ifdef _HDF5
+    xmf_finalize(dmod.xmf);
+#endif
+
     return ierr;
 }
 

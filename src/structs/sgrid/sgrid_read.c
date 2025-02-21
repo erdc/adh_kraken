@@ -66,7 +66,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     sfile_open(&gf,fn,NULL,NULL,NULL,mode,TRUE);
     strcpy(g->filename,fn);
     FILE *fp = gf.fp;
-    
+   
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Does the grid have a columnar component?
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -454,21 +454,6 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         g->y_min = g->my_y_min; g->y_max = g->my_y_max;
         g->z_min = g->my_z_min; g->z_max = g->my_z_max;
     }
-    
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Write grid in HD5/XDMF format for paraview
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#ifdef _HDF5
-    if (!doesFileExist(g->filename)) { // only if it hasn't been written already
-#ifdef _DEBUG
-        if (DEBUG && myid == 0) printf("\n-- Writing grid XDMF/HDF5\n");
-#endif
-        init_hdf5_file(g);
-        sgrid_write_xdmf(g);
-        sgrid_write_hdf5(g);
-    }
-#endif
     
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Done reading and storing grid

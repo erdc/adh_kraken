@@ -26,7 +26,7 @@ typedef struct {
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 typedef struct {
-    char filename[100];  // grid filename
+    char filename[100];  // grid filenames
     char type[15];       // grid descriptor :: options :: UNSTRUCTURED, COLUMNAR
     int ndim;            // highest grid dimension
     bool columnar;       // does grid have columnar parts
@@ -161,12 +161,12 @@ void sgrid_read(SGRID **pgrid, char *filename, MPI_Comm model_comm);
 #else
 void sgrid_read(SGRID **pgrid, char *filename);
 #endif
-void sgrid_write_hdf5(SGRID *g);
-void sgrid_write_xdmf(SGRID *g);
-void sgrid_write_nodal_pe(SGRID *g);
-void sgrid_write_elemental_pe(SGRID *g);
-void sgrid_write_xdmf_nodal_pe(SGRID *g);
-void sgrid_write_xdmf_elemental_pe(SGRID *g);
+//void sgrid_write_hdf5(SGRID *g, char *fbase, int mesh_no, double time);
+//void sgrid_write_xdmf(SGRID *g, FILE *xmf);
+//void sgrid_write_nodal_pe(SGRID *g);
+//void sgrid_write_elemental_pe(SGRID *g);
+//void sgrid_write_xdmf_nodal_pe(SGRID *g);
+//void sgrid_write_xdmf_elemental_pe(SGRID *g);
 void sgrid_read_nodal_attribute(SGRID *g);
 int sgrid_reorder(SGRID *grid, int option);
 

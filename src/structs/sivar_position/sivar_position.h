@@ -7,31 +7,47 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
-   \file sivar_pos.h
-   \brief Stores the independent variable positions in the **var storage
+ \file sivar_pos.h
+ \brief Stores the independent variable positions in the **var storage
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
+typedef struct {
+    
+    char h[MAXLINE];
+    char u[MAXLINE];
+    char v[MAXLINE];
+    char w[MAXLINE];
+    char uda[MAXLINE];
+    char vda[MAXLINE];
+    char dpl[MAXLINE];
+    char prs[MAXLINE];
+    char heat[MAXLINE];
+    char sal[MAXLINE];
+    char con[MAX_TRNS_VARS][MAXLINE];
+    
+} SNAMES;
 
 typedef struct {
+    
+    int n;     // total # of independent variables active (includes transport)
+    int ntrns; // total # of transport variables active only
+    
+    // independent variable order!
+    int h;
+    int u;
+    int v;
+    int w;
+    int uda;
+    int vda;
+    int dpl;
+    int prs;
+    int heat;
+    int sal;
+    int con[MAX_TRNS_VARS];
 
-   int n;     // total # of independent variables active (includes transport)
-   int ntrns; // total # of transport variables active only
-
-   // independent variable order!
-   int h;
-   int u;
-   int v;
-   int w;
-   int uda;
-   int vda;
-   int dpl;
-   int prs;
-   int heat;
-   int sal;
-   int con[MAX_TRNS_VARS];
-
+    SNAMES name;
+    
 } SIVAR_POSITION;   
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

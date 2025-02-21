@@ -31,5 +31,8 @@ void smodel_design_defaults(SMODEL_DESIGN *dm) {
     dm->unique_id = NULL;
     dm->lin_sys_id = NULL;
     dm->lin_sys = NULL;
+    dm->xmf = NULL;
+    
+    sdt_init(&dm->ts);
 
 }

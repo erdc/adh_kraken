@@ -14,9 +14,11 @@ typedef struct {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 typedef struct {
 
+    char filebase[MAXLINE];        // the base project filename
     char filename_design[MAXLINE]; // file - design data
     char filename_grid[MAXLINE];   // file - design grid
     char filename_params[MAXLINE]; // file - supermodel parameters
+    FILE *xmf;
 
     int nSuperModels;           // total # of superModels
     SMODEL_SUPER *superModel;   // superModel array
@@ -63,6 +65,8 @@ int smodel_design_init(SMODEL_DESIGN *dmod, char *filename, bool input_check);
 void smodel_design_read(SMODEL_DESIGN *dmod, char *filename);
 void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init, double t_final,
     int nSuperModels, int nphysics_mats[], char *elemVarCode[][10], int **coverage_arrays);
+void smodel_design_xmf_init(SMODEL_DESIGN *dm, char *filename, char *domain_name);
+void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

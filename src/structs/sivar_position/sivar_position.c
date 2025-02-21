@@ -18,22 +18,24 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 void sivar_position_init(SIVAR_POSITION *ip) {
-
+    
     ip->n = 0;
     ip->ntrns = 0;
-
-    ip->h = UNSET_INT;
-    ip->u = UNSET_INT;
-    ip->v = UNSET_INT;
-    ip->w = UNSET_INT;
-    ip->uda = UNSET_INT;
-    ip->vda = UNSET_INT;
-    ip->dpl = UNSET_INT;
-    ip->prs = UNSET_INT;
-    ip->heat = UNSET_INT;
-    ip->sal = UNSET_INT;
+    ip->h = UNSET_INT;    strcpy(ip->name.h,"h");
+    ip->u = UNSET_INT;    strcpy(ip->name.u,"u");
+    ip->v = UNSET_INT;    strcpy(ip->name.v,"v");
+    ip->w = UNSET_INT;    strcpy(ip->name.w,"w");
+    ip->uda = UNSET_INT;  strcpy(ip->name.uda,"uda");
+    ip->vda = UNSET_INT;  strcpy(ip->name.vda,"vda");
+    ip->dpl = UNSET_INT;  strcpy(ip->name.dpl,"dpl");
+    ip->prs = UNSET_INT;  strcpy(ip->name.prs,"prs");
+    ip->heat = UNSET_INT; strcpy(ip->name.heat,"heat");
+    ip->sal = UNSET_INT;  strcpy(ip->name.sal,"sal");
     sarray_init_value_int(ip->con,MAX_TRNS_VARS,UNSET_INT);
-
+    for (int itrns=0; itrns<MAX_TRNS_VARS; itrns++) {
+        char str[5]; sprintf(str, "%d", itrns);
+        strcpy(ip->name.con[itrns],"con"); strcat(ip->name.con[itrns],str);
+    }
 }
 
 void sivar_position_map(SIVAR_POSITION *ip, int *FLAG) {
@@ -65,18 +67,18 @@ void sivar_position_printScreen(SIVAR_POSITION *ip) {
 
     printf("------ ip->n: %d\n",ip->n);
     printf("------ ip->ntrns: %d\n",ip->ntrns);
-    printf("------ ip->h: %d\n",ip->h);
-    printf("------ ip->u: %d\n",ip->u);
-    printf("------ ip->v: %d\n",ip->v);
-    printf("------ ip->w: %d\n",ip->w);
-    printf("------ ip->uda: %d\n",ip->uda);
-    printf("------ ip->vda: %d\n",ip->vda);
-    printf("------ ip->dpl: %d\n",ip->dpl);
-    printf("------ ip->prs: %d\n",ip->prs);
-    printf("------ ip->heat: %d\n",ip->heat);
-    printf("------ ip->sal: %d\n",ip->sal);
+    printf("------ ip->%s: %d\n",ip->name.h,ip->h);
+    printf("------ ip->%s: %d\n",ip->name.u,ip->u);
+    printf("------ ip->%s: %d\n",ip->name.v,ip->v);
+    printf("------ ip->%s: %d\n",ip->name.w,ip->w);
+    printf("------ ip->%s: %d\n",ip->name.uda,ip->uda);
+    printf("------ ip->%s: %d\n",ip->name.vda,ip->vda);
+    printf("------ ip->%s: %d\n",ip->name.dpl,ip->dpl);
+    printf("------ ip->%s: %d\n",ip->name.prs,ip->prs);
+    printf("------ ip->%s: %d\n",ip->name.heat,ip->heat);
+    printf("------ ip->%s: %d\n",ip->name.sal,ip->sal);
     for (int itrns=0; itrns<ip->ntrns; itrns++) {
-        printf("------ ip->con[%d]: %d\n",itrns,ip->con[itrns]);
+        printf("------ ip->%s: %d\n",ip->name.con[itrns],ip->con[itrns]);
     }
 
 }

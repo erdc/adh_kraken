@@ -8,6 +8,8 @@ typedef struct {
     double dt, dt_old, dt_err, dt_prev;
     double t_init, t_prev, t_final;
     double tau_temporal;
+    double time;
+    int nt; // current time-step
     int t_adpt_flag;
     int ientry_out;
     bool green_ampt;
