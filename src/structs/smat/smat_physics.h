@@ -38,6 +38,8 @@ typedef struct {
 // Methods
 void smat_physics_alloc_init(SMAT_PHYSICS *mat, char codes[10]);
 void smat_physics_alloc_init_array(SMAT_PHYSICS **mat_physics, int nmat, char codes[][10]);
+void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes);
+void smat_physics_alloc_init_ptr_array(SMAT_PHYSICS **mat_physics, int nmat, char **codes);
 void smat_physics_free_array(SMAT_PHYSICS *mat, int nmat);
 void smat_physics_position_flag(SMAT_PHYSICS **mat_node, int nnodes, int *FLAG);
 void smat_physics_printScreen(SMAT_PHYSICS *m);

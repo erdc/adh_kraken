@@ -238,6 +238,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
 				grid.elem2d[k].nodes[0] = nd1;
 				grid.elem2d[k].nodes[1] = nd2;
 				grid.elem2d[k].nodes[2] = nd3;
+				grid.elem2d[k].bflag = BODY;
 				//printf("E3T %d %d %d %d 1\n",k+1,nd1+1,nd2+1,nd3+1);
             	k++;
 
@@ -298,6 +299,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
                 grid.elem2d[k].nodes[0] = nd1;
 				grid.elem2d[k].nodes[1] = nd2;
 				grid.elem2d[k].nodes[2] = nd3;
+				grid.elem2d[k].bflag = BODY;
                 //printf("E3T %d %d %d %d 1\n",k+1,nd1+1,nd2+1,nd3+1);
                 k++;
 
@@ -368,7 +370,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
                 grid.elem2d[k].nodes[0] = nd1;
 				grid.elem2d[k].nodes[1] = nd2;
 				grid.elem2d[k].nodes[2] = nd3;
-
+				grid.elem2d[k].bflag = BODY;
                 //printf("E3T %d %d %d %d 1\n",k+1,nd1+1,nd2+1,nd3+1);
                 k++;
 
@@ -430,6 +432,7 @@ SGRID create_rectangular_grid(double xmin, double xmax, double ymin, double ymax
                 grid.elem2d[k].nodes[0] = nd1;
 				grid.elem2d[k].nodes[1] = nd2;
 				grid.elem2d[k].nodes[2] = nd3;
+				grid.elem2d[k].bflag = BODY;
 				//printf("E3T %d %d %d %d 1\n",k+1,nd1+1,nd2+1,nd3+1);
 				k++;
 			}

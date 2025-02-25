@@ -48,15 +48,45 @@ int residual_test(void) {
     *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
+
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Fill in a simple design model
     //++++++++++++++++++++++++++++++++++++++++++++++
+    double dt = 1.0;
+	double t0 = 0.0;
+	double tf = 1.0;
+	int nSuperModels = 1;
+	int *nphysics_mats;
+	nphysics_mats = (int*) tl_alloc(sizeof(int), nSuperModels);
+	nphysics_mats[0] = 1;
+	//elemVarCode in general is triple pointer, nSuperModels x nphyics_mat[i] x 10
+	char ***elemVarCode;
+	elemVarCode = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	for (int i = 0; i< nSuperModels; i ++){
+		elemVarCode[i] = (char **) tl_alloc(sizeof(char *), nphysics_mats[i]);
+		for (int j = 0; j< nphysics_mats[i]; j++){
+			elemVarCode[i][j] = (char *) tl_alloc(sizeof(char), 10);
+		}
+	}
+	strcpy(&elemVarCode[0][0][0],"2");//SW2D
+	strcpy(&elemVarCode[0][0][1],"0"); //GW
+	strcpy(&elemVarCode[0][0][2],"0"); //Transport
+
+	printf("elem var code %s\n",elemVarCode[0][0]);
+	//mat ids
+	int **mat_ids;
+	mat_ids = (int **) tl_alloc(sizeof(int*),nSuperModels);
+	int nelems = dm.grid->nelems2d + dm.grid->nelems1d + dm.grid->nelems1d;
+	for (int i = 0; i < nSuperModels; i++){
+		mat_ids[i] = tl_alloc(sizeof(int), nelems);
+		sarray_init_int(mat_ids[i],nelems);
+	}
+
+    smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
     //smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
 	////specify elemental physics and other properties in super model
-//	double dt = 1.0;
-//	double t0 = 0.0;
-//	double tf = 1.0;//
+
 
 //	char elemVarCode[4]; 
 //	strcpy(&elemVarCode[0],"2");//SW2D

@@ -21,8 +21,8 @@ static int DEBUG = ON;
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init, double t_final,
-    int nSuperModels, int nphysics_mats[], char *elemVarCode[][10], int **coverage_arrays) {
-    
+    int nSuperModels, int nphysics_mats[], char ***elemVarCode, int **coverage_arrays) {
+
     int i,j;
     int isSimple=0;
     int ndof_temp;
@@ -147,7 +147,8 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
             &(dmod->superModel[sm_id].ndofs),&(dmod->superModel[sm_id].macro_ndofs), 
             &(dmod->superModel[sm_id].my_ndofs_old), &(dmod->superModel[sm_id].ndofs_old), 
             &(dmod->superModel[sm_id].macro_ndofs_old), 0, dmod->superModel[sm_id].ndofs, 0);
-
+        printf("Lin sys pointers intialized\n");
+        //Mark stopped here
         //NOT IMPLEMENTED, NEED FOR MPI
         //slin_sys_init_ghosts(&(dm->lin_sys[i]), dm->grid, dm->superModel[j].dof_map_local);
         

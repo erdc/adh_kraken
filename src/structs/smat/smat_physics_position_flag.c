@@ -23,6 +23,7 @@
 void smat_physics_position_flag(SMAT_PHYSICS **mat_node, int nnodes, int *FLAG) {
 
     sarray_init_int(FLAG,MAX_TRNS_VARS + MAX_VARS);
+    
     for (int i=0; i<nnodes; i++) {
         //smat_elem_printScreen(mat_node[i],i);
         if (mat_node[i]->ivars.h    != UNSET_INT) FLAG[0] = 1;
@@ -35,6 +36,7 @@ void smat_physics_position_flag(SMAT_PHYSICS **mat_node, int nnodes, int *FLAG) 
         if (mat_node[i]->ivars.prs  != UNSET_INT) FLAG[7] = 1;       
         if (mat_node[i]->ivars.heat != UNSET_INT) FLAG[8] = 1;
         if (mat_node[i]->ivars.sal  != UNSET_INT) FLAG[9] = 1;
+
         for (int itrns=0; itrns<MAX_TRNS_VARS ; itrns++) {
             // CJT - note: Different types of transport may cause issues here
             if (mat_node[i]->ivars.con[itrns] != UNSET_INT) {

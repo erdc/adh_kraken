@@ -22,16 +22,15 @@ static int DEBUG = ON;
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void smodel_super_no_read(SMODEL_SUPER *sm, char codes[][10], int nmat_physics, int *mat_ids) {
-    
+void smodel_super_no_read(SMODEL_SUPER *sm, char **codes, int nmat_physics, int *mat_ids) {
     int i;
     SGRID *grid = sm->grid; // alias
-    
     //++++++++++++++++++++++++++++++++++++++++++++++
     // Set Element Physics Materials with codes input
     //++++++++++++++++++++++++++++++++++++++++++++++
     sm->nmat_physics = nmat_physics;
-    smat_physics_alloc_init_array(&(sm->mat_physics_elem),sm->nmat_physics,codes);
+
+    smat_physics_alloc_init_ptr_array(&(sm->mat_physics_elem),sm->nmat_physics,codes);
     if (DEBUG) {
         for (i=0; i<sm->nmat_physics; i++) {smat_physics_printScreen(&sm->mat_physics_elem[i]);}
     }
@@ -152,6 +151,11 @@ void smodel_super_no_read(SMODEL_SUPER *sm, char codes[][10], int nmat_physics, 
     SIVAR_POSITION ip[grid->nnodes];
     for (i=0; i<grid->nnodes; i++) {ip[i] = sm->mat_physics_node[i]->ivars;}
     sm->ndofs = sivar_position_build_dof_map(&sm->ivar_pos,grid->nnodes,ip,&sm->ivars);
+    //my ndofs???
+    //FORNOW JUST WORKS IN SERIAL
+#ifndef _MESSG
+    sm->my_ndofs = sm->ndofs;
+#endif
     if (DEBUG) {
         printf(">total ndofs: %d\n",sm->ndofs);
     }
