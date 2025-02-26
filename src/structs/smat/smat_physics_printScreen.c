@@ -25,19 +25,19 @@ void smat_physics_printScreen(SMAT_PHYSICS *m) {
     printf("----------------------------------------\n");
     printf("SMAT #%d || code: %s\n",m->id+1,m->code);
     printf("----------------------------------------\n");
-    printf("------ ivars || n: %d || ntrns: %d\n",m->ivars.n,m->ivars.ntrns);
-    printf("------ ivars || h: %d\n",m->ivars.h);
-    printf("------ ivars || u: %d\n",m->ivars.u);
-    printf("------ ivars || v: %d\n",m->ivars.v);
-    printf("------ ivars || w: %d\n",m->ivars.w);
-    printf("------ ivars || uda: %d\n",m->ivars.uda);
-    printf("------ ivars || vda: %d\n",m->ivars.vda);
-    printf("------ ivars || dpl: %d\n",m->ivars.dpl);
-    printf("------ ivars || prs: %d\n",m->ivars.prs);
-    printf("------ ivars || heat: %d\n",m->ivars.heat);
-    printf("------ ivars || sal: %d\n",m->ivars.sal);
-    for (itrns=0; itrns<m->ivars.ntrns; itrns++) {
-        printf("------ ivars || con[%d]: %d\n",itrns,m->ivars.con[itrns]);
+    printf("------ ivar_pos || n: %d || ntrns: %d\n",m->ivar_pos.n,m->ivar_pos.ntrns);
+    printf("------ ivar_pos || h: %d\n",m->ivar_pos.h);
+    printf("------ ivar_pos || u: %d\n",m->ivar_pos.u);
+    printf("------ ivar_pos || v: %d\n",m->ivar_pos.v);
+    printf("------ ivar_pos || w: %d\n",m->ivar_pos.w);
+    printf("------ ivar_pos || uda: %d\n",m->ivar_pos.uda);
+    printf("------ ivar_pos || vda: %d\n",m->ivar_pos.vda);
+    printf("------ ivar_pos || dpl: %d\n",m->ivar_pos.dpl);
+    printf("------ ivar_pos || prs: %d\n",m->ivar_pos.prs);
+    printf("------ ivar_pos || heat: %d\n",m->ivar_pos.heat);
+    printf("------ ivar_pos || sal: %d\n",m->ivar_pos.sal);
+    for (itrns=0; itrns<m->ivar_pos.ntrns; itrns++) {
+        printf("------ ivar_pos || con[%d]: %d\n",itrns,m->ivar_pos.con[itrns]);
     }
     printf("------ SW_FLOW: %d \n",m->SW_FLOW);
     printf("------ SW1_FLOW: %d \n",m->SW1_FLOW);

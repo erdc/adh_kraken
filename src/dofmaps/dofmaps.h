@@ -5,6 +5,7 @@
 //cg_maps
 
 //uses array look up
+void get_cell_dofs_ivars(int *local_dofs, int **ivars, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_var_pos);
 //void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);
 void get_cell_dofs(int *local_dofs, int *fmaplocal, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_vars, SMAT_PHYSICS **node_physics_mat);
 //int get_cg_dof(int var, int NodeID, int *fmaplocal, SMAT_PHYSICS *node_physics_mat, int *nodal_physics_mat_id);

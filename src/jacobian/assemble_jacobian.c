@@ -80,7 +80,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //pull all global information to local memory
         mat_id = sm->elem3d_physics_mat[j];
         //Get stuff from physics mat
-        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nvars_elem = sm->mat_physics_elem[mat_id].n;
         //get array of variables specified on element
         //sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem); // cjt -- comment for now
         //number of phyics routines on element
@@ -137,7 +137,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //pull all global information to local memory
         mat_id = sm->elem2d_physics_mat[j];
         //Get stuff from physics mat
-        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nvars_elem = sm->mat_physics_elem[mat_id].n;
         //get array of variables specified on element
         //sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem); // cjt -- comment for now
         //number of phyics routines on element
@@ -197,7 +197,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         //pull all global information to local memory
         mat_id = sm->elem1d_physics_mat[j];
         //Get stuff from physics mat
-        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nvars_elem = sm->mat_physics_elem[mat_id].n;
         //get array of variables specified on element
         //sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem); // cjt -- comment for now
         //number of phyics routines on element

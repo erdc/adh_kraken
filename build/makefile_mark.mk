@@ -152,16 +152,24 @@ DEPS                = $(foreach dir,    $(INCLUDE_DIR), $(wildcard  $(dir)/*.h))
 OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
-CFLAGS              += -g -pedantic -std=c99 -O3
+CFLAGS              += -g -pedantic -std=c99 -O3 -Wno-incompatible-pointer-types-discards-qualifiers
 CFLAGS              += -D_PETSC -D_HDF5 -D_DEBUG #-D_MPI
-#CFLAGS              += -L/opt/homebrew/Cellar/suite-sparse/7.8.3/lib -lumfpack -I/opt/homebrew/Cellar/suite-sparse/7.8.3/include/suitesparse
-#CFLAGS              += -L/opt/homebrew/Cellar/scotch/7.0.6/lib -lscotch -I/opt/homebrew/Cellar/scotch/7.0.6/include/
-CFLAGS              += -I/${PETSC_DIR}/${PETSC_ARCH}/include
-#CFLAGS              += -I/opt/homebrew/Cellar/metis/5.1.0/include/
-#CFLAGS              += -L/opt/homebrew/Cellar/hdf5-mpi/1.14.5/lib/
-#CFLAGS              += -lhdf5 -I/opt/homebrew/Cellar/hdf5-mpi/1.14.5/include
-CFLAGS              += -Wno-incompatible-pointer-types-discards-qualifiers
-CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/include -lhdf5 -lscotch
+CFLAGS              += -L/opt/homebrew/Cellar/suite-sparse/7.8.3/lib -lumfpack -I/opt/homebrew/Cellar/suite-sparse/7.8.3/include/suitesparse
+CFLAGS              += -L/opt/homebrew/Cellar/scotch/7.0.6/lib -lscotch -I/opt/homebrew/Cellar/scotch/7.0.6/include
+CFLAGS              += -L/${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -I/${PETSC_DIR}/${PETSC_ARCH}/include
+CFLAGS              += -L/opt/homebrew/Cellar/hdf5-mpi/1.14.5/lib -lhdf5 -I/opt/homebrew/Cellar/hdf5-mpi/1.14.5/include 
+CFLAGS              += -I/opt/homebrew/Cellar/metis/5.1.0/include
+
+#CFLAGS              += -g -pedantic -std=c99 -O3
+#CFLAGS              += -D_PETSC -D_HDF5 -D_DEBUG #-D_MPI
+##CFLAGS              += -L/opt/homebrew/Cellar/suite-sparse/7.8.3/lib -lumfpack -I/opt/homebrew/Cellar/suite-sparse/7.8.3/include/suitesparse
+##CFLAGS              += -L/opt/homebrew/Cellar/scotch/7.0.6/lib -lscotch -I/opt/homebrew/Cellar/scotch/7.0.6/include/
+#CFLAGS              += -I/${PETSC_DIR}/${PETSC_ARCH}/include
+##CFLAGS              += -I/opt/homebrew/Cellar/metis/5.1.0/include/
+##CFLAGS              += -L/opt/homebrew/Cellar/hdf5-mpi/1.14.5/lib/
+##CFLAGS              += -lhdf5 -I/opt/homebrew/Cellar/hdf5-mpi/1.14.5/include
+#CFLAGS              += -Wno-incompatible-pointer-types-discards-qualifiers
+#CFLAGS              += -L/opt/homebrew/lib -lumfpack -pedantic -std=c99 -I/opt/homebrew/include/suitesparse -I/opt/homebrew/include -lhdf5 -lscotch
 
 #CFLAGS              += -L/usr/local/Cellar/suite-sparse/7.7.0/lib -L/usr/local/Cellar/scotch/7.0.6/lib -lumfpack -lscotch -pedantic -std=c99 -I/usr/local/Cellar/metis/5.1.0/include/ -I/usr/local/Cellar/suite-sparse/7.7.0/include/suitesparse -I/${PETSC_DIR}/${PETSC_ARCH}/lib/include/petsc -lhdf5 -I/usr/local/Cellar/hdf5-mpi/1.14.5/include -I/usr/local/Cellar/hdf5-mpi/1.14.5/include -I/usr/local/Cellar/scotch/7.0.6/include/
 FLAGS               = $(OPT) $(IFLAGS) $(LFLAGS) $(CFLAGS) $(LDLIBS) 

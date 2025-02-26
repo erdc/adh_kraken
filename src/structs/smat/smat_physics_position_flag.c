@@ -26,20 +26,20 @@ void smat_physics_position_flag(SMAT_PHYSICS **mat_node, int nnodes, int *FLAG) 
     
     for (int i=0; i<nnodes; i++) {
         //smat_elem_printScreen(mat_node[i],i);
-        if (mat_node[i]->ivars.h    != UNSET_INT) FLAG[0] = 1;
-        if (mat_node[i]->ivars.u    != UNSET_INT) FLAG[1] = 1;
-        if (mat_node[i]->ivars.v    != UNSET_INT) FLAG[2] = 1;
-        if (mat_node[i]->ivars.w    != UNSET_INT) FLAG[3] = 1;
-        if (mat_node[i]->ivars.uda  != UNSET_INT) FLAG[4] = 1;
-        if (mat_node[i]->ivars.vda  != UNSET_INT) FLAG[5] = 1;
-        if (mat_node[i]->ivars.dpl  != UNSET_INT) FLAG[6] = 1;
-        if (mat_node[i]->ivars.prs  != UNSET_INT) FLAG[7] = 1;       
-        if (mat_node[i]->ivars.heat != UNSET_INT) FLAG[8] = 1;
-        if (mat_node[i]->ivars.sal  != UNSET_INT) FLAG[9] = 1;
+        if (mat_node[i]->ivar_pos.h    != UNSET_INT) FLAG[0] = 1;
+        if (mat_node[i]->ivar_pos.u    != UNSET_INT) FLAG[1] = 1;
+        if (mat_node[i]->ivar_pos.v    != UNSET_INT) FLAG[2] = 1;
+        if (mat_node[i]->ivar_pos.w    != UNSET_INT) FLAG[3] = 1;
+        if (mat_node[i]->ivar_pos.uda  != UNSET_INT) FLAG[4] = 1;
+        if (mat_node[i]->ivar_pos.vda  != UNSET_INT) FLAG[5] = 1;
+        if (mat_node[i]->ivar_pos.dpl  != UNSET_INT) FLAG[6] = 1;
+        if (mat_node[i]->ivar_pos.prs  != UNSET_INT) FLAG[7] = 1;       
+        if (mat_node[i]->ivar_pos.heat != UNSET_INT) FLAG[8] = 1;
+        if (mat_node[i]->ivar_pos.sal  != UNSET_INT) FLAG[9] = 1;
 
         for (int itrns=0; itrns<MAX_TRNS_VARS ; itrns++) {
             // CJT - note: Different types of transport may cause issues here
-            if (mat_node[i]->ivars.con[itrns] != UNSET_INT) {
+            if (mat_node[i]->ivar_pos.con[itrns] != UNSET_INT) {
                 FLAG[MAX_VARS + itrns] = 1;   
             }
         }

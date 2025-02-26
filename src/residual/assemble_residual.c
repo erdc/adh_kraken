@@ -65,7 +65,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
         // cjt -- started jacking with this
         mat_id = sm->elem3d_physics_mat[j];
-        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nvars_elem = sm->mat_physics_elem[mat_id].n;
         nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
         //sarray_copy_int(elem_vars, sm->elem3d_physics_mat[mat_id].vars, nvars_elem); // cjt -- commented for now
 
@@ -124,7 +124,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
         // cjt -- started jacking with this
         mat_id = sm->elem2d_physics_mat[j];
-        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nvars_elem = sm->mat_physics_elem[mat_id].n;
         nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
         //sarray_copy_int(elem_vars, sm->elem2d_physics_mat[mat_id].vars, nvars_elem); // cjt -- commented for now
 
@@ -186,7 +186,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
         // cjt -- started jacking with
         mat_id = sm->elem1d_physics_mat[j];
-        nvars_elem = sm->mat_physics_elem[mat_id].ivars.n;
+        nvars_elem = sm->mat_physics_elem[mat_id].n;
         nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
         //sarray_copy_int(elem_vars, sm->elem1d_physics_mat[mat_id].vars, nvars_elem); // cjt -- commented for now
         

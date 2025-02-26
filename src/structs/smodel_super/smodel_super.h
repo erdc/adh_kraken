@@ -102,10 +102,6 @@ void smodel_super_free(SMODEL_SUPER *smod);
 void smodel_super_read(SMODEL_SUPER *smod);
 void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
-
-//Mark added for testing
-void smodel_super_no_read_simple(SMODEL_SUPER *sm, double* dt_in, double* t_init, double* t_prev,
-    double* t_final, int nmat_physics, char elemVarCode[4], int isSimple, SGRID *grid, SLIN_SYS *sys);
 //from fe_newton.c
 //int fe_newton(struct SMODEL_SUPER* sm);
 

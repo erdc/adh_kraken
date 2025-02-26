@@ -194,8 +194,8 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         imat = sm->elem1d_physics_mat[ie];
         for (i=0; i<grid->elem1d[ie].nnodes; i++) {
             nd = grid->elem1d[ie].nodes[i];
-            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivars.n) {
-                node_nvars[nd] = sm->mat_physics_elem[imat].ivars.n;
+            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivar_pos.n) {
+                node_nvars[nd] = sm->mat_physics_elem[imat].ivar_pos.n;
                 sm->mat_physics_node[nd] =  &(sm->mat_physics_elem[sm->elem1d_physics_mat[ie]]); // point to the elemental material
             }
         }
@@ -205,8 +205,8 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         imat = sm->elem2d_physics_mat[ie];
         for (i=0; i<grid->elem2d[ie].nnodes; i++) {
             nd = grid->elem2d[ie].nodes[i];
-            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivars.n) {
-                node_nvars[nd] = sm->mat_physics_elem[imat].ivars.n;
+            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivar_pos.n) {
+                node_nvars[nd] = sm->mat_physics_elem[imat].ivar_pos.n;
                 sm->mat_physics_node[nd] =  &(sm->mat_physics_elem[sm->elem2d_physics_mat[ie]]); // point to the elemental material
             }
         }
@@ -215,8 +215,8 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         imat = sm->elem3d_physics_mat[ie];
         for (i=0; i<grid->elem3d[ie].nnodes; i++) {
             nd = grid->elem3d[ie].nodes[i];
-            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivars.n) {
-                node_nvars[nd] = sm->mat_physics_elem[imat].ivars.n;
+            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivar_pos.n) {
+                node_nvars[nd] = sm->mat_physics_elem[imat].ivar_pos.n;
                 sm->mat_physics_node[nd] =  &(sm->mat_physics_elem[sm->elem3d_physics_mat[ie]]); // point to the elemental material
             }
         }
@@ -242,6 +242,12 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
+    // Use this to update ivar pos in mat physics
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    smat_physics_update_array(sm->mat_physics_elem,sm->nmat_physics,&(sm->ivar_pos));
+
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
     // Allocate the map from the independent variables 
     // to their position in the solution vector
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -250,7 +256,7 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     }
     // problem here
     SIVAR_POSITION ip[grid->nnodes];
-    for (i=0; i<grid->nnodes; i++) {ip[i] = sm->mat_physics_node[i]->ivars;}
+    for (i=0; i<grid->nnodes; i++) {ip[i] = sm->mat_physics_node[i]->ivar_pos;}
     sm->ndofs = sivar_position_build_dof_map(&sm->ivar_pos,grid->nnodes,ip,&sm->ivars);
     if (DEBUG) {
         printf(">total ndofs: %d\n",sm->ndofs);

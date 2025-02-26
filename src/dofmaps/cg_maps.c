@@ -5,6 +5,51 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
+ *  \brief     Routine that gives an array of degrees of freedom local to the current process for a CG element using ivars double array
+ *             Designed to work for nodal (CG) based dof mappings
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] local_dofs (int*) - an array of integers that will give the degree of freedom numbers (equation numbers) for a
+ *  given element local to the process
+ *  @param[in] fmaplocal (int*) - an array of integers that gives the lowest d.o.f at a given node
+ *  @param[in] nnodes (int) - the number of nodes on the element
+ *  @param[in] local_node_ids (int*) - array of length nnodes containing node numbers local to process
+ *  @param[in] elem_nvars (int) - number of solution variables active on the element
+ *  @param[in] elem_vars (int*) - array of length elem_nvars that has the integer code for each variable
+ *  @param[in] node_physics_mat (SMAT_PHYSICS*) - an array of SMAT_PHYSICS structs that contains variable info for each node
+ *  @param[in] nodal_physics_mat_id (int*) - array of integers that gives the nodal physics mat id
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void get_cell_dofs_ivars(int *local_dofs, int **ivars, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_var_pos){
+
+    int i,j,ctr, nodeID;
+    int current_var;
+    ctr =0;
+    //ivars will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
+    for (i=0; i<nnodes; i++){
+        nodeID=local_node_ids[i];
+        for (j=0; j<elem_nvars; j++){
+            //map the current var from the residual to the correct var number in global residual
+            current_var = elem_var_pos[j];
+            //loop through the nodal vars to look for match
+#ifdef _DEBUG
+            assert(ivars[nodeID][current_var] != UNSET_INT);
+#endif
+            local_dofs[ctr] =  ivars[nodeID][current_var];
+            ctr++;
+         }
+     }
+
+}
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
  *  \brief     Routine that gives an array of degrees of freedom local to the current process for a CG element using fmaplocal array
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland

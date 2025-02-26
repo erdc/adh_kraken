@@ -29,6 +29,9 @@ void smat_physics_free_array(SMAT_PHYSICS *mat, int nmat) {
         if(mat[imat].model!=NULL){
             smodel_free_array(mat[imat].model, mat[imat].nSubmodels); 
         }
+        if(mat[imat].ivar_loc != NULL){
+            mat[imat].ivar_loc = (int *) tl_free(sizeof(bool), mat[imat].n, mat[imat].ivar_loc);
+        }
 
     }
     mat = (SMAT_PHYSICS *) tl_free(sizeof(SMAT_PHYSICS), nmat, mat);

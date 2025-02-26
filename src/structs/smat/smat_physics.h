@@ -7,7 +7,9 @@ typedef struct {
     int id;
     char code[10];
     int ntrns; // # of transport constituents on this element
-    SIVAR_POSITION ivars; // a list of independent variables on the element
+    SIVAR_POSITION ivar_pos; // a list of independent variables on the element
+    int n; //number of variables
+    int *ivar_loc; //arry of n who's entries are location in **ivar array
     int nSubmodels;
     SMODEL *model; // [nSubModels] length array
 
@@ -43,6 +45,7 @@ void smat_physics_alloc_init_ptr_array(SMAT_PHYSICS **mat_physics, int nmat, cha
 void smat_physics_free_array(SMAT_PHYSICS *mat, int nmat);
 void smat_physics_position_flag(SMAT_PHYSICS **mat_node, int nnodes, int *FLAG);
 void smat_physics_printScreen(SMAT_PHYSICS *m);
+void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION* ivar_pos);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

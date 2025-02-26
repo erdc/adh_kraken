@@ -140,28 +140,24 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
         sm_id = dmod->unique_id[imono];
         //allocate the linear systems, need to wrap this into 1 routine
         // separate into 3 steps for now, how do we want to do ghosts? 
-        //need way to set ghosts before calling sparsity init
+        //need way to set ghosts BEFORE calling sparsity init
 
         //WARNING: ONLY SET FOR SERIAL (SEE LAST THREE ARGUMENTS)
         slin_sys_init_ptrs(&(dmod->lin_sys[i]), &(dmod->superModel[sm_id].my_ndofs),
             &(dmod->superModel[sm_id].ndofs),&(dmod->superModel[sm_id].macro_ndofs), 
             &(dmod->superModel[sm_id].my_ndofs_old), &(dmod->superModel[sm_id].ndofs_old), 
             &(dmod->superModel[sm_id].macro_ndofs_old), 0, dmod->superModel[sm_id].ndofs, 0);
-        printf("Lin sys pointers intialized\n");
-        //Mark stopped here
+
         //NOT IMPLEMENTED, NEED FOR MPI
         //slin_sys_init_ghosts(&(dm->lin_sys[i]), dm->grid, dm->superModel[j].dof_map_local);
         
 
         //if mono maybe call one routine and if not call another?
         //for now just Mono
-        //Mark stopped here!
+        slin_sys_init_sparsity_mono(&(dmod->lin_sys[i]), dmod->superModel[j].elem3d_physics_mat, 
+        dmod->superModel[j].elem2d_physics_mat , dmod->superModel[j].elem1d_physics_mat,
+        dmod->superModel[j].mat_physics_elem, dmod->grid, dmod->superModel[j].ivars);
 
-//        slin_sys_init_sparsity_mono(&(dm->lin_sys[i]), dm->superModel[j].elem3d_physics_mat_id, 
-//        dm->superModel[j].elem2d_physics_mat_id , dm->superModel[j].elem1d_physics_mat_id ,
-//        dm->superModel[j].elem3d_physics_mat, dm->superModel[j].elem2d_physics_mat,
-//        dm->superModel[j].elem1d_physics_mat ,dm->superModel[j].node_physics_mat, 
-//        dm->grid, dm->superModel[j].dof_map_local);
 //#ifdef _PETSC
 //        dm->lin_sys[i].A = PETSC_NULLPTR;
 //        dm->lin_sys[i].ksp = PETSC_NULLPTR;

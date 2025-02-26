@@ -54,8 +54,9 @@ void slin_sys_init_ptrs(SLIN_SYS *lin_sys, int *my_ndof_ptr, int *ndof_ptr, int 
     int *my_ndof_ptr_old, int *ndof_ptr_old, int *macro_ndof_ptr_old,
     int start, int end, int nghost);
 void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id, 
-    int *elem2d_physics_mat_id, int *elem1d_physics_mat_id,
-    SMAT_PHYSICS *mat_physics, SGRID *grid, int **ivars);
+    int *elem2d_physics_mat_id, int *elem1d_physics_mat_id, SMAT_PHYSICS *elem_physics_mat,
+    SGRID *grid, int **ivars);
+
 void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys);
 void slin_sys_free_array(SLIN_SYS *lin_sys, int nlin_sys);
 void slin_sys_free(SLIN_SYS *lin_sys);
