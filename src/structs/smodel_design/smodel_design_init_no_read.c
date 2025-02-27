@@ -128,6 +128,15 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
     // linear system, need to change in future
     // for models to share
     //++++++++++++++++++++++++++++++++++++++++++++++
+    if (DEBUG) {
+        printf("------------------------------------------------------\n");
+        printf("------------------------------------------------------\n");
+        printf("Initiating Lin Sys\n");
+        printf("------------------------------------------------------\n");
+    }
+#ifdef _PETSC
+    PetscInitializeNoArguments();
+#endif
     dmod->nlin_sys = dmod->nSuperModels;
     slin_sys_alloc_array(&(dmod->lin_sys), dmod->nlin_sys);
     //in general this will be an nlin_sys array pointing
@@ -154,81 +163,25 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
 
         //if mono maybe call one routine and if not call another?
         //for now just Mono
-        slin_sys_init_sparsity_mono(&(dmod->lin_sys[i]), dmod->superModel[j].elem3d_physics_mat, 
-        dmod->superModel[j].elem2d_physics_mat , dmod->superModel[j].elem1d_physics_mat,
-        dmod->superModel[j].mat_physics_elem, dmod->grid, dmod->superModel[j].ivars);
+        slin_sys_init_sparsity_mono(&(dmod->lin_sys[i]), dmod->superModel[sm_id].elem3d_physics_mat, 
+        dmod->superModel[sm_id].elem2d_physics_mat , dmod->superModel[sm_id].elem1d_physics_mat,
+        dmod->superModel[sm_id].mat_physics_elem, dmod->grid, dmod->superModel[sm_id].ivars);
 
-//#ifdef _PETSC
-//        dm->lin_sys[i].A = PETSC_NULLPTR;
-//        dm->lin_sys[i].ksp = PETSC_NULLPTR;
-//        dm->lin_sys[i].B = PETSC_NULLPTR;
-//        dm->lin_sys[i].X = PETSC_NULLPTR;
-//        slin_sys_allocate_petsc_objects(&(dm->lin_sys[i]));
-//#endif
+#ifdef _PETSC
+        dmod->lin_sys[i].A = PETSC_NULLPTR;
+        dmod->lin_sys[i].ksp = PETSC_NULLPTR;
+        dmod->lin_sys[i].B = PETSC_NULLPTR;
+        dmod->lin_sys[i].X = PETSC_NULLPTR;
+        slin_sys_allocate_petsc_objects(&(dmod->lin_sys[i]));
+#endif
 
 
     }
-
-//     for(i=0;i<dm->nUnique;i++){
-        
-//         //define some pointers in each supermodel
-//         //assign some hard coded values first, then set the pointers
-//         //in general these would require info taken from each superModel
-
-//         //MARK IS SWITCHING FOR DEBUG, PLEASE SWITCH BACK!!!
-//         //hard code to only point to first supermodel
-//         dm->unique_id[i] = 0; 
-//         j= dm->unique_id[i];
-
-//         //allocate the linear systems, need to wrap this into 1 routine
-//         // separate into 3 steps for now, how do we want to do ghosts? 
-//         //need way to set ghosts before calling sparsity init
-//         slin_sys_init_ptrs(&(dm->lin_sys[i]), &(dm->my_ndofs[i]),&(dm->ndofs[i]),&(dm->macro_ndofs[i]),
-//         &(dm->my_ndofs_old[i]), &(dm->ndofs_old[i]), &(dm->macro_ndofs_old[i]),
-//         0, dm->ndofs[i], 0);
-//         //likely will require the grid and maybe fmap? maybe if fmap empty then ghosts is easier
-//         slin_sys_init_ghosts(&(dm->lin_sys[i]), dm->grid, dm->superModel[j].dof_map_local);
-//         //if mono maybe call one routine and if not call another?
-//         //for now just Mono
-// //        slin_sys_init_sparsity_mono(&(dm->lin_sys[i]), dm->superModel[j].elem3d_physics_mat_id, 
-// //        dm->superModel[j].elem2d_physics_mat_id , dm->superModel[j].elem1d_physics_mat_id ,
-// //        dm->superModel[j].elem3d_physics_mat, dm->superModel[j].elem2d_physics_mat,
-// //        dm->superModel[j].elem1d_physics_mat ,dm->superModel[j].node_physics_mat_id,
-// //        dm->superModel[j].node_physics_mat, dm->grid, dm->superModel[j].dof_map_local);
-//         slin_sys_init_sparsity_mono(&(dm->lin_sys[i]), dm->superModel[j].elem3d_physics_mat_id, 
-//         dm->superModel[j].elem2d_physics_mat_id , dm->superModel[j].elem1d_physics_mat_id ,
-//         dm->superModel[j].elem3d_physics_mat, dm->superModel[j].elem2d_physics_mat,
-//         dm->superModel[j].elem1d_physics_mat ,dm->superModel[j].node_physics_mat, 
-//         dm->grid, dm->superModel[j].dof_map_local);
-// #ifdef _PETSC
-//         dm->lin_sys[i].A = PETSC_NULLPTR;
-//         dm->lin_sys[i].ksp = PETSC_NULLPTR;
-//         dm->lin_sys[i].B = PETSC_NULLPTR;
-//         dm->lin_sys[i].X = PETSC_NULLPTR;
-//         slin_sys_allocate_petsc_objects(&(dm->lin_sys[i]));
-// #endif
-//     }
-
-//     //loop through every super model to allocate and assign pointters
-//     for(i=0;i<dm->nSuperModels;i++){
-//         j = dm->lin_sys_id[i];
-//         ndof_temp = dm->ndofs[j];
-
-//         dm->superModel[i].my_ndofs = &(dm->my_ndofs[j]); //pointers to design model, not arrays
-//         dm->superModel[i].my_ndofs_old = &(dm->my_ndofs_old[j]);
-//         dm->superModel[i].ndofs = &(dm->ndofs[j]);
-//         dm->superModel[i].ndofs_old = &(dm->ndofs_old[j]);
-//         dm->superModel[i].macro_ndofs = &(dm->macro_ndofs[j]);
-//         dm->superModel[i].macro_ndofs_old = &(dm->macro_ndofs_old[j]);
-//         dm->superModel[i].bc_mask = (int*) tl_alloc(sizeof(int), ndof_temp);
-//         dm->superModel[i].dirichlet_data = (double*) tl_alloc(sizeof(double), ndof_temp);
-//         dm->superModel[i].sol = (double*) tl_alloc(sizeof(double), ndof_temp );
-//         dm->superModel[i].sol_old = (double*) tl_alloc(sizeof(double), ndof_temp);
-//         dm->superModel[i].sol_older = (double*) tl_alloc(sizeof(double), ndof_temp);
-//         sarray_init_dbl(dm->superModel[i].sol,ndof_temp);
-//         sarray_init_dbl(dm->superModel[i].sol_old,ndof_temp);
-//         sarray_init_dbl(dm->superModel[i].sol_older,ndof_temp);
-
-//     }
+    if (DEBUG) {
+        printf("------------------------------------------------------\n");
+        printf("------------------------------------------------------\n");
+        printf("Design model init completed\n");
+        printf("------------------------------------------------------\n");
+    }
 
 }

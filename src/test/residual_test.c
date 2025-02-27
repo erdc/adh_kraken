@@ -84,21 +84,8 @@ int residual_test(void) {
 	}
 
     smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
-    //smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
-	////specify elemental physics and other properties in super model
-
-
-//	char elemVarCode[4]; 
-//	strcpy(&elemVarCode[0],"2");//SW2D
-//	strcpy(&elemVarCode[1],"0"); //GW
-//	strcpy(&elemVarCode[2],"0"); //Transport
-//	//printf("GRID NELEMS2D = %d\n",grid.nelems2d);
-//	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-//	smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
-//	//printf("NDOFS %d\n",dm->ndofs[0]);//
-
-////	//assemble a residual and check correctness
-//	assemble_residual(&(dm.superModel[0]), dm.grid);
+    
+	assemble_residual(&(dm.superModel[0]), dm.grid);
 
 	//print final residual
 //	for(int local_index=0;local_index<grid.nnodes;local_index++){

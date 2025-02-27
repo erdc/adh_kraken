@@ -21,12 +21,13 @@ void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys){
     //ksp only will exist if PETSc is active
     int local_size = *(lin_sys->local_size);
     int global_size = *(lin_sys->global_size);
+
+
     //this is somehow not null 
     if(lin_sys->ksp == PETSC_NULLPTR){
         ierr = KSPCreate(PETSC_COMM_WORLD, &(lin_sys->ksp));
         ierr = KSPSetFromOptions(lin_sys->ksp);
     }
-
     // Check if Jacobian, sol, and residual have already been created.
     // If so, destroy each of them before creating new PETSc objects.
     //also somehow not null
@@ -50,10 +51,14 @@ void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys){
     //vals should update by reference
     if (lin_sys->indptr_off_diag == NULL){
         MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, local_size, local_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, &(lin_sys->A));
+#ifdef _DEBUG
         printf("PETSC Mat created with sequential array\n");
+#endif
     }else{
         MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, local_size, local_size, global_size, global_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag, lin_sys->vals_off_diag, &(lin_sys->A));
+#ifdef _DEBUG        
         printf("PETSC Mat created with split arrays\n");
+#endif
     }
     
     //ierr = MatCreateMPIAIJWithArrays(PETSC_COMM_WORLD, sm->my_ndofs, sm->my_ndofs, sm->macro_ndofs, sm->macro_ndofs, sm->indptr, sm->indices, sm->vals, &(sm->A))

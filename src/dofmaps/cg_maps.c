@@ -27,7 +27,7 @@ void get_cell_dofs_ivars(int *local_dofs, int **ivars, int nnodes, int *local_no
 
     int i,j,ctr, nodeID;
     int current_var;
-    ctr =0;
+    ctr = 0;
     //ivars will only work for CG, need to rethink for DG or possibly mixed CG-DG materials
     for (i=0; i<nnodes; i++){
         nodeID=local_node_ids[i];
@@ -36,9 +36,9 @@ void get_cell_dofs_ivars(int *local_dofs, int **ivars, int nnodes, int *local_no
             current_var = elem_var_pos[j];
             //loop through the nodal vars to look for match
 #ifdef _DEBUG
-            assert(ivars[nodeID][current_var] != UNSET_INT);
+            assert(ivars[current_var][nodeID] != UNSET_INT);
 #endif
-            local_dofs[ctr] =  ivars[nodeID][current_var];
+            local_dofs[ctr] =  ivars[current_var][nodeID];
             ctr++;
          }
      }

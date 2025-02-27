@@ -161,17 +161,27 @@ printf(">Calling smat_physics_update_array\n");
     //FORNOW JUST WORKS IN SERIAL
 #ifndef _MESSG
     sm->my_ndofs = sm->ndofs;
+    sm->macro_ndofs = sm->ndofs;
 #endif
+    sm->ndofs_old = 0;
+    sm->my_ndofs_old = 0;
+    sm->macro_ndofs_old = 0;
+
     if (DEBUG) {
         printf(">total ndofs: %d\n",sm->ndofs);
     }
     sm->sol       = (double *) tl_alloc(sizeof(double), sm->ndofs);
     sm->sol_old   = (double *) tl_alloc(sizeof(double), sm->ndofs);
     sm->sol_older = (double *) tl_alloc(sizeof(double), sm->ndofs);
+    sm->dirichlet_data = (double*) tl_alloc(sizeof(double), sm->ndofs);
+    sm->bc_mask = (int*) tl_alloc(sizeof(int), sm->ndofs);
 
     sarray_init_dbl(sm->sol,sm->ndofs);
     sarray_init_dbl(sm->sol_old,sm->ndofs);
     sarray_init_dbl(sm->sol_older,sm->ndofs);
+    sarray_init_dbl(sm->dirichlet_data,sm->ndofs);
+    sarray_init_int(sm->bc_mask,sm->ndofs);
+
     
 }
 

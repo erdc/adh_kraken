@@ -93,6 +93,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     if (isize < nrows){
         isize_prev = isize;
         isize = nrows;
+
         nnz_rows_diag = (int *) tl_realloc(sizeof(int), isize, isize_prev, nnz_rows_diag);
         nnz_rows_diag_no_duplicate = (int *) tl_realloc(sizeof(int), isize, isize_prev, nnz_rows_diag_no_duplicate);
         if (has_off_diag){
@@ -111,6 +112,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     //++++++++++++++++++++++++++++++++++++++++++++++
     // initialize arrays with zeros
     //++++++++++++++++++++++++++++++++++++++++++++++
+
     sarray_init_int(nnz_rows_diag, nrows);
     if (has_off_diag){
         sarray_init_int(nnz_rows_off_diag, nrows);
@@ -170,9 +172,8 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
             }
         }
     }
-
+    
     for (j=0;j<grid->nelems2d;j++){
-
         nnodes = grid->elem2d[j].nnodes;
         //pull all global information to local memory
         mat_id = elem2d_physics_mat_id[j];
@@ -192,7 +193,6 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         // cell # is implicit
         //++++++++++++++++++++++++++++++++++++++++++++++
         get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem2d[j].nodes, nvars_elem, elem_physics_mat[mat_id].ivar_loc);
-
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
     

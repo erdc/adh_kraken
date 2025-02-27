@@ -21,10 +21,10 @@ static int DEBUG = OFF;
 void assemble_jacobian(SMODEL_SUPER *sm) {
     SGRID *grid = sm->grid;
     int j,k;
-    int* fmap = NULL; //sm->dof_map_local; // cjt -- for now
     int* ghosts = sm->lin_sys->ghosts;
     int ndofs_ele;
     int nnodes, var_code;
+    int *fmap;
     //maybe change this from 3d to 2d to 1d
     //in loop we dont want to have to alloc and free everytime, think about this
     double **elem_mat;
@@ -49,27 +49,14 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
     int local_range[2];
     local_range[0]= sm->lin_sys->local_range[0];
     local_range[1]= sm->lin_sys->local_range[1];
-    //allocate 2d array, more memory than necessary
-    //int vars_node[MAX_NNODE][MAX_NVAR];
-//    int **vars_node;
-//    vars_node = (int**) tl_alloc(sizeof(int*), MAX_NNODE);
-//    for(j=0;j<MAX_NNODE;j++){
-//        vars_node[j] = (int*) tl_alloc(sizeof(int), MAX_NVAR);
-//        for(k=0;k<MAX_NVAR;k++){
-//            vars_node[j][k]=0;
-//        }
-//    }
-
 
     //zero out stuff
     sarray_init_dbl(vals_diag, nnz_diag);
     //#ifdef? or avoid maybe
     if (indptr_off_diag !=NULL){
-     sarray_init_dbl(vals_off_diag, nnz_off_diag);
+        sarray_init_dbl(vals_off_diag, nnz_off_diag);
     }
-
-
-
+    //WORK IN PROGRESS
     int mat_id, nvars_elem, nphysics_models;
     int elem_vars[MAX_NVAR];
     //need sm->local_range whih is array of integers giving range (if process owned rows 0,1,2,3) then 
@@ -106,7 +93,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         for (k=0;k<nvars_elem;k++){
             //use var code like PERTURB_H ,. ...
             //maybe get this from mat instead too!
-            var_code = elem_vars[k];
+            var_code = sm->mat_physics_elem[mat_id].ivar_loc[k];
             //want to loop over variables not necessarily submodels right?
             //need to think about this more
             //like sw2 is vector equation so that we would need 3 perturbations
@@ -473,7 +460,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
             sarray_copy_int(physics_vars, model[j].physics_vars,nvar_pde);
             //eq_var_code = model[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
             eq_var_code = smodel_super_resid(sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG, fe_resid[model[j].physics]);
-            add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
+            add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
@@ -483,7 +470,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
             //should always be same as var_code
             //eq_var_code2 = model[j].fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
             eq_var_code2 = smodel_super_resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG, fe_resid[model[j].physics]);
-            add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,elem_vars,nvar_pde,physics_vars,nodes_on_element, 1);
+            add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         }

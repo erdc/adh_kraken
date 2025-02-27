@@ -18,7 +18,9 @@ int run_tests(void){
 
 
 	int err = residual_test();
-
+#ifdef _PETSC
+    PetscFinalize();
+#endif
 	return err; 
 
 }
