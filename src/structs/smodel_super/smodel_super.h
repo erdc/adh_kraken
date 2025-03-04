@@ -4,7 +4,7 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-typedef struct {
+typedef struct sm{
 
     int myid, npes; // multi-core ID and ncpus
     SFLAGS flags;   // flags associated with superModel
@@ -91,6 +91,13 @@ typedef struct {
     double initial_grid_mass;
     double grid_mass_error;    
 
+    //can we dynamically allocate isntead?
+    //using macro for now
+    int *resid_ptr; //an array of nmat_physics giving start index
+    int (*fe_resid[N_MAX_RESID_SM])(struct sm *, double *, int, double, int, int, int, int);
+    int *init_ptr; //an array of nmat_physics giving start index
+    int (*fe_init[N_INIT_ROUTINES])(struct sm *);
+
 } SMODEL_SUPER;
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -102,12 +109,12 @@ void smodel_super_free(SMODEL_SUPER *smod);
 void smodel_super_read(SMODEL_SUPER *smod);
 void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
+void smodel_super_set_resid_init(SMODEL_SUPER *sm, SMAT_PHYSICS *mat_physics, int nmat_physics);
 //from fe_newton.c
 //int fe_newton(struct SMODEL_SUPER* sm);
 
 //TODOD, write this up!
 int smodel_super_forward_step(SMODEL_SUPER* sm, int (*ts_fnctn)(SMODEL_SUPER*));
-int smodel_super_resid(SMODEL_SUPER* sm, double *rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG, int (*fe_resid)(SMODEL_SUPER *, double *, int, double, int, int, int, int));
 void smodel_super_update_dirichlet_data(SMODEL_SUPER *sm);
 void smodel_super_prep_sol(SMODEL_SUPER *sm);
 void smodel_super_no_read(SMODEL_SUPER *sm, char** codes, int nmat_physics, int *mat_ids);

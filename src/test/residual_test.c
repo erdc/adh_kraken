@@ -69,9 +69,9 @@ int residual_test(void) {
 			elemVarCode[i][j] = (char *) tl_alloc(sizeof(char), 10);
 		}
 	}
-	strcpy(&elemVarCode[0][0][0],"2");//SW2D
-	strcpy(&elemVarCode[0][0][1],"0"); //GW
-	strcpy(&elemVarCode[0][0][2],"0"); //Transport
+	strcpy(&elemVarCode[0][0][0],"2"); // SW2D
+	strcpy(&elemVarCode[0][0][1],"0"); // GW
+	strcpy(&elemVarCode[0][0][2],"0"); // Transport
 
 	printf("elem var code %s\n",elemVarCode[0][0]);
 	//mat ids

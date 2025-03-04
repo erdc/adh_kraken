@@ -292,6 +292,7 @@ void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes) {
     mat->DW_FLOW    = false;
     mat->WVEL_SPLIT = false;
     mat->PRESSURE   = false;
+    mat->POISSON    = false;
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         mat->TRANSPORT[itrns] = false;
     }
@@ -358,6 +359,11 @@ void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes) {
             mat->PRESSURE = true;
             mat->ivar_pos.prs = mat->ivar_pos.n; mat->ivar_pos.n++; // 3D NS - SPLIT
             mat->nSubmodels++;
+        } else if (mat->code[0] == '9'){
+            //just for testing
+            mat->POISSON = true;
+            mat->ivar_pos.h = mat->ivar_pos.n; mat->ivar_pos.n++; // 2D Poisson
+            mat->nSubmodels++;
         }
 
         // ground water
@@ -397,6 +403,7 @@ void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes) {
     if (mat->DW_FLOW)    {nSubMod_nvar[k]=1; k++;} // 6
     if (mat->WVEL_SPLIT) {nSubMod_nvar[k]=1; k++;} // 7
     if (mat->PRESSURE)   {nSubMod_nvar[k]=1; k++;} // 8
+    if (mat->POISSON)    {nSubMod_nvar[k]=1; k++;} // 9
     if (mat->GW_FLOW)    {nSubMod_nvar[k]=1; k++;}
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         if (mat->TRANSPORT[itrns]) {nSubMod_nvar[k]=1; k++;}    

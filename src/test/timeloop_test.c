@@ -81,7 +81,7 @@ int timeloop_test(void) {
 	printf("NDOFS %d\n",dm.superModel[0].ndofs);
 
 	//OVER WRITE TO HEAT
-	dm.superModel[0].mat_physics_elem[0].model[0].physics = HEAT;
+	//dm.superModel[0].mat_physics_elem[0].model[0].physics = HEAT;
 	//printf("Supermodel no read complete\n");
 
 

@@ -423,6 +423,9 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
     //Mark add switch cases for all sol_var
     //switch case for which sm->sol_var
     double temp_sol;
+
+    //Mark: TODO FIX
+    int mat_id, k;
 //    if (perturb_var_code == PERTURB_H){
 //        temp_sol = sm->head;
 //    }else if (perturb_var_code == PERTURB_U){
@@ -459,7 +462,8 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
             sarray_init_int(physics_vars, nvar_pde);
             sarray_copy_int(physics_vars, model[j].physics_vars,nvar_pde);
             //eq_var_code = model[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
-            eq_var_code = smodel_super_resid(sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG, fe_resid[model[j].physics]);
+            //eq_var_code = smodel_super_resid(sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG, fe_resid[model[j].physics]);
+            eq_var_code = sm->fe_resid[mat_id+k](sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG);
             add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
@@ -468,8 +472,8 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
 #endif
             //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
             //should always be same as var_code
-            //eq_var_code2 = model[j].fe_resid(sm,temp_M,ie, epsilon,i, perturb_var_code, -1, DEBUG);
-            eq_var_code2 = smodel_super_resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG, fe_resid[model[j].physics]);
+            //eq_var_code2 = smodel_super_resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG, fe_resid[model[j].physics]);
+            eq_var_code2 = sm->fe_resid[mat_id+k](sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG);
             add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

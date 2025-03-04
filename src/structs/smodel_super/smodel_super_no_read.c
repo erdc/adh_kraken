@@ -142,8 +142,15 @@ printf(">Calling smat_physics_update_array\n");
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
     // Use this to update ivar pos in mat physics
+    // also sets proper models
     //++++++++++++++++++++++++++++++++++++++++++++++
     smat_physics_update_array(sm->mat_physics_elem,sm->nmat_physics,&sm->ivar_pos);
+
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    // Use this info to fill in resid pointers
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    smodel_super_set_resid_init(sm, sm->mat_physics_elem, sm->nmat_physics);
 
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++

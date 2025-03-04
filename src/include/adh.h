@@ -29,6 +29,7 @@ void print_build_info();
 
 #include "define.h"
 #include "macro.h"
+#include "model_codes.h"
 
 #ifdef _PETSC
 //Mark changed
@@ -79,7 +80,7 @@ void print_build_info();
 #include "smodel_super.h"
 #include "smodel_design.h"
 
-#include "model_codes.h"
+
 #include "models.h"
 
 #include "bc.h"

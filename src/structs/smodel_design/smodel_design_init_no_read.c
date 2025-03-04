@@ -152,7 +152,7 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
         //need way to set ghosts BEFORE calling sparsity init
 
         //WARNING: ONLY SET FOR SERIAL (SEE LAST THREE ARGUMENTS)
-        slin_sys_init_ptrs(&(dmod->lin_sys[i]), &(dmod->superModel[sm_id].my_ndofs),
+        slin_sys_init_ptrs(&(dmod->lin_sys[imono]), &(dmod->superModel[sm_id].my_ndofs),
             &(dmod->superModel[sm_id].ndofs),&(dmod->superModel[sm_id].macro_ndofs), 
             &(dmod->superModel[sm_id].my_ndofs_old), &(dmod->superModel[sm_id].ndofs_old), 
             &(dmod->superModel[sm_id].macro_ndofs_old), 0, dmod->superModel[sm_id].ndofs, 0);
@@ -163,20 +163,27 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
 
         //if mono maybe call one routine and if not call another?
         //for now just Mono
-        slin_sys_init_sparsity_mono(&(dmod->lin_sys[i]), dmod->superModel[sm_id].elem3d_physics_mat, 
+        slin_sys_init_sparsity_mono(&(dmod->lin_sys[imono]), dmod->superModel[sm_id].elem3d_physics_mat, 
         dmod->superModel[sm_id].elem2d_physics_mat , dmod->superModel[sm_id].elem1d_physics_mat,
         dmod->superModel[sm_id].mat_physics_elem, dmod->grid, dmod->superModel[sm_id].ivars);
 
 #ifdef _PETSC
-        dmod->lin_sys[i].A = PETSC_NULLPTR;
-        dmod->lin_sys[i].ksp = PETSC_NULLPTR;
-        dmod->lin_sys[i].B = PETSC_NULLPTR;
-        dmod->lin_sys[i].X = PETSC_NULLPTR;
-        slin_sys_allocate_petsc_objects(&(dmod->lin_sys[i]));
+        dmod->lin_sys[imono].A = PETSC_NULLPTR;
+        dmod->lin_sys[imono].ksp = PETSC_NULLPTR;
+        dmod->lin_sys[imono].B = PETSC_NULLPTR;
+        dmod->lin_sys[imono].X = PETSC_NULLPTR;
+        slin_sys_allocate_petsc_objects(&(dmod->lin_sys[imono]));
 #endif
 
 
     }
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    // Associate the correct supermodel to correct
+    // linear system
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //Ask corey
+    dmod->superModel[0].lin_sys = &(dmod->lin_sys[0]);
     if (DEBUG) {
         printf("------------------------------------------------------\n");
         printf("------------------------------------------------------\n");
