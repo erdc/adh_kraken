@@ -1,0 +1,167 @@
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \file  smodel_super_set_resid_init
+ * The file is for filling in the ivar_positions in an SMAT_PHYSICS struct */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+#include "adh.h"
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     Allocates and sets up physics material properties
+ *  \author    Corey Trahan, Ph.D.
+ *  \author    Mark Loveand, Ph.D.
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *
+ * @param[inout] mat_physics (SMAT_PHYSICS**)  double pointer to a physics material
+ * @param[in]    nmat        (int) number of materials to allocate
+ * @param[in]    codes       (char [][10]) an array of strings that encode the materials physics
+ *
+ * \note
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void smodel_super_set_resid_init(SMODEL_SUPER *sm, SMAT_PHYSICS *mat_physics, int nmat_physics){
+	int n_sub_mods;
+	int ctr = 0;
+
+	sm->resid_ptr = (int *) tl_alloc(sizeof(int),nmat_physics);
+	sarray_init_int(sm->resid_ptr, nmat_physics); 
+	// Loop over each mat physics and store the proper function pointers
+	// canonical ordering is flattened version of
+	// loop over mat physics then each submodel in that physics
+	for (int imat=0; imat<nmat_physics; imat++){
+		n_sub_mods= mat_physics[imat].nSubmodels;
+		sm->resid_ptr[imat] = ctr;
+		for(int nmod=0; nmod<n_sub_mods ; nmod++){
+			//++++++++++++++++++++++++++++++++++++++++++++++
+    		// This needs to be updated each time smodels are added
+    		// see model_codes.h
+    		//++++++++++++++++++++++++++++++++++++++++++++++
+    		switch(mat_physics[imat].model[nmod].physics){
+
+    			case UNSET_INT:
+    				// we can actually add empty routine
+    				sm->fe_resid[ctr] = no_resid;
+    				break;
+    			case SW1D_:
+    				//if there were a SW1D we would assign here
+    				break;
+				case SW2D_:
+					sm->fe_resid[ctr] = fe_sw2_body_resid;
+					break;
+				case SW3D_:
+					break;
+				case WVEL_:
+					break;
+				case NS1D_:
+					break;
+				case NS2D_:
+					break;
+				case NS3D_:
+					break;
+				case NS1DSPLIT_:
+					break;
+				case NS2DSPLIT_:
+					break;
+				case NS3DSPLIT_:
+					break;
+				case PRS_:
+					break;
+				case DW1D_:
+					break;
+				case DW2D_:
+					break;
+				case GW1D_:
+					break;
+				case GW2D_:
+					break;
+				case GW3D_:
+					break;
+				case TRNS_:
+					break;
+				case TRNS1D_:
+					break;
+				case TRNS2D_:
+					break;
+				case TRNS3D_:
+					break;
+				case HEAT1D_:
+					break;
+				case HEAT2D_:
+					sm->fe_resid[ctr] = heat_residual;
+					break;
+				case HEAT3D_:
+					break;
+				case POISSON2D_:
+					sm->fe_resid[ctr] = poisson_residual;
+					break;
+				// Definitions for weak boundary treatments, included as resid routines
+				case SW2_BC_DISCHARGE_:
+					sm->fe_resid[ctr] = fe_sw2_bc_discharge;
+					break;
+				case SW2_BC_ELE_:
+					sm->fe_resid[ctr] = fe_sw2_bc_ele;
+					break;
+				case SW2_BC_FLAPD_:
+					sm->fe_resid[ctr] = fe_sw2_bc_flapd;
+					break;
+				case SW2_BC_FLAPU_:
+					sm->fe_resid[ctr] = fe_sw2_bc_flapu;
+					break;
+				case SW2_BC_FLUX_:
+					sm->fe_resid[ctr] = fe_sw2_bc_flux;
+					break;
+				case SW2_BC_H_:
+					sm->fe_resid[ctr] = fe_sw2_bc_h;
+					break;
+				case SW2_BC_HYBRID_:
+					sm->fe_resid[ctr] = fe_sw2_bc_hybrid;
+					break;
+				case SW2_BC_OUTFLOW_:
+					sm->fe_resid[ctr] = fe_sw2_bc_outflow;
+					break;
+				case SW2_BC_SLUICED_:
+					sm->fe_resid[ctr] = fe_sw2_bc_sluiced;
+					break;
+				case SW2_BC_SLUICEU_:
+					sm->fe_resid[ctr] = fe_sw2_bc_sluiceu;
+					break;
+				case SW2_BC_TAILWATER_:
+					sm->fe_resid[ctr] = fe_sw2_bc_tailwater;
+					break;
+				case SW2_BC_VEL_:
+					sm->fe_resid[ctr] = fe_sw2_bc_vel;
+					break;
+				case SW2_BC_VEL_ELE_:
+					sm->fe_resid[ctr] = fe_sw2_bc_vel_ele;
+					break;
+				case SW2_BC_WEIRD_:
+					sm->fe_resid[ctr] = fe_sw2_bc_weird;
+					break;
+				case SW2_BC_WEIRU_:
+					sm->fe_resid[ctr] = fe_sw2_bc_weiru;
+					break;
+
+    		}
+
+    		//++++++++++++++++++++++++++++++++++++++++++++++
+    		// This needs to be updated each time inits are added
+    		// all init ptrs set
+    		// see model_codes.h
+    		//++++++++++++++++++++++++++++++++++++++++++++++
+    		switch(mat_physics[imat].model[nmod].physics){
+    			case UNSET_INT:
+    				sm->fe_init[ctr] = no_init;
+    				break;
+				case SW2:
+					sm->fe_init[ctr] = fe_sw2_init;
+					break;
+    		}
+
+			ctr++;
+		}
+	}
+
+
+}

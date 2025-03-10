@@ -138,7 +138,7 @@ void smodel_super_no_read(SMODEL_SUPER *sm, char **codes, int nmat_physics, int 
         printf("Variable Position Info:\n");
         sivar_position_printScreen(&sm->ivar_pos);
     }
-printf(">Calling smat_physics_update_array\n");
+    printf(">Calling smat_physics_update_array\n");
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
     // Use this to update ivar pos in mat physics
@@ -149,8 +149,9 @@ printf(">Calling smat_physics_update_array\n");
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
     // Use this info to fill in resid pointers
+    // if we want to go object-oriented way
     //++++++++++++++++++++++++++++++++++++++++++++++
-    smodel_super_set_resid_init(sm, sm->mat_physics_elem, sm->nmat_physics);
+    //smodel_super_set_resid_init(sm, sm->mat_physics_elem, sm->nmat_physics);
 
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -160,11 +161,9 @@ printf(">Calling smat_physics_update_array\n");
     if (DEBUG) {
         printf(">allocating solution variables\n");
     }
-    // problem here
     SIVAR_POSITION ip[grid->nnodes];
     for (i=0; i<grid->nnodes; i++) {ip[i] = sm->mat_physics_node[i]->ivar_pos;}
     sm->ndofs = sivar_position_build_dof_map(&sm->ivar_pos,grid->nnodes,ip,&sm->ivars);
-    //my ndofs???
     //FORNOW JUST WORKS IN SERIAL
 #ifndef _MESSG
     sm->my_ndofs = sm->ndofs;

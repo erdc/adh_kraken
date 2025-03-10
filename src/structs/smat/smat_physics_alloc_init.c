@@ -88,6 +88,7 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, char codes[10]) {
     mat->DW_FLOW    = false;
     mat->WVEL_SPLIT = false;
     mat->PRESSURE   = false;
+    mat->POISSON    = false;
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         mat->TRANSPORT[itrns] = false;
     }
@@ -154,7 +155,13 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, char codes[10]) {
             mat->PRESSURE = true;
             mat->ivar_pos.prs = mat->ivar_pos.n; mat->ivar_pos.n++; // 3D NS - SPLIT
             mat->nSubmodels++;
+        } else if (mat->code[0] == '9'){
+            //just for testing
+            mat->POISSON = true;
+            mat->ivar_pos.h = mat->ivar_pos.n; mat->ivar_pos.n++; // 2D Poisson
+            mat->nSubmodels++;
         }
+
 
         // ground water
         if (mat->code[1] == '1') {
@@ -192,6 +199,7 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, char codes[10]) {
     if (mat->DW_FLOW)    {nSubMod_nvar[k]=1; k++;} // 6
     if (mat->WVEL_SPLIT) {nSubMod_nvar[k]=1; k++;} // 7
     if (mat->PRESSURE)   {nSubMod_nvar[k]=1; k++;} // 8
+    if (mat->POISSON)    {nSubMod_nvar[k]=1; k++; printf("Set POISONN \n\n\n");} // 9
     if (mat->GW_FLOW)    {nSubMod_nvar[k]=1; k++;}
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         if (mat->TRANSPORT[itrns]) {nSubMod_nvar[k]=1; k++;}    
@@ -273,6 +281,7 @@ void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes) {
     // get number of transport contistuents on this element
     mat->ivar_pos.ntrns = mat->code[3] - '0'; // only 4th column for now [0-9] transports
     //printf("mat->ivar_pos.ntrns: %d\n",mat->ivar_pos.ntrns);
+    mat->TRANSPORT = NULL;
     if (mat->ivar_pos.ntrns > 0) {
         mat->TRANSPORT = (bool *) tl_alloc(sizeof(bool), mat->ivar_pos.ntrns);
     }
@@ -293,6 +302,7 @@ void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes) {
     mat->WVEL_SPLIT = false;
     mat->PRESSURE   = false;
     mat->POISSON    = false;
+
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         mat->TRANSPORT[itrns] = false;
     }
@@ -304,6 +314,7 @@ void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes) {
     mat->NSM       = false;
     mat->WAVE      = false;
     mat->WIND      = false;
+
 
         //++++++++++++++++++++++++++++++++++++++++++++++
         // load the variables into the array
@@ -403,7 +414,7 @@ void smat_physics_alloc_init_ptr(SMAT_PHYSICS *mat, char *codes) {
     if (mat->DW_FLOW)    {nSubMod_nvar[k]=1; k++;} // 6
     if (mat->WVEL_SPLIT) {nSubMod_nvar[k]=1; k++;} // 7
     if (mat->PRESSURE)   {nSubMod_nvar[k]=1; k++;} // 8
-    if (mat->POISSON)    {nSubMod_nvar[k]=1; k++;} // 9
+    if (mat->POISSON)    {nSubMod_nvar[k]=1; k++; printf("Set POISONN \n\n\n");} // 9
     if (mat->GW_FLOW)    {nSubMod_nvar[k]=1; k++;}
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         if (mat->TRANSPORT[itrns]) {nSubMod_nvar[k]=1; k++;}    

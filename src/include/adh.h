@@ -81,6 +81,12 @@ void print_build_info();
 #include "smodel_design.h"
 
 
+//Mark added physics module
+#include "fe.h"
+#include "sw2.h"
+#include "poisson.h"
+#include "heat.h"
+#include "no_model.h"
 #include "models.h"
 
 #include "bc.h"
@@ -90,11 +96,7 @@ void print_build_info();
 #include "jacobian.h"
 #include "la.h"
 #include "newton.h"
-//Mark added physics module
-#include "fe.h"
-#include "sw2.h"
-#include "poisson.h"
-#include "heat.h"
+
 //Mark added time loop
 #include "time_loop.h"
 
@@ -108,4 +110,8 @@ void print_build_info();
 
 //Mark added
 #include "test.h"
+
+//Adding function pointers that will always be needed
+int (*adh_resid_routines[N_RESID_ROUTINES])(struct sm *, double *, int, double, int, int, int, int);
+int (*adh_init_routines[N_INIT_ROUTINES])(struct sm *);
 //#endif

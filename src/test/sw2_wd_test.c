@@ -78,8 +78,8 @@ int sw2_wd_test(void) {
 	printf("NDOFS %d\n",dm.superModel[0].ndofs);
 
 	//OVER WRITE TO SW2
-	dm.superModel[0].mat_physics_elem[0].model[0].physics = SW2;
-	dm.superModel[0].mat_physics_elem[0].model[0].physics_init = SW2;
+	dm.superModel[0].mat_physics_elem[0].model[0].physics = SW2D_;
+	dm.superModel[0].mat_physics_elem[0].model[0].physics_init = SW2_INIT;
 	dm.superModel[0].mat_physics_elem[0].model[0].nvar = 3;
     dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[0] = PERTURB_H;
     dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[1] = PERTURB_U;

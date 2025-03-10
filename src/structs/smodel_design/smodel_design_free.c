@@ -32,5 +32,5 @@ void smodel_design_free(SMODEL_DESIGN *dm) {
 
     sgrid_free(dm->grid);
     //nFluxInterfaces = (int *) tl_free(sizeof(int), sm_p->nSuperModels, nFluxInterfaces);
-    dm = (SMODEL_DESIGN *) tl_free(sizeof(SMODEL_DESIGN), 1, dm);
+    //dm = (SMODEL_DESIGN *) tl_free(sizeof(SMODEL_DESIGN), 1, dm);
 }

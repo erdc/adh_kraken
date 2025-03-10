@@ -33,6 +33,7 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
 	// put correct indices in mat_physics
     //++++++++++++++++++++++++++++++++++++++++++++++
 	for (int imat=0; imat<nmat_physics; imat++){
+
 		//temporary variable, copy pointer
 		mat = &(m[imat]);
 		//check the IVAR_POSITION of this mat_physics
@@ -52,6 +53,7 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
             con_loc[nt] = ctr;
         	ctr++;
         }
+
         ctr=0;
         //++++++++++++++++++++++++++++++++++++++++++++++
     	// now use ivar_loc to inform the submodels
@@ -80,6 +82,7 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
         	mat->model[isubModel].physics_init = SW3D_;
         	isubModel++;
     	}
+
     	if (mat->NS3_FLOW) {
         	mat->model[isubModel].physics_vars[0] = u_loc;
         	mat->model[isubModel].physics_vars[1] = v_loc;
@@ -98,6 +101,7 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
         	isubModel++;
     	}
     	if (mat->DW_FLOW) {
+
         	mat->model[isubModel].physics_vars[0] = h_loc;
         	mat->model[isubModel].physics = DW2D_;
         	mat->model[isubModel].physics_init = DW2D_;
@@ -121,6 +125,14 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
         	mat->model[isubModel].physics_init = GW3D_;
         	isubModel++;
     	}
+        if (mat->POISSON) {
+            mat->model[isubModel].physics_vars[0] = h_loc;
+            mat->model[isubModel].physics = POISSON2D_;
+            //leave unset
+            //mat->model[isubModel].physics_init = NO_INIT_;
+            isubModel++;
+        }
+
     	for (int itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         	if (mat->TRANSPORT[itrns]) {
             	mat->model[isubModel].physics_vars[0] = con_loc[itrns];
@@ -129,6 +141,8 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
             	isubModel++;
         	}  
     	}
+
+
     	assert(isubModel == mat->nSubmodels);
     	isubModel=0;
 	}

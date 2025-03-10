@@ -93,10 +93,13 @@ typedef struct sm{
 
     //can we dynamically allocate isntead?
     //using macro for now
-    int *resid_ptr; //an array of nmat_physics giving start index
-    int (*fe_resid[N_MAX_RESID_SM])(struct sm *, double *, int, double, int, int, int, int);
-    int *init_ptr; //an array of nmat_physics giving start index
-    int (*fe_init[N_INIT_ROUTINES])(struct sm *);
+    //int *resid_ptr; //an array of nmat_physics giving start index
+    //int (*fe_resid[N_MAX_RESID_SM])(struct sm *, double *, int, double, int, int, int, int);
+    //int *init_ptr; //an array of nmat_physics giving start index
+    //int (*fe_init[N_MAX_RESID_SM])(struct sm *);
+
+    //just to build without bug
+    STR_VALUE *str_values;
 
 } SMODEL_SUPER;
 
@@ -109,7 +112,7 @@ void smodel_super_free(SMODEL_SUPER *smod);
 void smodel_super_read(SMODEL_SUPER *smod);
 void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
-void smodel_super_set_resid_init(SMODEL_SUPER *sm, SMAT_PHYSICS *mat_physics, int nmat_physics);
+//void smodel_super_set_resid_init(SMODEL_SUPER *sm, SMAT_PHYSICS *mat_physics, int nmat_physics);
 //from fe_newton.c
 //int fe_newton(struct SMODEL_SUPER* sm);
 

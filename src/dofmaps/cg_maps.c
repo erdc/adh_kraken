@@ -24,7 +24,6 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void get_cell_dofs_ivars(int *local_dofs, int **ivars, int nnodes, int *local_node_ids ,int elem_nvars, int *elem_var_pos){
-
     int i,j,ctr, nodeID;
     int current_var;
     ctr = 0;

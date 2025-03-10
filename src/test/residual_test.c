@@ -1,5 +1,7 @@
 /*! \file residual_test.c This file tests the residual assembly */
 #include "adh.h"
+static void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double h);
+static double RESID_TEST_TOL = 1e-12;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -13,7 +15,12 @@
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int residual_test(void) {
+int residual_test(int npx, double xmin, double xmax) {
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// return error code
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	int ierr = -1;
 	//++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Create a design model
@@ -27,12 +34,9 @@ int residual_test(void) {
 	dm.grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
 	//let's just do something simple
 	//3x3 triangular element grid
-	double xmin = 0.0;
-	double xmax = 2.0;
-	double ymin = 0.0;
-	double ymax = 2.0;
-	int npx = 13;
-	int npy = 5;
+	//double xmin = 0.0;
+	//double xmax = 5.0;
+	//int npx = 11;
 	double theta = 0.0;
 	double dz = 1.0;
 	double a0 = -5.0;
@@ -45,7 +49,7 @@ int residual_test(void) {
 	double axy2 = 0.0;
 	double ax2y2 = 0.0;
 	int flag3d =0;
-    *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
+    *(dm.grid) = create_rectangular_grid(xmin, xmax, xmin, xmax, npx, npx,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
 
@@ -69,7 +73,7 @@ int residual_test(void) {
 			elemVarCode[i][j] = (char *) tl_alloc(sizeof(char), 10);
 		}
 	}
-	strcpy(&elemVarCode[0][0][0],"2"); // SW2D
+	strcpy(&elemVarCode[0][0][0],"9"); // POISSON
 	strcpy(&elemVarCode[0][0][1],"0"); // GW
 	strcpy(&elemVarCode[0][0][2],"0"); // Transport
 
@@ -85,23 +89,76 @@ int residual_test(void) {
 
     smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
     
+    sarray_init_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs);
+    dm.superModel[0].LINEAR_PROBLEM = YES;
 	assemble_residual(&(dm.superModel[0]), dm.grid);
 
 	//print final residual
-//	for(int local_index=0;local_index<grid.nnodes;local_index++){
-//		printf("Node %d: (x,y) = {%f,%f}, Residual = {%f,%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y,sm.residual[local_index*3],sm.residual[local_index*3+1],sm.residual[local_index*3+2]);
-//	}
+	//sarray_printScreen_dbl(dm.superModel[0].lin_sys->residual, dm.superModel[0].ndofs, "residual");
 
+	double *exact_sol;
+	int nnodes = dm.grid->nnodes;
+	double h = (xmax-xmin)/(npx-1);
+	exact_sol = (double *) tl_alloc(sizeof(double), nnodes);
+	sarray_init_dbl(exact_sol, nnodes);
+	find_analytic_residual_linear_poisson(exact_sol, dm.grid, h);
+	
+	//compute L2 and Linf error
+	double l2_err =  l2_error(dm.superModel[0].lin_sys->residual, exact_sol, nnodes);
+	double linf_err =  linf_error(dm.superModel[0].lin_sys->residual, exact_sol, nnodes);
 
+	//printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
+
+	//return -1 if failed, 0 if good
+	
+	if(l2_err < RESID_TEST_TOL && linf_err < RESID_TEST_TOL){
+		ierr=0;
+	}
 
 
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Free Memory
     //++++++++++++++++++++++++++++++++++++++++++++++
+    exact_sol = tl_free(sizeof(double), nnodes, exact_sol);
     smodel_design_free(&dm);
     
-	
+#ifdef _DEBUG
+    printf(">assemble residual error code %d : l2err = %16.4e, linf err=%16.4e \n", ierr, l2_err, linf_err);
+#endif
+	return ierr;
+}
 
-	return 0;
+
+
+void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double h){
+	//computes the integral int_f_v_dx where f=-6
+	//h is the element width
+
+	//this will be (n elements connected to node) * -6 * (h^2)/6
+
+	//get connections per node
+	int nd1,nd2,nd3;
+	int *n_connections;
+	int nnodes = grid->nnodes;
+	n_connections = (int *) tl_alloc(sizeof(int), nnodes);
+	sarray_init_int(n_connections, nnodes);
+
+	for (int ie = 0; ie<grid->nelems2d ; ie++ ){
+		nd1 = grid->elem2d[ie].nodes[0];
+		nd2 = grid->elem2d[ie].nodes[1];
+		nd3 = grid->elem2d[ie].nodes[2];
+
+		n_connections[nd1]++;
+		n_connections[nd2]++;
+		n_connections[nd3]++;
+	} 
+
+
+	for (int i = 0; i<nnodes; i++){
+		resid[i] = n_connections[i]*(-6.0)*h*h/6.0;
+	}
+
+	return;
+
 }

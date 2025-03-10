@@ -134,9 +134,6 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
         printf("Initiating Lin Sys\n");
         printf("------------------------------------------------------\n");
     }
-#ifdef _PETSC
-    PetscInitializeNoArguments();
-#endif
     dmod->nlin_sys = dmod->nSuperModels;
     slin_sys_alloc_array(&(dmod->lin_sys), dmod->nlin_sys);
     //in general this will be an nlin_sys array pointing

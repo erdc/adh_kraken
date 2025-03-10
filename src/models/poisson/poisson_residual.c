@@ -49,6 +49,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG) {
+    
     SELEM_2D *elem2d = &(mod->grid->elem2d[ie]); // be careful not to shallow copy here
     //call a simple integral
     int nnodes = mod->grid->elem2d[ie].nnodes;
@@ -86,6 +87,7 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
 
     //linear case
     if (mod->LINEAR_PROBLEM == YES){
+
         //compute diffusion
         for (i=0; i<nnodes; i++) {
             grad_u.x += elem_u[i] * grad_shp[i].x;
@@ -99,9 +101,11 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
         //rhs of linear system (will be 0 when Jacobian is computed)
         integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
     }else if(mod->LINEAR_PROBLEM == NO){
+
         svect2d_init_array(grad_u_nonlinear, nnodes);
         //compute diffusion
         for (i=0; i<nnodes; i++) {
+
             grad_u_nonlinear[0].x += elem_u[i] * grad_shp[i].x;
             grad_u_nonlinear[0].y += elem_u[i] * grad_shp[i].y;
             grad_u_nonlinear[1].x += elem_u[i] * grad_shp[i].x;

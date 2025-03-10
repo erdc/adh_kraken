@@ -1,8 +1,9 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*! \file  fe_sw2_init.c This file is the init routine for sw2
+/*! \file  no_resid.c This file is the init routine for sw2
  *         which will be called right before each Newton solve       */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+#include "adh.h"
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
  *  \brief     Performs any preprocessing for dependent variables in SW2 equations.
@@ -21,28 +22,6 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-#include "adh.h"
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-//needs to be called inside an init routine
-int fe_sw2_init(SMODEL_SUPER *sm) {
-    fe_sw2_wdflag_legacy(sm);
-    // update Dirchlet condition for nodes with depth less than zero
-    //how are mappings going to look??
-    //this should work for now
-    int i,temp,tempu,tempv;
-    //only want to loop over active nodes here not all nodes!!!! Will lead to bug
-    for (i=0; i<sm->grid->nnodes; i++) {
-        //temp = get_cg_dof(PERTURB_H, i, sm->dof_map_local, sm->node_physics_mat);
-        if (sm->sol_old[temp] <= 0.) {
-            //get the two corresponding u and v entries
-            //tempu = get_cg_dof(PERTURB_U, i, sm->dof_map_local, sm->node_physics_mat);
-            //tempv = get_cg_dof(PERTURB_V, i, sm->dof_map_local, sm->node_physics_mat);
-            sm->bc_mask[tempu] = YES;
-            sm->bc_mask[tempv] = YES;
-        }
-    }
-
-    
-    return 0;
+int no_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation, int perturb_node, int perturb_var, int perturb_sign, int DEBUG){
+	return 0;
 }

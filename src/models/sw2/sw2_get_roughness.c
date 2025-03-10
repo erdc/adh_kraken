@@ -24,26 +24,26 @@
 
 double fe_sw2_get_roughness(SMODEL_SUPER *mod, double depth, double velocity, int id, int which) {
     
-    // double zero_drag = 0.0;
-    // if(mod->str_values[id].fterms.sav_flag == YES) {
-    //     return fr_sav_drag_coef(depth, mod->str_values[id].fterms.eqrheight,
-    //                             mod->str_values[id].fterms.hghtstem);
-    // }
-    // else if(mod->str_values[id].fterms.urv_flag == YES) {
-    //     return fr_urv_drag_coef(depth, mod->str_values[id].fterms.eqrheight,
-    //                             mod->str_values[id].fterms.diamstem,
-    //                             mod->str_values[id].fterms.densstem);
-    // }
-    // else if(mod->str_values[id].fterms.icethick != UNSET_FLT) {
-    //     return fr_stationary_ice_coef(depth, velocity, mod->str_values[id].fterms.bedrhght,
-    //                                   mod->str_values[id].fterms.icerhght, mod->density, which);
-    // }
-    // else {
-    //     if(mod->str_values[id].fterms.eqrheight > SMALL) {
-    //         return fr_bedshstr_drag_coef(depth, mod->str_values[id].fterms.eqrheight);
-    //     }
-    //     else {
-    //         return zero_drag;
-    //     }
-    // }
+    double zero_drag = 0.0;
+    if(mod->str_values[id].fterms.sav_flag == YES) {
+        return fr_sav_drag_coef(depth, mod->str_values[id].fterms.eqrheight,
+                                mod->str_values[id].fterms.hghtstem);
+    }
+    else if(mod->str_values[id].fterms.urv_flag == YES) {
+        return fr_urv_drag_coef(depth, mod->str_values[id].fterms.eqrheight,
+                                mod->str_values[id].fterms.diamstem,
+                                mod->str_values[id].fterms.densstem);
+    }
+    else if(mod->str_values[id].fterms.icethick != UNSET_FLT) {
+        return fr_stationary_ice_coef(depth, velocity, mod->str_values[id].fterms.bedrhght,
+                                      mod->str_values[id].fterms.icerhght, mod->density, which);
+    }
+    else {
+        if(mod->str_values[id].fterms.eqrheight > SMALL) {
+            return fr_bedshstr_drag_coef(depth, mod->str_values[id].fterms.eqrheight);
+        }
+        else {
+            return zero_drag;
+        }
+    }
 }

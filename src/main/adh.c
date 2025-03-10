@@ -45,7 +45,19 @@ int main(int argc, char *argv[]) {
     ierr_code = MPI_Comm_rank(cstorm_comm, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
     ierr_code = MPI_Comm_size(cstorm_comm, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
 #endif
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Initialize PETSC
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifdef _PETSC
+    PetscInitialize(&argc, &argv, NULL, NULL);
+#endif
     
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Initialize all function pointers
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    set_function_pointers(adh_resid_routines, adh_init_routines);
+
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Check command line arguments
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -200,6 +212,9 @@ int main(int argc, char *argv[]) {
 //
 #ifdef _HDF5
     xmf_finalize(dmod.xmf);
+#endif
+#ifdef _PETSC
+    PetscFinalize();
 #endif
 
     return ierr;
