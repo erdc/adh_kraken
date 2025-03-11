@@ -1683,7 +1683,7 @@ PAPER_TYPE             = a4
 # MUST BE ABSOLUTE PATH IF NOT IN INCLUDE
 #                         
 EXTRA_PACKAGES         = amsmath \
-                         /Users/markloveland/adh_kraken/doc/latex_macros_new
+                         $(PWD)/latex_macros_new
 
     
 # The LATEX_HEADER tag can be used to specify a personal LaTeX header for the
