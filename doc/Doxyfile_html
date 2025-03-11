@@ -1680,10 +1680,10 @@ PAPER_TYPE             = a4
 # EXTRA_PACKAGES=[intlimits]{amsmath}
 # If left blank no extra packages will be included.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
-#MUST BE ABSOLUTE PATH IF NOT IN INCLUDE
-#                         /Users/markloveland/Kraken/adhv8_kraken/src/NEW_ADH/doxygen/latex_macros_new
+# MUST BE ABSOLUTE PATH IF NOT IN INCLUDE
+#                         
 EXTRA_PACKAGES         = amsmath \
-                         ../doc/latex_macros_new
+                         /Users/markloveland/adh_kraken/doc/latex_macros_new
 
     
 # The LATEX_HEADER tag can be used to specify a personal LaTeX header for the
