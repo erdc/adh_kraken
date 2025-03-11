@@ -48,5 +48,5 @@ src/pt/test/verification/**/*.h5_back
 src/pt/test/verification/**/*.xmf
 src/pt/test/verification/**/*.xmf_back
 
-src/doxygen/latex
-src/doxygen/html
+doc/latex
+doc/html
