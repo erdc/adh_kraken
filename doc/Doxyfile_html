@@ -704,7 +704,7 @@ LAYOUT_FILE            =
 # LATEX_BIB_STYLE. To use this feature you need bibtex and perl available in the
 # search path. See also \cite for info how to create references.
 
-CITE_BIB_FILES         = "bibliography_new.bib"
+CITE_BIB_FILES         = "$(PWD)/bibliography_new.bib"
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -1722,7 +1722,7 @@ LATEX_FOOTER           =
 # list).
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-LATEX_EXTRA_STYLESHEET = latex_macros_new.sty
+#LATEX_EXTRA_STYLESHEET = latex_macros_new.sty
 
 # The LATEX_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the LATEX_OUTPUT output
@@ -1730,7 +1730,7 @@ LATEX_EXTRA_STYLESHEET = latex_macros_new.sty
 # markers available.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-LATEX_EXTRA_FILES      = latex_macros_new.sty
+#LATEX_EXTRA_FILES      = latex_macros_new.sty
 
 # If the PDF_HYPERLINKS tag is set to YES, the LaTeX that is generated is
 # prepared for conversion to PDF (using ps2pdf or pdflatex). The PDF file will
@@ -1781,7 +1781,7 @@ LATEX_SOURCE_CODE      = NO
 # The default value is: plain.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-LATEX_BIB_STYLE        = natbib
+#LATEX_BIB_STYLE        = natbib
 
 
 #---------------------------------------------------------------------------
