@@ -33,8 +33,8 @@ jobs:
       - name: Run Doxygen
         uses: mattnotmitt/doxygen-action@v1.9.5
         with:
-          working-directory: './doc'
-          doxyfile-path: './doc/Doxyfile_html'
+          working-directory: '${{github.workspace}}/doc'
+          doxyfile-path: '${{github.workspace}}/doc/Doxyfile_html'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
