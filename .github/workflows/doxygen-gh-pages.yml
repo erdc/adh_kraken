@@ -38,6 +38,7 @@ jobs:
         with:
           working-directory: 'doc'
           doxyfile-path: 'Doxyfile_html'
+          enable-latex: true
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
