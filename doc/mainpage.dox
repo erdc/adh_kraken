@@ -7,7 +7,8 @@
     2. Diffusive Wave Equation (2D)
     3. Transport Equation including Sediment Transport (2D or 3D)
     4. Richards Equation (3D)
- 
+    5. Heat Equation (2D or 3D)
+
  AdH Kraken allows the construction of mixed dimensional unstructured meshes (3D-2D-1D) with support for tetrahedral and triangular prism elements in 3D, and triangle or quadrilateral elements in 2D. The underlying finite element solver utilizes P1 Lagrange basis functions and SUPG-based stabilization when necessary. The time step method is fully implicit using an adaptive BDF2 finite-difference scheme. The nonlinear solver utilizes a quasi-Newton method, replacing the exact Jacobian calculation with a central finite difference approximation. The framework for the coupling is set up in the following way. A single simulation in Kraken is comprised of a single object called a design model which is defined on a single unstructured mesh (potentially mixed dimensional). The design model maybe comprised of 1 or more objects called super models. A super model is no more than a set of monolithically coupled models (defined through physics materials) that leads to a single linear system of equations as the super model marches through its nonlinear iterations. If multiple super models are defined, then these are coupled via time lagging (maybe more sophisticated methods such as Strang splitting in the future). 
  *
  * \section install_sec Installation
