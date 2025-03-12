@@ -27,31 +27,29 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
     sarray_init_dbl(sm->lin_sys->residual, (sm->ndofs));
 
-    double elem_rhs[MAX_ELEM_DOF];
-    double eq_rhs[MAX_ELEM_DOF];
-    int dofs[MAX_ELEM_DOF];
+    int max_elem_dof = sm->ivar_pos.n*MAX_NNODE;
+    double elem_rhs[max_elem_dof];
+    double eq_rhs[max_elem_dof];
+    int dofs[max_elem_dof];
     int nnodes;
-    int physics_vars[MAX_NVAR];
+    int physics_vars[sm->ivar_pos.n];
     int var_code;
     int resid_index;
     int nvars_elem, nphysics_models, mat_id, nvar_pde;
     int **ivars = sm->ivars;
 
-    int offset;
-
     //loop through and assemble residual
     for (j=0;j<grid->nelems3d;j++){
-        sarray_init_dbl(elem_rhs,MAX_ELEM_DOF);
+        sarray_init_dbl(elem_rhs,max_elem_dof);
 
         nnodes = grid->elem3d[j].nnodes;
         mat_id = sm->elem3d_physics_mat[j];
         nvars_elem =  sm->mat_physics_elem[mat_id].n;
         nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
-        //offset = sm->resid_ptr[mat_id];
 
 
         for (k=0;k<nphysics_models;k++){
-            sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
+            sarray_init_dbl(eq_rhs,max_elem_dof);
             
             nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
             resid_index = sm->mat_physics_elem[mat_id].model[k].physics;
@@ -59,12 +57,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
-            //var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->mat_physics_elem[mat_id].model[k].physics]);
-            //replace with:
-            //var_code = sm->fe_resid[mat_id+k](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            //or:
             var_code = adh_resid_routines[resid_index](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            //var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->mat_physics_elem[mat_id].model[k].physics]);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
             add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,nvar_pde,physics_vars,nnodes,-1.0);
@@ -84,7 +77,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
     for (j=0;j<grid->nelems2d;j++){
 
-        sarray_init_dbl(elem_rhs,MAX_ELEM_DOF);
+        sarray_init_dbl(elem_rhs,max_elem_dof);
         nnodes = grid->elem2d[j].nnodes;
         mat_id = sm->elem2d_physics_mat[j];
         nvars_elem =  sm->mat_physics_elem[mat_id].n;
@@ -93,7 +86,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
         for (k=0;k<nphysics_models;k++){
 
-            sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
+            sarray_init_dbl(eq_rhs,max_elem_dof);
             
             nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
             resid_index = sm->mat_physics_elem[mat_id].model[k].physics;
@@ -101,12 +94,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
             sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
-            //var_code = smodel_super_resid(sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG, fe_resid[sm->mat_physics_elem[mat_id].model[k].physics]);
-            
-            //var_code = sm->fe_resid[mat_id+k](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            //or
             var_code = adh_resid_routines[resid_index](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine
             add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,nvar_pde,physics_vars,nnodes,-1.0);
         }
@@ -124,7 +112,7 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
     for (j=0;j<grid->nelems1d;j++){
 
-        sarray_init_dbl(elem_rhs,MAX_ELEM_DOF);
+        sarray_init_dbl(elem_rhs,max_elem_dof);
         nnodes = grid->elem1d[j].nnodes;
         mat_id = sm->elem1d_physics_mat[j];
         nvars_elem =  sm->mat_physics_elem[mat_id].n;
@@ -132,14 +120,13 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
 
         for (k=0;k<nphysics_models;k++){
-            sarray_init_dbl(eq_rhs,MAX_ELEM_DOF);
+            sarray_init_dbl(eq_rhs,max_elem_dof);
             resid_index = sm->mat_physics_elem[mat_id].model[k].physics;
             nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
             sarray_init_int(physics_vars, nvar_pde);
             sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
             //convention for filling temp will be:
             // for i in node (for j in nvar temp[nnode*i + j] = result)
-            //var_code = sm->fe_resid[mat_id+k](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
             var_code = adh_resid_routines[resid_index](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
             //add eq_rhs to elem_rhs
             //in order to do this we will need elemental vars and info about fe_resid routine

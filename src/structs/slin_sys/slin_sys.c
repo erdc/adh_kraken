@@ -80,7 +80,7 @@ void slin_sys_init_array(SLIN_SYS *lin_sys, int nlin_sys){
  *  \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void lin_sys_CSR_printScreen(SLIN_SYS *lin_sys){
+void slin_sys_CSR_printScreen(SLIN_SYS *lin_sys){
 	int *indptr = lin_sys->indptr_diag;
 	int *cols = lin_sys->cols_diag;
 	double *vals = lin_sys->vals_diag;

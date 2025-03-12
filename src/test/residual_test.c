@@ -52,6 +52,12 @@ int residual_test(int npx, int npy, double xmin, double xmax, double ymin, doubl
     *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Reorder grid to minimize bandwidth
+    //++++++++++++++++++++++++++++++++++++++++++++++
+
+    sgrid_reorder(dm.grid,2);
 
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++

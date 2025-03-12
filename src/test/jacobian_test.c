@@ -12,19 +12,28 @@
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int jacobian_test(void) {
-	//create a grid
-	SGRID *grid;
-	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
-
+int jacobian_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax) {
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// return error code
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	int ierr = -1;
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Create a design model
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	SMODEL_DESIGN dm; smodel_design_defaults(&dm);
+	
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Create a regular grid
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	dm.grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
 	//let's just do something simple
 	//3x3 triangular element grid
-	double xmin = 0.0;
-	double xmax = 2.0;
-	double ymin = 0.0;
-	double ymax = 2.0;
-	int npx = 7;
-	int npy = 7;
+	//double xmin = 0.0;
+	//double xmax = 5.0;
+	//int npx = 11;
 	double theta = 0.0;
 	double dz = 1.0;
 	double a0 = -5.0;
@@ -37,41 +46,59 @@ int jacobian_test(void) {
 	double axy2 = 0.0;
 	double ax2y2 = 0.0;
 	int flag3d =0;
-
-    *grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
+    *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
-    sgrid_reorder(grid,3);
-    printf("Grid reorder completed\n");
-//    for(int local_index=0; local_index<grid->nnodes;local_index++){
-//    	printf("Inverse permuatin[%d] = %d, node id = %d\n",local_index,grid->inv_per_node[local_index],grid->node[local_index].id);
-//    }
 
-	//print coordinates
-//  for(int local_index =0; local_index<grid.nnodes; local_index++){
-//		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
-//	}
-//	//print connectivity
-//	for(int local_index =0; local_index<grid.nelems2d; local_index++){
-//		printf("Element %d: (nd1,nd2,nd3) = {%d,%d,%d}\n",local_index ,grid.elem2d[local_index].nodes[0], grid.elem2d[local_index].nodes[1], grid.elem2d[local_index].nodes[2]);
-//	}
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Reorder grid to minimize bandwidth
+    //++++++++++++++++++++++++++++++++++++++++++++++
 
-
-    SMODEL_DESIGN dm;
-	//specify elemental physics and other properties in super model
-	double dt = 1.0;
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Fill in a simple design model
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    double dt = 1.0;
 	double t0 = 0.0;
 	double tf = 1.0;
+	int nSuperModels = 1;
+	int *nphysics_mats;
+	nphysics_mats = (int*) tl_alloc(sizeof(int), nSuperModels);
+	nphysics_mats[0] = 1;
+	//elemVarCode in general is triple pointer, nSuperModels x nphyics_mat[i] x 10
+	char ***elemVarCode;
+	elemVarCode = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	for (int i = 0; i< nSuperModels; i ++){
+		elemVarCode[i] = (char **) tl_alloc(sizeof(char *), nphysics_mats[i]);
+		for (int j = 0; j< nphysics_mats[i]; j++){
+			elemVarCode[i][j] = (char *) tl_alloc(sizeof(char), 10);
+		}
+	}
+	strcpy(&elemVarCode[0][0][0],"9"); // POISSON
+	strcpy(&elemVarCode[0][0][1],"0"); // GW
+	strcpy(&elemVarCode[0][0][2],"0"); // Transport
 
-	char elemVarCode[4]; 
-	strcpy(&elemVarCode[0],"2");//SW2D
-	strcpy(&elemVarCode[1],"0"); //GW
-	strcpy(&elemVarCode[2],"0"); //Transport
-	//printf("GRID NELEMS2D = %d\n",grid.nelems2d);
-	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	//smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
-	//printf("NDOFS %d\n",dm->ndofs[0]);
+
+	//mat ids
+	int **mat_ids;
+	mat_ids = (int **) tl_alloc(sizeof(int*),nSuperModels);
+	int nelems = dm.grid->nelems3d + dm.grid->nelems2d + dm.grid->nelems1d;
+	for (int i = 0; i < nSuperModels; i++){
+		mat_ids[i] = tl_alloc(sizeof(int), nelems);
+		sarray_init_int(mat_ids[i],nelems);
+	}
+
+    smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
+    
+    //sarray_init_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs);
+    sarray_init_value_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs, 1.0);
+    dm.superModel[0].LINEAR_PROBLEM = YES;
+
+
 	assemble_jacobian(&(dm.superModel[0]));
+
+	slin_sys_CSR_printScreen(dm.superModel[0].lin_sys);
 
 	//free stuff
     smodel_design_free(&dm);

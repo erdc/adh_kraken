@@ -2,7 +2,7 @@
 #define _H_TEST_
 
 
-int jacobian_test(void);
+int jacobian_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
 int la_test(void);
 int newton_test(void);
 int residual_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
