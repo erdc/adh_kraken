@@ -1,6 +1,6 @@
 /*! \file residual_test.c This file tests the residual assembly */
 #include "adh.h"
-static void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double h);
+static void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double hx, double hy);
 static double RESID_TEST_TOL = 1e-12;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -15,7 +15,7 @@ static double RESID_TEST_TOL = 1e-12;
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int residual_test(int npx, double xmin, double xmax) {
+int residual_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax) {
 	//++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// return error code
@@ -49,7 +49,7 @@ int residual_test(int npx, double xmin, double xmax) {
 	double axy2 = 0.0;
 	double ax2y2 = 0.0;
 	int flag3d =0;
-    *(dm.grid) = create_rectangular_grid(xmin, xmax, xmin, xmax, npx, npx,
+    *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
 
@@ -81,7 +81,7 @@ int residual_test(int npx, double xmin, double xmax) {
 	//mat ids
 	int **mat_ids;
 	mat_ids = (int **) tl_alloc(sizeof(int*),nSuperModels);
-	int nelems = dm.grid->nelems2d + dm.grid->nelems1d + dm.grid->nelems1d;
+	int nelems = dm.grid->nelems3d + dm.grid->nelems2d + dm.grid->nelems1d;
 	for (int i = 0; i < nSuperModels; i++){
 		mat_ids[i] = tl_alloc(sizeof(int), nelems);
 		sarray_init_int(mat_ids[i],nelems);
@@ -100,11 +100,12 @@ int residual_test(int npx, double xmin, double xmax) {
 
 	double *exact_sol;
 	int nnodes = dm.grid->nnodes;
-	double h = (xmax-xmin)/(npx-1);
+	double hx = (xmax - xmin)/(npx-1);
+	double hy = (ymax - ymin)/(npy-1);
 	exact_sol = (double *) tl_alloc(sizeof(double), nnodes);
 	sarray_init_dbl(exact_sol, nnodes);
 
-	find_analytic_residual_linear_poisson(exact_sol, dm.grid, h);
+	find_analytic_residual_linear_poisson(exact_sol, dm.grid, hx, hy);
 
 	//compute L2 and Linf error
 	double l2_err =  l2_error(dm.superModel[0].lin_sys->residual, exact_sol, nnodes);
@@ -134,7 +135,7 @@ int residual_test(int npx, double xmin, double xmax) {
 
 
 
-void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double h){
+void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double hx, double hy){
 	//computes the integral int_f_v_dx where f=-6
 	//h is the element width
 
@@ -159,7 +160,7 @@ void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double h)
 
 
 	for (int i = 0; i<nnodes; i++){
-		resid[i] = n_connections[i]*(-6.0)*h*h/6.0;
+		resid[i] = n_connections[i]*(-6.0)*hx*hy/6.0;
 	}
 
 	return;
