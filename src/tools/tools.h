@@ -10,6 +10,8 @@ int **allocate_dptr_int(int rows, int cols);
 void free_dptr_int(int **ptr, int rows, int cols);
 double **allocate_dptr_dbl(int rows, int cols);
 void free_dptr_dbl(double **ptr, int rows, int cols);
+char **allocate_dptr_char(int rows, int cols);
+void free_dptr_char(char **ptr, int rows, int cols);
 
 //const char *get_filename_ext(const char *filename);
 //FILE* openFileFromBase(const char* filebase, const char* mode, char *filename, const char *fext);

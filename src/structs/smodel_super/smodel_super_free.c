@@ -69,12 +69,10 @@ void smodel_super_free(SMODEL_SUPER *sm) {
     if (sm->elem3d_physics_mat != NULL) {
         sm->elem2d_physics_mat = (int *) tl_free(sizeof(int), sm->grid->nelems3d, sm->elem3d_physics_mat);
     }
-
-    if (sm->mat_physics_elem != NULL) {smat_physics_free_array(sm->mat_physics_elem,1);}
+    if (sm->mat_physics_elem != NULL) {smat_physics_free_array(sm->mat_physics_elem,sm->nmat_physics);}
     if (sm->mat_physics_node != NULL) {
         sm->mat_physics_node = (SMAT_PHYSICS **) tl_free(sizeof(SMAT_PHYSICS *), sm->grid->nnodes, sm->mat_physics_node);
     }
-
     if (sm->ivars != NULL) {
         for (int iv=0; iv<sm->ivar_pos.n; iv++) {
             sm->ivars[iv] = (int *) tl_free(sizeof(int), sm->grid->nnodes, sm->ivars[iv]);

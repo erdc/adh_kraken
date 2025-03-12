@@ -30,7 +30,7 @@ void smodel_super_no_read(SMODEL_SUPER *sm, char **codes, int nmat_physics, int 
     //++++++++++++++++++++++++++++++++++++++++++++++
     sm->nmat_physics = nmat_physics;
 
-    smat_physics_alloc_init_ptr_array(&(sm->mat_physics_elem),sm->nmat_physics,codes);
+    smat_physics_alloc_init_array(&(sm->mat_physics_elem),sm->nmat_physics,codes);
     if (DEBUG) {
         for (i=0; i<sm->nmat_physics; i++) {smat_physics_printScreen(&sm->mat_physics_elem[i]);}
     }
@@ -128,7 +128,7 @@ void smodel_super_no_read(SMODEL_SUPER *sm, char **codes, int nmat_physics, int 
     if (DEBUG) {
         printf(">creating ivar_pos\n");
     }
-    int FLAGS[MAX_TRNS_VARS + MAX_VARS]; sarray_init_int(FLAGS,MAX_TRNS_VARS + MAX_VARS);
+    int FLAGS[N_IVARS_TOTAL];
     sivar_position_init(&(sm->ivar_pos));
     smat_physics_position_flag(sm->mat_physics_node,grid->nnodes,FLAGS); 
     sivar_position_map(&(sm->ivar_pos),FLAGS);

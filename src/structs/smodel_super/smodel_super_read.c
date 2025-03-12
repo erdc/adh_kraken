@@ -68,8 +68,7 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     if (DEBUG) {
         printf(">reading bc file for model extraction\n");
     }
-    // this needs to get moved to strings
-    char codes[50][10]; 
+    char **codes = allocate_dptr_char(50,10);
     for (i=0; i<50; i++) {strcpy(codes[i],"0000");}
     read_bc_MODEL(sm,fp,codes);
     if (DEBUG) {
@@ -84,7 +83,8 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     if (DEBUG) {
         for (i=0; i<sm->nmat_physics; i++) {smat_physics_printScreen(&sm->mat_physics_elem[i]);}
     }
-    
+    free_dptr_char(codes,50,10);
+
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
     //tl_check_all_pickets(__FILE__,__LINE__);//exit(-1);
@@ -111,6 +111,7 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     }
     while ((read = getline(&line, &len, fp)) != -1) {
         get_token(line,&token); if (token == NULL) continue;
+        if (strcmp(token, "WINDS") == 0) {sm->flags.WIND_STRESS = true;} // cjt -- for now
         //  if      (strcmp(token, "OP")  == 0) {read_bc_OP(sm,&token);}
         //  else if (strcmp(token, "IP")  == 0) {read_bc_IP(sm,&token);}
         //  else if (strcmp(token, "PC")  == 0) {read_bc_PC(sm,&token);}
@@ -229,7 +230,7 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     if (DEBUG) {
         printf(">creating ivar_pos\n");
     }
-    int FLAGS[MAX_TRNS_VARS + MAX_VARS]; sarray_init_int(FLAGS,MAX_TRNS_VARS + MAX_VARS);
+    int FLAGS[N_IVARS_TOTAL];
     sivar_position_init(&(sm->ivar_pos));
     smat_physics_position_flag(sm->mat_physics_node,grid->nnodes,FLAGS); 
     sivar_position_map(&(sm->ivar_pos),FLAGS);
@@ -279,6 +280,13 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     sarray_init_dbl(sm->sol_older,sm->ndofs);
     sarray_init_dbl(sm->dirichlet_data,sm->ndofs);
     sarray_init_int(sm->bc_mask,sm->ndofs);
+
+
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    // Allocating dependent variables
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    smodel_super_build_dvars(sm);
     
 }
 

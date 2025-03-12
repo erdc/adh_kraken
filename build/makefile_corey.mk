@@ -39,10 +39,6 @@ $(wildcard $(MASTER_SRC_DIR)/xdmf) \
 $(wildcard $(MASTER_SRC_DIR)/dofmaps) \
 $(wildcard $(MASTER_SRC_DIR)/tokens) \
 $(wildcard $(MASTER_SRC_DIR)/messg) \
-$(wildcard $(MASTER_SRC_DIR)/models) \
-$(wildcard $(MASTER_SRC_DIR)/models/heat) \
-$(wildcard $(MASTER_SRC_DIR)/models/poisson) \
-$(wildcard $(MASTER_SRC_DIR)/models/sw2) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sfile) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sdvar) \
 $(wildcard $(MASTER_SRC_DIR)/structs/svect) \
@@ -69,6 +65,11 @@ $(wildcard $(MASTER_SRC_DIR)/structs/ssw) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smodel) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smodel_super) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smodel_design) \
+$(wildcard $(MASTER_SRC_DIR)/models/heat) \
+$(wildcard $(MASTER_SRC_DIR)/models/poisson) \
+$(wildcard $(MASTER_SRC_DIR)/models/sw2) \
+$(wildcard $(MASTER_SRC_DIR)/models/no_model) \
+$(wildcard $(MASTER_SRC_DIR)/models) \
 $(wildcard $(MASTER_SRC_DIR)/residual) \
 $(wildcard $(MASTER_SRC_DIR)/jacobian) \
 $(wildcard $(MASTER_SRC_DIR)/newton) \
@@ -87,10 +88,6 @@ $(MASTER_SRC_DIR)/xdmf \
 $(MASTER_SRC_DIR)/dofmaps \
 $(MASTER_SRC_DIR)/tokens \
 $(MASTER_SRC_DIR)/messg \
-$(MASTER_SRC_DIR)/models \
-$(MASTER_SRC_DIR)/models/heat \
-$(MASTER_SRC_DIR)/models/poisson \
-$(MASTER_SRC_DIR)/models/sw2 \
 $(MASTER_SRC_DIR)/structs/sdt \
 $(MASTER_SRC_DIR)/structs/sdvar \
 $(MASTER_SRC_DIR)/structs/sfile \
@@ -118,9 +115,13 @@ $(MASTER_SRC_DIR)/structs/ssw \
 $(MASTER_SRC_DIR)/structs/smodel \
 $(MASTER_SRC_DIR)/structs/smodel_super \
 $(MASTER_SRC_DIR)/structs/smodel_design \
+$(MASTER_SRC_DIR)/models/heat \
+$(MASTER_SRC_DIR)/models/poisson \
+$(MASTER_SRC_DIR)/models/sw2 \
+$(MASTER_SRC_DIR)/models/no_model \
+$(MASTER_SRC_DIR)/models \
 $(MASTER_SRC_DIR)/residual \
 $(MASTER_SRC_DIR)/jacobian \
-$(MASTER_SRC_DIR)/newton \
 $(MASTER_SRC_DIR)/newton \
 $(MASTER_SRC_DIR)/timeloop \
 $(MASTER_SRC_DIR)/la \

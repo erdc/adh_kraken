@@ -15,186 +15,166 @@ static int DEBUG = ON;
  *
  * @param[inout] sm     (SMODEL_DESIGN **) a pointer to an AdH design-level model
  * @param[in]    filename (CHAR *) the design model filename
- * 
- * \note: CJT :: New AdH Input Files - .bc, .init, .cov, .geo
- * \note: CJT :: Need to figure out how to read dependent variables!
+ *
+ * \note: CJT :: Must be called after BC read to setup which variables should be read
+ * \note: CJT :: DataSet has a structured format
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-void read_1col(double *sol, int **ivars, int nnodes, char **line, int varcode, FILE *fp, size_t *len) {
-	ssize_t read;
-	for (int inode=0; inode<nnodes; inode++) {
-		read = getline(line, len, fp);
-        //printf("varcode: %d || inode: %d ||  ivars[varcode][inode]: %d\n",varcode,inode,ivars[varcode][inode]);   
-        if (ivars[varcode][inode] == UNSET_INT) continue;
-        //printf("varcode: %d || inode: %d ||  ivars[varcode][inode]: %d\n",varcode,inode,ivars[varcode][inode]);   
-        sscanf(*line, "%lf", &sol[ivars[varcode][inode]]);
-        //printf("varcode: %d || inode: %d || ivars[varcode][inode] %d || sol: %f || line: %s\n",varcode,inode,ivars[varcode][inode],sol[ivars[varcode][inode]], *line);
-	}
-}
-void read_2col(double *sol, int **ivars, int nnodes, char **line, int varcode1, int varcode2, FILE *fp, size_t *len) {
-	ssize_t read;
-	for (int inode=0; inode<nnodes; inode++) {
-		read = getline(line, len, fp);
-        if (ivars[varcode1][inode] == UNSET_INT || 
-            ivars[varcode2][inode] == UNSET_INT) continue;
-        //printf("inode: %d || varcodes: [%d,%d] || ivars1[varcode1][inode]: %d || ivars2[varcode2][inode]: %d\n",
-        //            inode,varcode1,varcode2,ivars[varcode1][inode],ivars[varcode2][inode]);
-
-        sscanf(*line, "%lf %lf", &sol[ivars[varcode1][inode]],&sol[ivars[varcode2][inode]]);
-        //printf("sol1: %f || sol2: %f \n",sol[ivars[varcode1][inode]],sol[ivars[varcode2][inode]]);
-	}
-}
-void read_3col(double *sol, int **ivars, int nnodes, char **line, int varcode1, int varcode2, int varcode3, FILE *fp, size_t *len) {
-	ssize_t read;
-	for (int inode=0; inode<nnodes; inode++) {
-        if (ivars[varcode1][inode] == UNSET_INT || 
-            ivars[varcode2][inode] == UNSET_INT ||
-            ivars[varcode3][inode] == UNSET_INT) continue;
-		//read = getline(line, len, fp);
-		sscanf(*line, "%lf %lf %lf", &sol[ivars[varcode1][inode]],&sol[ivars[varcode2][inode]],&sol[ivars[varcode3][inode]]);
-	}
-}
+void write_stats(int ndim, double *min, double *max);
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase) {
-
-    char *token,mode[MAXLINE],ext[MAXLINE];
-    SFILE file;
-    strcpy(mode,"r"); strcpy(ext,".init");
-    sfile_open(&file,filebase,NULL,NULL,ext,mode,TRUE);
-    FILE *fp = file.fp;
-
+    
+    int i,ivar,ndim,ndiml,ip,inode,lnnodes,lnelems;
+    char *token,mode[MAXLINE],ext[MAXLINE],name[MAXLINE],preName[MAXLINE],str[MAXLINE];
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
-    double dtmp;
-    int conID = UNSET_INT;
-
-    int nnodes = sm->grid->nnodes; // alias
-    SIVAR_POSITION *ivar_pos = &sm->ivar_pos; 
-    double *s = sm->sol;
-    double *s_old = sm->sol_old;
-    double *s_older = sm->sol_older;   
-
+    double max[3], min[3];
+    bool found = false;
+    int nnodes = sm->grid->nnodes;
+    SIVAR_POSITION *ivar_pos = &sm->ivar_pos;
+    int **ivars = sm->ivars;
+    double *s = NULL;
+    SDVAR_POSITION *dvar_pos = &sm->dvars.sdvar_pos_node;
+    double **dvars = sm->dvars.nodal_dvar;
+    
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    // Open Initialization File
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    SFILE file;
+    strcpy(mode,"r"); strcpy(ext,".init");
+    sfile_open(&file,filebase,NULL,NULL,ext,mode,TRUE);
+    FILE *fp = file.fp; // alias
+    
     //++++++++++++++++++++++++++++++++++++++++++++++
     // Read INIT file
     //++++++++++++++++++++++++++++++++++++++++++++++
-    while ((read = getline(&line, &len, fp)) != -1) {
-        //printf("line: %s\n",line);
-        get_token(line,&token); //printf("token: %s\n",token);
-        if (token == NULL) continue;
-        // //printf("token: %s\n",token);
-        if (strcmp(token,"DEPTH") == 0) {
-            if (DEBUG) printf("-- initializing depth\n");
-        	read_1col(s,sm->ivars,nnodes,&line,ivar_pos->h,fp,&len);
+    while ((read = getline(&line, &len, fp)) != -1) { //printf("line: %s\n",line);
+        get_token(line,&token); if (token == NULL) continue; //printf("token: %s\n",token);
+        if (strcmp(token,"DATASET") == 0) {
+            found = false;
+            strcpy(name,"");
+            
+            // ++++++++++++++++++++++++++
+            // Read DataSet Header Info
+            // ++++++++++++++++++++++++++
+            read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"OBJTYPE") == 0);
+            read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"ND") == 0);
+            lnnodes = get_next_token_int(&token); assert(lnnodes = nnodes);
+            read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"NC") == 0);
+            read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"DIM") == 0);
+            ndim = get_next_token_int(&token); assert(ndim > 0 && ndim < 3);
+            read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"NAME") == 0);
+            get_next_token(&token);
+            if (strcmp(token,"OLD") == 0) {
+                strcpy(preName,token);
+                s = sm->sol_old;
+                get_next_token(&token); if (token == NULL) continue;
+            } else if (strcmp(token,"OLDER") == 0) {
+                strcpy(preName,token);
+                s = sm->sol_older;
+                get_next_token(&token); if (token == NULL) continue;
+            } else {
+                strcpy(preName,"");
+                s = sm->sol;
+            }
+            strcpy(name,token);
+            read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"TS") == 0);
+            
+            //if (DEBUG == ON) {printf("<<< reading DATASET for variable: %s %s of dim: %d\n",preName,name,ndim);}
+            
+            // +++++++++++++++++++++++++++
+            // Independent Variables Read
+            // Stores into solution array
+            // +++++++++++++++++++++++++++
+            for (ivar=0; ivar<N_IVARS_TOTAL; ivar++) { //printf("var_name: %s\n",ivar_pos->var_name[ivar]);
+                //printf("name: %s || IVAR_NAME[ivar]: %s\n",name,IVAR_NAME[ivar]);
+                if (strcmp(name,IVAR_NAME[ivar]) == 0) {
+                    if (DEBUG) printf("---- initializing: %s %s\n",preName,IVAR_NAME[ivar]);
+                    
+                    for (i=0; i<3; i++) {max[i] = -99999999.; min[i] = 99999999.;}
+                    for (inode=0; inode<nnodes; inode++) {
+                        read = getline(&line, &len, fp); //printf("line: %s\n",line); //exit(-1);
+                        get_token(line,&token);
+                        ndiml = 0;
+                        while (token != NULL) {
+                            ip = ivar_pos->var[ivar + ndiml];
+                            if (ivars[ip][inode] == UNSET_INT) continue;
+                            sscanf(token, "%lf", &s[ivars[ip][inode]]); // independent variables go into the solution array
+                            if (s[ivars[ip][inode]] > max[ndiml]) {max[ndiml] = s[ivars[ip][inode]];}
+                            if (s[ivars[ip][inode]] < min[ndiml]) {min[ndiml] = s[ivars[ip][inode]];}
+                            ndiml++;
+                            get_next_token(&token);
+                        }
+                        assert(ndiml == ndim);
+                    }
+                    read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"ENDDS") == 0);
+                    if (DEBUG == ON) {write_stats(ndim,min,max);}
+                    found = true; break;
+                }
+            }
+            if (found) {
+                //if (DEBUG == ON) {printf("<<< Finished reading DATASET || variable: %s %s || dim: %d \n",preName,name,ndim);}
+                continue;
+            }
+            
+            // +++++++++++++++++++++++++++
+            // Dependent Variables Read
+            // Stores into dvar matrix
+            // +++++++++++++++++++++++++++
+            for (ivar=0; ivar<N_DVARS; ivar++) { //printf("var_name: %s\n",ivar_pos->var_name[ivar]);
+                if (strcmp(name,DVAR_NAME[ivar]) == 0) {
+                    if (DEBUG) printf("---- initializing: %s %s\n",preName,DVAR_NAME[ivar]);
+                    
+                    for (i=0; i<3; i++) {max[i] = -99999999.; min[i] = 99999999.;}
+                    for (inode=0; inode<nnodes; inode++) {
+                        read = getline(&line, &len, fp); //printf("line: %s\n",line); //exit(-1);
+                        get_token(line,&token);
+                        ndiml = 0;
+                        while (token != NULL) {
+                            ip = dvar_pos->var[ivar + ndiml];
+                            //printf("token: %s || ivar: %d || ip: %d || ndiml: %d\n",token,ivar + ndiml,ip,ndiml);
+                            if (ip == UNSET_INT) continue;
+                            sscanf(token, "%lf", &dvars[ip][inode]); // dependent variables are stored in a matrix
+                            if (dvars[ip][inode] > max[ndiml]) {max[ndiml] = dvars[ip][inode];}
+                            if (dvars[ip][inode] < min[ndiml]) {min[ndiml] = dvars[ip][inode];}
+                            ndiml++;
+                            get_next_token(&token);
+                        }
+                        assert(ndiml == ndim);
+                    }
+                    read = getline(&line, &len, fp); get_token(line,&token); assert(strcmp(token,"ENDDS") == 0);
+                    write_stats(ndim,min,max);
+                    found = true; break;
+                }
+            }
+            if (!found) {
+                sprintf(str, "WARNING: Initialization variable %s %s not found by AdH.\n",preName,name);
+                tl_error(str);
+            } else {
+                if (DEBUG == ON) {printf("<<< Finished reading DATASET || variable: %s %s || dim: %d \n",preName,name,ndim);}
+            }
         }
-        if (strcmp(token,"OLD_DEPTH") == 0) {
-            if (DEBUG) printf("-- initializing old depth\n");
-        	read_1col(s_old,sm->ivars,nnodes,&line,ivar_pos->h,fp,&len);
-        }
-        if (strcmp(token,"OLDER_DEPTH") == 0) {
-            if (DEBUG) printf("-- initializing older depth\n");
-        	read_1col(s_older,sm->ivars,nnodes,&line,ivar_pos->h,fp,&len);
-        }
-        if (strcmp(token,"VELOCITY") == 0) {
-            if (DEBUG) printf("-- initializing velocity\n");
-        	read_3col(s,sm->ivars,nnodes,&line,ivar_pos->u,ivar_pos->v,ivar_pos->w,fp,&len);
-        }
-        if (strcmp(token,"OLD_VELOCITY") == 0) {
-            if (DEBUG) printf("-- initializing old velocity\n");
-        	read_3col(s_old,sm->ivars,nnodes,&line,ivar_pos->u,ivar_pos->v,ivar_pos->w,fp,&len);
-        }
-        if (strcmp(token,"OLDER_VELOCITY") == 0) {
-            if (DEBUG) printf("-- initializing older velocity\n");
-        	read_3col(s_older,sm->ivars,nnodes,&line,ivar_pos->u,ivar_pos->v,ivar_pos->w,fp,&len);
-        }
-        if (strcmp(token,"DA_VELOCITY") == 0) {
-            if (DEBUG) printf("-- initializing depth-averaged velocity\n");
-        	read_2col(s,sm->ivars,nnodes,&line,ivar_pos->uda,ivar_pos->vda,fp,&len);
-        }
-        if (strcmp(token,"OLD_DA_VELOCITY") == 0) {
-            if (DEBUG) printf("-- initializing old depth-averaged velocity\n");
-        	read_2col(s_old,sm->ivars,nnodes,&line,ivar_pos->uda,ivar_pos->vda,fp,&len);
-        }
-        if (strcmp(token,"OLDER_DA_VELOCITY") == 0) {
-            if (DEBUG) printf("-- initializing older depth-averaged velocity\n");
-        	read_2col(s_older,sm->ivars,nnodes,&line,ivar_pos->uda,ivar_pos->vda,fp,&len);
-        }
-        if (strcmp(token,"DISPLACEMENT") == 0) {
-            if (DEBUG) printf("-- initializing displacement\n");
-        	read_1col(s,sm->ivars,nnodes,&line,ivar_pos->dpl,fp,&len);
-        }
-        if (strcmp(token,"OLD_DISPLACEMENT") == 0) {
-            if (DEBUG) printf("-- initializing old displacement\n");
-        	read_1col(s_old,sm->ivars,nnodes,&line,ivar_pos->dpl,fp,&len);
-        }
-        if (strcmp(token,"OLDER_DISPLACEMENT") == 0) {
-            if (DEBUG) printf("-- initializing older displacement\n");
-        	read_1col(s_older,sm->ivars,nnodes,&line,ivar_pos->dpl,fp,&len);
-        }
-        if (strcmp(token,"PRESSURE") == 0) {
-            if (DEBUG) printf("-- initializing pressure\n");
-        	read_1col(s,sm->ivars,nnodes,&line,ivar_pos->prs,fp,&len);
-        }
-        if (strcmp(token,"OLD_PRESSURE") == 0) {
-            if (DEBUG) printf("-- initializing old pressure\n");
-        	read_1col(s_old,sm->ivars,nnodes,&line,ivar_pos->prs,fp,&len);
-        }
-        if (strcmp(token,"OLDER_PRESSURE") == 0) {
-            if (DEBUG) printf("-- initializing older pressure\n");
-        	read_1col(s_older,sm->ivars,nnodes,&line,ivar_pos->prs,fp,&len);
-        }
-        if (strcmp(token,"HEAT") == 0) {
-            if (DEBUG) printf("-- initializing heat\n");
-        	read_1col(s,sm->ivars,nnodes,&line,ivar_pos->dpl,fp,&len);
-        }
-        if (strcmp(token,"OLD_HEAT") == 0) {
-            if (DEBUG) printf("-- initializing old heat\n");
-        	read_1col(s_old,sm->ivars,nnodes,&line,ivar_pos->dpl,fp,&len);
-        }
-        if (strcmp(token,"OLDER_HEAT") == 0) {
-            if (DEBUG) printf("-- initializing older heat\n");
-        	read_1col(s_older,sm->ivars,nnodes,&line,ivar_pos->dpl,fp,&len);
-        }
-        if (strcmp(token,"SALINITY") == 0) {
-            if (DEBUG) printf("-- initializing salinity\n");
-        	read_1col(s,sm->ivars,nnodes,&line,ivar_pos->sal,fp,&len);
-        }
-        if (strcmp(token,"OLD_SALINITY") == 0) {
-            if (DEBUG) printf("-- initializing old salinity\n");
-        	read_1col(s_old,sm->ivars,nnodes,&line,ivar_pos->sal,fp,&len);
-        }
-        if (strcmp(token,"OLDER_SALINITY") == 0) {
-            if (DEBUG) printf("-- initializing older salinity\n");
-        	read_1col(s_older,sm->ivars,nnodes,&line,ivar_pos->sal,fp,&len);
-        }
-        if (strcmp(token,"CON") == 0) {
-        	conID = get_next_token_int(&token);
-            if (DEBUG) printf("-- initializing constituent #%d\n",conID);
-        	read_1col(s,sm->ivars,nnodes,&line,ivar_pos->con[conID-1],fp,&len);
-        }
-        if (strcmp(token,"OLD_CON") == 0) {
-        	conID = get_next_token_int(&token);
-            if (DEBUG) printf("-- initializing old constituent #%d\n",conID);
-        	read_1col(s_old,sm->ivars,nnodes,&line,ivar_pos->con[conID-1],fp,&len);
-        }
-        if (strcmp(token,"OLDER_CON") == 0) {
-        	conID = get_next_token_int(&token);
-            if (DEBUG) printf("-- initializing older constituent #%d\n",conID);
-        	read_1col(s_older,sm->ivars,nnodes,&line,ivar_pos->con[conID-1],fp,&len);
-        } 
     }
     
-    //for (int i=0; i<sm->grid->my_nnodes; i++) {
-        //printf("INIT || sol[%d]: %f\n",i,s[i]);
-        //printf("node: %d || uda: %f || vda: %f \n",i,s[sm->ivars[ivar_pos->uda][i]],s[sm->ivars[ivar_pos->vda][i]]);
-    //}
-
-    
-    
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
     //tl_check_all_pickets(__FILE__,__LINE__);
     //exit(1);
-
+    
     fclose(file.fp);
+    
+}
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+void write_stats(int ndim, double *min, double *max) {
+    for (int i=0; i<ndim; i++) {
+        printf("---- dim[%d] || min/max: %f/%f\n",i,min[i],max[i]);
+    }
 }

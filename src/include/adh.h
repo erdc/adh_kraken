@@ -27,6 +27,7 @@ void print_build_info();
 #endif
 #include "messg.h"
 
+#include "vars.h"
 #include "define.h"
 #include "macro.h"
 #include "model_codes.h"
@@ -112,6 +113,6 @@ void print_build_info();
 #include "test.h"
 
 //Adding function pointers that will always be needed
-int (*adh_resid_routines[N_RESID_ROUTINES])(struct sm *, double *, int, double, int, int, int, int);
-int (*adh_init_routines[N_INIT_ROUTINES])(struct sm *);
+int (*adh_resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int);
+int (*adh_init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *);
 //#endif

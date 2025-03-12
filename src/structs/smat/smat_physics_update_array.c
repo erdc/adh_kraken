@@ -22,12 +22,11 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION* ivar_pos){
-
 	int ctr=0;
 	int isubModel = 0;
 	SMAT_PHYSICS *mat;
     int h_loc, u_loc, v_loc, w_loc, uda_loc, vda_loc, dpl_loc, prs_loc, heat_loc, sal_loc;
-    int con_loc[MAX_TRNS_VARS];
+    int con_loc[N_IVARS_TRNS];
 	//++++++++++++++++++++++++++++++++++++++++++++++
     // use the smodel_super level ivar_pos to
 	// put correct indices in mat_physics
@@ -37,19 +36,19 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
 		//temporary variable, copy pointer
 		mat = &(m[imat]);
 		//check the IVAR_POSITION of this mat_physics
-		if (mat->ivar_pos.h    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->h; h_loc=ctr; ctr++;}
-        if (mat->ivar_pos.u    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->u; u_loc=ctr; ctr++;}
-        if (mat->ivar_pos.v    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->v; v_loc=ctr; ctr++;}
-        if (mat->ivar_pos.w    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->w; w_loc=ctr; ctr++;}
-        if (mat->ivar_pos.uda  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->uda; uda_loc=ctr; ctr++;}
-        if (mat->ivar_pos.vda  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->vda; vda_loc=ctr; ctr++;}
-        if (mat->ivar_pos.dpl  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->dpl; dpl_loc=ctr; ctr++;}
-        if (mat->ivar_pos.prs  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->prs; prs_loc=ctr; ctr++;}     
-        if (mat->ivar_pos.heat != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->heat; heat_loc=ctr; ctr++;}
-        if (mat->ivar_pos.sal  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->sal; sal_loc=ctr; ctr++;}
+		if (mat->ivar_pos.var[_H]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_H]; h_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_U]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_U]; u_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_V]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_V]; v_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_W]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_W]; w_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_UDA]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_UDA]; uda_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_VDA]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_VDA]; vda_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_DPL]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_DPL]; dpl_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_PRS]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_PRS]; prs_loc=ctr; ctr++;}     
+        if (mat->ivar_pos.var[_HEAT] != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_HEAT]; heat_loc=ctr; ctr++;}
+        if (mat->ivar_pos.var[_SAL]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_SAL]; sal_loc=ctr; ctr++;}
         
         for (int nt = 0; nt<mat->ntrns ;nt++){
-        	mat->ivar_loc[ctr] = ivar_pos->con[nt];
+        	mat->ivar_loc[ctr] = ivar_pos->var[N_IVARS + nt];
             con_loc[nt] = ctr;
         	ctr++;
         }

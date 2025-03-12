@@ -8,6 +8,7 @@ static int DEBUG_WITH_PICKETS = OFF;
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void data_stack(double **matrix, int ivar, int ndim, int n, double *data);
 void data_extract(double *sol, int **ivars, int varpos, int n, double *data);
 void data_extract_vec2d(double *sol, int **ivars, int varpos1, int varpos2, int n, double *data);
 void data_extract_vec3d(double *sol, int **ivars, int varpos1, int varpos2, int varpos3, int n, double *data);
@@ -49,7 +50,7 @@ void smodel_design_xmf_init(SMODEL_DESIGN *dm, char *filename, char *domain_name
  * @param[in] dm  (SMODEL_DESIGN *)  a pointer to a design model structure
  * @param[in] mesh_no (int) the adapted mesh ID.  If not printing adapted meshes, this is always 0;
  *
- * \note
+ * \note CJT -- figure out later how to write just u for 1D SW for example
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no) {
@@ -65,6 +66,7 @@ void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no) {
     SIVAR_POSITION *ip = NULL;
     int **ivars = NULL;
     int n = g->my_nnodes;
+    SMODEL_SUPER *sm;
     
     //++++++++++++++++++++++++++++++
     // data buffer
@@ -92,57 +94,62 @@ void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no) {
     //++++++++++++++++++++++++++++++
     for (int isup=0; isup<dm->nSuperModels; isup++) {
         
-        sol   = dm->superModel[isup].sol;
-        ip    = &dm->superModel[isup].ivar_pos;
-        ivars = dm->superModel[isup].ivars;
+        // write independent nodal variables
+        sm    = &dm->superModel[isup];
+        sol   = sm->sol;
+        ip    = &(sm->ivar_pos);
+        ivars = sm->ivars;
         
-        // nodal depth
-        if (ip->h != UNSET_INT) {
-            data_extract(sol,ivars,ip->h,n,data);
-            //if (dm->ts.nt > 0) sarray_scale_replace_dbl(data, dm->ts.nt * 10, 3*n); // JUST TESTING
-            xmf_write_ts_attribute(g, dm->xmf, dm->filebase, ip->name.h,1,dm->ts.nt,true);
-            hdf5_write_data(g, dm->filebase, ip->name.h, data, 1, true, dm->ts.nt);
-            sarray_init_dbl(data,3*n);
-        }
-
-        // nodal velocity
-        if (ip->w != UNSET_INT && ip->v != UNSET_INT && ip->u != UNSET_INT) {
-            data_extract_vec3d(sol,ivars,ip->u,ip->v,ip->w,n,data);
-            xmf_write_ts_attribute(g, dm->xmf, dm->filebase, "velocity",3,dm->ts.nt,true);
-            hdf5_write_data(g, dm->filebase, "velocity", data, 3, true, dm->ts.nt);
-            sarray_init_dbl(data,3*n);
-        } else if (ip->v != UNSET_INT && ip->u != UNSET_INT) {
-            data_extract_vec2d(sol,ivars,ip->u,ip->v,n,data);
-            xmf_write_ts_attribute(g, dm->xmf, dm->filebase, "velocity",3,dm->ts.nt,true);
-            hdf5_write_data(g, dm->filebase, "velocity", data, 3, true, dm->ts.nt);
-            sarray_init_dbl(data,3*n);
-        } else if (ip->u != UNSET_INT) {
-            data_extract(sol,ivars,ip->u,n,data);
-            xmf_write_ts_attribute(g, dm->xmf, dm->filebase, "velocity",1,dm->ts.nt,true);
-            hdf5_write_data(g, dm->filebase, "velocity", data, 1, true, dm->ts.nt);
-            sarray_init_dbl(data,3*n);
-        }
-        
-        // nodal depth-averaged velocity
-        if (ip->vda != UNSET_INT && ip->uda != UNSET_INT) {
-            data_extract_vec2d(sol,ivars,ip->uda,ip->vda,n,data);
-            xmf_write_ts_attribute(g, dm->xmf, dm->filebase, "da-velocity",3,dm->ts.nt,true);
-            hdf5_write_data(g, dm->filebase, "da-velocity", data, 3, true, dm->ts.nt);
-            sarray_init_dbl(data,3*n);
-        } else if (ip->uda != UNSET_INT) {
-            data_extract(sol,ivars,ip->uda,n,data);
-            xmf_write_ts_attribute(g, dm->xmf, dm->filebase, "da-velocity",1,dm->ts.nt,true);
-            hdf5_write_data(g, dm->filebase, "da-velocity", data, 1, true, dm->ts.nt);
-            sarray_init_dbl(data,3*n);
+        for (int ivar=0; ivar<N_IVARS_TOTAL; ivar++) {
+            if (ip->var[ivar] != UNSET_INT) {
+                printf(">>> writing XDMF: var_name: %s || var_ndim: %d\n",IVAR_NAME[ivar],IVAR_DIM[ivar]);
+                if (IVAR_DIM[ivar] == 1) {
+                    data_extract(sol,ivars,ip->var[ivar],n,data);
+                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, IVAR_NAME[ivar], 1, dm->ts.nt, true);
+                    hdf5_write_data(g, dm->filebase, IVAR_NAME[ivar], data, 1, true, dm->ts.nt);
+                    sarray_init_dbl(data,3*n);
+                } else if (IVAR_DIM[ivar] == 2) {
+                    data_extract_vec2d(sol,ivars,ip->var[ivar],ip->var[ivar+1],n,data);
+                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, IVAR_NAME[ivar], 2, dm->ts.nt, true);
+                    hdf5_write_data(g, dm->filebase, IVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                    sarray_init_dbl(data,3*n);
+                    ivar += 1;
+                } else if (IVAR_DIM[ivar] == 3) {
+                    data_extract_vec3d(sol,ivars,ip->var[ivar],ip->var[ivar+1],ip->var[ivar+2],n,data);
+                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, IVAR_NAME[ivar], 3, dm->ts.nt, true);
+                    hdf5_write_data(g, dm->filebase, IVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                    sarray_init_dbl(data,3*n);
+                    ivar += 2;
+                }
+            }
         }
         
-        // constituents
-        for (int icon=0; icon<ip->ntrns; icon++) {
-            if (ip->con[icon] != UNSET_INT) {
-                data_extract(sol,ivars,ip->con[icon],n,data);
-                xmf_write_ts_attribute(g, dm->xmf, dm->filebase, ip->name.con[icon],1,dm->ts.nt,true);
-                hdf5_write_data(g, dm->filebase, ip->name.con[icon], data, 1, true, dm->ts.nt);
-                sarray_init_dbl(data,3*n);
+        // write dependent nodal variables
+        SDVAR_POSITION *dp = &sm->dvars.sdvar_pos_node;
+        if (sm->dvars.n_dvar > 0) { 
+            for (int ivar=0; ivar<N_DVARS; ivar++) {
+                // cjt - need to add print flags here to let user choose what dep-variables are written
+                if (dp->var[ivar] != UNSET_INT) {
+                    printf(">>> writing XDMF: var_name: %s || var_ndim: %d\n",DVAR_NAME[ivar],DVAR_DIM[ivar]);
+                    if (DVAR_DIM[ivar] == 1) {
+                        data_stack(sm->dvars.nodal_dvar,dp->var[ivar],1,n,data);
+                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, DVAR_NAME[ivar],1,dm->ts.nt,true);
+                        hdf5_write_data(g, dm->filebase, DVAR_NAME[ivar], data, 1, true, dm->ts.nt);
+                        sarray_init_dbl(data,3*n);
+                    } else if (DVAR_DIM[ivar] == 2) {
+                        data_stack(sm->dvars.nodal_dvar,dp->var[ivar],2,n,data);
+                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, DVAR_NAME[ivar],2,dm->ts.nt,true);
+                        hdf5_write_data(g, dm->filebase, DVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                        sarray_init_dbl(data,3*n);
+                        ivar += 1;
+                    } else if (DVAR_DIM[ivar] == 3) {
+                        data_stack(sm->dvars.nodal_dvar,dp->var[ivar],3,n,data);
+                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, DVAR_NAME[ivar],3,dm->ts.nt,true);
+                        hdf5_write_data(g, dm->filebase, DVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                        sarray_init_dbl(data,3*n);
+                        ivar += 2;
+                    }
+                }
             }
         }
         
@@ -181,3 +188,25 @@ void data_extract_vec3d(double *sol, int **ivars, int varpos1, int varpos2, int 
         data[k] = sol[ivars[varpos3][i]]; k++;
     }
 }
+
+void data_stack(double **matrix, int ivar, int ndim, int n, double *data) {
+    int idim,i,j,k=0;
+    for (i=0; i<n; i++) {
+        for (idim=0; idim<ndim; idim++) {
+            data[k] = matrix[ivar + idim][i]; k++;
+        }
+        if (ndim == 2) { // add a 0 to the third dimension
+            data[k] = 0.0; k++;
+        }
+    }
+    
+//    k=0;
+//    for (i=0; i<n; i++) {
+//        for (j=0; j<3; j++) {
+//            printf("data[%d]: %f\n",k,data[k]);
+//            k++;
+//        }
+//    }
+//    exit(-1);
+}
+

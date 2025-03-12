@@ -18,7 +18,7 @@ static int DEBUG = OFF;
  * \note
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void read_bc_MODEL(SMODEL_SUPER *sm, FILE *fp, char codes[][10]) {
+void read_bc_MODEL(SMODEL_SUPER *sm, FILE *fp, char **codes) {
 
     char *line = NULL;
     size_t len = 0;

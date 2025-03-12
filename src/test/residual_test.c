@@ -77,7 +77,7 @@ int residual_test(int npx, double xmin, double xmax) {
 	strcpy(&elemVarCode[0][0][1],"0"); // GW
 	strcpy(&elemVarCode[0][0][2],"0"); // Transport
 
-	printf("elem var code %s\n",elemVarCode[0][0]);
+
 	//mat ids
 	int **mat_ids;
 	mat_ids = (int **) tl_alloc(sizeof(int*),nSuperModels);
@@ -91,6 +91,8 @@ int residual_test(int npx, double xmin, double xmax) {
     
     sarray_init_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs);
     dm.superModel[0].LINEAR_PROBLEM = YES;
+
+
 	assemble_residual(&(dm.superModel[0]), dm.grid);
 
 	//print final residual
@@ -101,13 +103,14 @@ int residual_test(int npx, double xmin, double xmax) {
 	double h = (xmax-xmin)/(npx-1);
 	exact_sol = (double *) tl_alloc(sizeof(double), nnodes);
 	sarray_init_dbl(exact_sol, nnodes);
+
 	find_analytic_residual_linear_poisson(exact_sol, dm.grid, h);
-	
+
 	//compute L2 and Linf error
 	double l2_err =  l2_error(dm.superModel[0].lin_sys->residual, exact_sol, nnodes);
 	double linf_err =  linf_error(dm.superModel[0].lin_sys->residual, exact_sol, nnodes);
 
-	//printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
+
 
 	//return -1 if failed, 0 if good
 	

@@ -4,7 +4,7 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-typedef struct sm{
+typedef struct {
 
     int myid, npes; // multi-core ID and ncpus
     SFLAGS flags;   // flags associated with superModel
@@ -53,6 +53,9 @@ typedef struct sm{
     //SCON *con;          // transport constituent storage
     //SSED *sed;          // sediment constituent storage
     //SGW  *gw;           // groundwater storage
+    // Dependent variable matrix
+    SDVAR dvars;
+
 
     // cjt :: really, this only needs to be done for the body elements
     int *elem1d_physics_mat;    // [nelems1d] - gives the physics material ID
@@ -112,15 +115,11 @@ void smodel_super_free(SMODEL_SUPER *smod);
 void smodel_super_read(SMODEL_SUPER *smod);
 void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase);
 void smodel_super_printScreen(SMODEL_SUPER *smod);
-//void smodel_super_set_resid_init(SMODEL_SUPER *sm, SMAT_PHYSICS *mat_physics, int nmat_physics);
-//from fe_newton.c
-//int fe_newton(struct SMODEL_SUPER* sm);
-
-//TODOD, write this up!
 int smodel_super_forward_step(SMODEL_SUPER* sm, int (*ts_fnctn)(SMODEL_SUPER*));
 void smodel_super_update_dirichlet_data(SMODEL_SUPER *sm);
 void smodel_super_prep_sol(SMODEL_SUPER *sm);
 void smodel_super_no_read(SMODEL_SUPER *sm, char** codes, int nmat_physics, int *mat_ids);
+void smodel_super_build_dvars(SMODEL_SUPER *sm);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
