@@ -4,7 +4,7 @@
 
 int jacobian_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
 int la_test(void);
-int newton_test(void);
+int newton_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
 int residual_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
 int sw2_wd_test(void);
 int timeloop_test(void);

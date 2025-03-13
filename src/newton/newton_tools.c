@@ -40,7 +40,7 @@ void initialize_system(SMODEL_SUPER *sm) {
         nmods = sm->mat_physics_elem[i].nSubmodels;
         //offset = sm->resid_ptr[i];
         for (j=0;j<nmods;j++){
-            //inc_index = sm->mat_physics_elem[i].model[j].physics_init;
+            inc_index = sm->mat_physics_elem[i].model[j].physics_init;
             //call wrapper for init function
             //as long as it is not unset
             if (inc_index!=UNSET_INT){

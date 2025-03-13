@@ -42,10 +42,10 @@ void smodel_super_free(SMODEL_SUPER *sm) {
 
 
     int ntransport=0,nlayer=0,nsed=0; // CJT -- send this later
-
-    if (sm->ts != NULL) {
-        sm->ts = (SDT *) tl_free(sizeof(SDT), 1, sm->ts);
-    }
+    //points to design model?
+    //if (sm->ts != NULL) {
+    //    sm->ts = (SDT *) tl_free(sizeof(SDT), 1, sm->ts);
+    //}
         //if (sm->con != NULL) {scon_free(sm->con);}
         //if (sm->sed != NULL) {ssed_free(sm->sed);}
         //if (sm->gw != NULL) {sgw_free(sm->gw);}

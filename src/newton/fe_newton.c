@@ -223,9 +223,9 @@ int fe_newton(SMODEL_SUPER* sm)
     /* initial setup */
     //(*init_fnctn) (sm,isuperModel);
     //split up into 2 steps
-    //printf("attempting initial\n");
     initialize_system(sm);
     //need to think about this bit
+
     initialize_dirichlet_bc(sm);
 
 
@@ -273,6 +273,7 @@ int fe_newton(SMODEL_SUPER* sm)
         my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
         );
 
+
 #ifdef _MESSG
     resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
 #endif
@@ -307,9 +308,12 @@ int fe_newton(SMODEL_SUPER* sm)
         //if (sm->solver_info.LINEAR_PROBLEM ==TRUE) {
         //    if(myid==0)printf("\n%s_%d TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0],index, sm->t_prev, sm->dt, (100.0 * (sm->t_prev - sm->t_init) / (sm->t_final - sm->t_init)), it + 1);} /* gkc warning come back later and fix use of submodel[0]. */
         //else{
+
+        //Mark stopps here, issue with dt!!!!
             if(myid==0){
                 printf("\n%s TIME: %7.5e DT: %7.5e Progress: %3.2f%% | NIT: %2d | ", prn_head[0], sm->ts->t_prev, sm->ts->dt, (100.0 * (sm->ts->t_prev - sm->ts->t_init) / (sm->ts->t_final - sm->ts->t_init)), it + 1);
             }
+
         //}
         
         
@@ -555,9 +559,7 @@ int fe_newton(SMODEL_SUPER* sm)
         /* calculates the residual after the increment?*/
         old_resid_norm = resid_l2_norm;
         update_function(sm);
-        //for (int i=0;i<sm->ndofs;i++){
-        //    printf("solution after increment, before new residual call[%d] = %f\n",i,sm->sol[i]);
-        //}
+
         assemble_residual(sm,grid);
 //                for (int i=0;i<sm->ndofs;i++){
 //        printf("solution after increment, after new residual call[%d] = %f\n",i,sm->sol[i]);
@@ -611,7 +613,6 @@ int fe_newton(SMODEL_SUPER* sm)
         &imax_dof, &iinc_dof, include_dof,
         my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
         );
-        //printf("residual norms computed: %.17e, %.17e, %.17e\n",resid_max_norm,resid_l2_norm,inc_max_norm);
 #ifdef _DEBUG
         if (DEBUG_FULL) {
             printf("\n pe: %d resid_max_norm before line search = %18.9e my_nnodes: %d nnodes: %d macro_nnodes: %d \n", myid,resid_max_norm,my_nnodes, nnodes, macro_nnodes);
@@ -805,7 +806,6 @@ int fe_newton(SMODEL_SUPER* sm)
 	       //printf("fe_newton UMFail_max != FALSE\n");
 	       check = OFF;
         }
-        //printf("CHECK VAL %d\n",check);
         //Mark, need to figure this out
         //if (solver->LINEAR_PROBLEM == TRUE) {
         //    if (sm->tol_nonlin > SMALL && resid_max_norm > sm->tol_nonlin) {
@@ -817,7 +817,6 @@ int fe_newton(SMODEL_SUPER* sm)
         } else {
             check = OFF;
         }
-        //printf("CHECK VAL %d\n",check);
         //check=OFF;
 
 

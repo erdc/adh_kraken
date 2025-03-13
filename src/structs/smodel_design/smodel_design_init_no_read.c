@@ -94,6 +94,8 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
         //smodel_super_read(&(dmod->superModel[imono]));
         //without read replace with
         smodel_super_no_read(&(dmod->superModel[imono]), elemVarCode[imono], nphysics_mats[imono], coverage_arrays[imono]);
+        //how to do this properly?
+        dmod->superModel[imono].ts = &(dmod->ts);
         //exit(-1);
 
 //        if (DEBUG) {

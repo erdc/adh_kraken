@@ -77,6 +77,31 @@ if (DEBUG) {
 }
 
 
+if (DEBUG) {
+    printf("------------------------------------------------------\n");
+    printf("------------------------------------------------------\n");
+    printf("Newton Tests Begin\n");
+    printf("------------------------------------------------------\n");
+    
+}
+
+    err = 0;
+    int n_newton_tests = 10;
+
+    for (int i = 0 ; i < n_jacobian_tests; i++){
+        err += newton_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
+    }
+
+if (DEBUG) {
+    printf("------------------------------------------------------\n");
+    printf("------------------------------------------------------\n");
+    printf("%d / %d Newton Tests Passed\n", err+n_jacobian_tests, n_jacobian_tests);
+    printf("------------------------------------------------------\n");
+    
+}
+
+
+
 	return err; 
 
 }
