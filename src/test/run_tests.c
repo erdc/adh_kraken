@@ -62,7 +62,7 @@ if (DEBUG) {
 }
 
     err = 0;
-    int n_jacobian_tests = 1;
+    int n_jacobian_tests = 10;
 
     for (int i = 0 ; i < n_jacobian_tests; i++){
         err += jacobian_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
