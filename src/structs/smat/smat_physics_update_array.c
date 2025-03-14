@@ -131,6 +131,13 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
             //mat->model[isubModel].physics_init = NO_INIT_;
             isubModel++;
         }
+        if (mat->HEAT) {
+            mat->model[isubModel].physics_vars[0] = h_loc;
+            mat->model[isubModel].physics = HEAT2D_;
+            //leave unset
+            //mat->model[isubModel].physics_init = NO_INIT_;
+            isubModel++;
+        }
 
     	for (int itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         	if (mat->TRANSPORT[itrns]) {

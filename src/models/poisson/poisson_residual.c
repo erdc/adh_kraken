@@ -60,7 +60,6 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     
     //for now let's let f be a constant so we have analytic solution to compare to
     double f[nnodes];
-    double q[nnodes];
     int i;
     SNODE nodes[nnodes];
     for (i=0; i<nnodes; i++) {
@@ -108,7 +107,6 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
             grad_u_nonlinear[1].y += elem_u[i] * grad_shp[i].y;
             grad_u_nonlinear[2].x += elem_u[i] * grad_shp[i].x;
             grad_u_nonlinear[2].y += elem_u[i] * grad_shp[i].y;
-            q[i] = 1 + elem_u[i]*elem_u[i];
             f[i] = 10.0 + 10.0*nodes[i].x + 20.0*nodes[i].y;
         }
 

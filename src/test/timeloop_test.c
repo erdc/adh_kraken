@@ -21,18 +21,30 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int timeloop_test(void) {
-	//create a grid
-	SGRID *grid;
-	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
-	//let's just do something simple
-	//3x3 triangular element grid
+int timeloop_test(int npx, int npy) {
+
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// return error code
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	int ierr = -1;
+
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Create a design model
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	SMODEL_DESIGN dm; smodel_design_defaults(&dm);
+
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Create a regular grid
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	dm.grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
+
 	double xmin = 0.0;
 	double xmax = 1.0;
 	double ymin = 0.0;
 	double ymax = 1.0;
-	int npx = NEWTON_TEST_NX;
-	int npy = NEWTON_TEST_NY;
 	double theta = 0.0;
 	double dz = 1.0;
 	double a0 = -5.0;
@@ -46,39 +58,54 @@ int timeloop_test(void) {
 	double ax2y2 = 0.0;
 	int flag3d =0;
 	int err_code=-1;
-    *grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
+    *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
-    nnodes = grid->nnodes;
-    sgrid_reorder(grid,2);
-	//print coordinates
-//  for(int local_index =0; local_index<grid.nnodes; local_index++){
-//		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
-//	}
-//	//print connectivity
-//	for(int local_index =0; local_index<grid.nelems2d; local_index++){
-//		printf("Element %d: (nd1,nd2,nd3) = {%d,%d,%d}\n",local_index ,grid.elem2d[local_index].nodes[0], grid.elem2d[local_index].nodes[1], grid.elem2d[local_index].nodes[2]);
-//	}
-
-
-	//create a supermodel with a grid in it
-	//SMODEL_SUPER sm;
-	//sm.grid = &grid;
-    SMODEL_DESIGN dm;
-	//specify elemental physics and other properties in super model
-	double dt = 2.0/20.0;
+    nnodes = dm.grid->nnodes;
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Reorder grid to minimize bandwidth
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    sgrid_reorder(dm.grid,2);
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Fill in a simple design model
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    double dt = 2.0/20.0;
 	double t0 = 0.0;
 	double tf = 2.0;
+	int nSuperModels = 1;
+	int *nphysics_mats;
+	nphysics_mats = (int*) tl_alloc(sizeof(int), nSuperModels);
+	nphysics_mats[0] = 1;
+	//elemVarCode in general is triple pointer, nSuperModels x nphyics_mat[i] x 10
+	char ***elemVarCode;
+	elemVarCode = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	for (int i = 0; i< nSuperModels; i ++){
+		elemVarCode[i] = (char **) tl_alloc(sizeof(char *), nphysics_mats[i]);
+		for (int j = 0; j< nphysics_mats[i]; j++){
+			elemVarCode[i][j] = (char *) tl_alloc(sizeof(char), 10);
+		}
+	}
+	strcpy(&elemVarCode[0][0][0],"H"); // Heat
+	strcpy(&elemVarCode[0][0][1],"0"); // GW
+	strcpy(&elemVarCode[0][0][2],"0"); // Transport
 
-	char elemVarCode[4]; 
-	strcpy(&elemVarCode[0],"2");//SW2D
-	strcpy(&elemVarCode[1],"0"); //GW
-	strcpy(&elemVarCode[2],"0"); //Transport
-	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
-	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	//smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
-	printf("NDOFS %d\n",dm.superModel[0].ndofs);
+
+	//mat ids
+	int **mat_ids;
+	mat_ids = (int **) tl_alloc(sizeof(int*),nSuperModels);
+	int nelems = dm.grid->nelems3d + dm.grid->nelems2d + dm.grid->nelems1d;
+	for (int i = 0; i < nSuperModels; i++){
+		mat_ids[i] = tl_alloc(sizeof(int), nelems);
+		sarray_init_int(mat_ids[i],nelems);
+	}
+
+    smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
+    
+
+
 
 	//OVER WRITE TO HEAT
 	//dm.superModel[0].mat_physics_elem[0].model[0].physics = HEAT;
@@ -148,8 +175,8 @@ int timeloop_test(void) {
 	int id;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
-		x_coord = grid->node[i].x;
-		y_coord = grid->node[i].y;
+		x_coord = dm.grid->node[i].x;
+		y_coord = dm.grid->node[i].y;
 		//id = grid->node[i].id;
 		id=i;
 		//need to set IC
@@ -189,7 +216,7 @@ int timeloop_test(void) {
 	//it is a scalar
 	double *u_exact;
 	u_exact = (double*) tl_alloc(sizeof(double),nnodes);
-	compute_exact_solution_heat(u_exact, nnodes, grid,tf);
+	compute_exact_solution_heat(u_exact, nnodes, dm.grid,tf);
 //	for(int i=0;i<nnodes;i++){
 //		printf("Exact solution[%d] = %f\n",i,u_exact[i]);
 //	}

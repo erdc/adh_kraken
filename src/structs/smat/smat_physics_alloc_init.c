@@ -90,6 +90,7 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, char *codes) {
     mat->WVEL_SPLIT = false;
     mat->PRESSURE   = false;
     mat->POISSON    = false;
+    mat->HEAT       = false;
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         mat->TRANSPORT[itrns] = false;
     }
@@ -161,6 +162,11 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, char *codes) {
         mat->POISSON = true;
         mat->ivar_pos.var[_H] = mat->ivar_pos.n; mat->ivar_pos.n++; // 2D Poisson
         mat->nSubmodels++;
+    }else if (mat->code[0] == 'H'){
+        //just for testing
+        mat->HEAT = true;
+        mat->ivar_pos.var[_H] = mat->ivar_pos.n; mat->ivar_pos.n++; // 2D Heat
+        mat->nSubmodels++;
     }
     
     // ground water
@@ -204,7 +210,8 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, char *codes) {
     if (mat->DW_FLOW)    {nSubMod_nvar[k]=1; k++;} // 6
     if (mat->WVEL_SPLIT) {nSubMod_nvar[k]=1; k++;} // 7
     if (mat->PRESSURE)   {nSubMod_nvar[k]=1; k++;} // 8
-    if (mat->POISSON)    {nSubMod_nvar[k]=1; k++; printf("Set POISONN \n\n\n");} // 9
+    if (mat->POISSON)    {nSubMod_nvar[k]=1; k++;} // 9
+    if (mat->HEAT)       {nSubMod_nvar[k]=1; k++;} // H
     if (mat->GW_FLOW)    {nSubMod_nvar[k]=1; k++;}
     for (itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
         if (mat->TRANSPORT[itrns]) {nSubMod_nvar[k]=1; k++;}    

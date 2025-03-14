@@ -33,6 +33,7 @@ typedef struct {
     bool WIND;
     bool *TRANSPORT; // ntrans
     bool POISSON; // just used for testing
+    bool HEAT;
 
 } SMAT_PHYSICS;
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

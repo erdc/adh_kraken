@@ -79,7 +79,7 @@ int linear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, 
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Reorder grid to minimize bandwidth
     //++++++++++++++++++++++++++++++++++++++++++++++
-    //sgrid_reorder(dm.grid,2);
+    sgrid_reorder(dm.grid,2);
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Fill in a simple design model
@@ -154,29 +154,6 @@ int linear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, 
 			dm.superModel[0].bc_mask[id]=NO;
 		}
 	}
-	printf("BCMASK COMPLETE\n");
-
-	//set up bc mask
-//	for (int i=0; i<nnodes; i++){
-//		printf("Dirichlet data node[%d] = %f\n", i, dm.superModel[0].dirichlet_data[i]);
-//	}
-//	for (int i=0;i<sm.ndofs;i++){
-//		printf("sm bc mask[%d] = %d\n",i,sm.bc_mask[i]);
-//	}
-
-
-	//see if it works
-	//apply_Dirichlet_BC(&sm);
-	//see if something is happening within newton loop or something else
-//	initialize_system(&sm);
-//	assemble_residual(&sm,sm.grid);
-//	assemble_jacobian(&sm,sm.grid);
-//	apply_Dirichlet_BC(&sm);
-//	int status;
-//	status = prep_umfpack(sm.indptr_diag,sm.cols_diag,sm.vals_diag, sm.dsol, sm.residual, sm.local_size);
-//	status = solve_umfpack(sm.dsol, sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.residual, sm.local_size);
-//	increment_function(&sm);
-	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
 	//call fe_newton
 	fe_newton(sm); 
@@ -355,8 +332,8 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
     sarray_init_value_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs, 1.0);
     dm.superModel[0].LINEAR_PROBLEM = NO;
     dm.superModel[0].max_nonlin_it = 35;
-    dm.superModel[0].tol_nonlin = 1e-7;
-	dm.superModel[0].inc_nonlin = 1e-6;
+    dm.superModel[0].tol_nonlin = 1e-10;
+	dm.superModel[0].inc_nonlin = 1e-8;
 
  	SMODEL_SUPER *sm;
 	sm = &(dm.superModel[0]);
@@ -395,27 +372,6 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
 		}
 	}
 	printf("BCMASK COMPLETE\n");
-	//set up bc mask
-//	for (int i=0; i<nnodes; i++){
-//		printf("Dirichlet data node[%d] = %f\n", i, dm.superModel[0].dirichlet_data[i*3+1]);
-//	}
-//	for (int i=0;i<sm.ndofs;i++){
-//		printf("sm bc mask[%d] = %d\n",i,sm.bc_mask[i]);
-//	}
-
-
-	//see if it works
-	//apply_Dirichlet_BC(&sm);
-	//see if something is happening within newton loop or something else
-//	initialize_system(&sm);
-//	assemble_residual(&sm,sm.grid);
-//	assemble_jacobian(&sm,sm.grid);
-//	apply_Dirichlet_BC(&sm);
-//	int status;
-//	status = prep_umfpack(sm.indptr_diag,sm.cols_diag,sm.vals_diag, sm.dsol, sm.residual, sm.local_size);
-//	status = solve_umfpack(sm.dsol, sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.residual, sm.local_size);
-//	increment_function(&sm);
-	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
 	//call fe_newton
 	fe_newton(sm); 
@@ -436,14 +392,6 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
 
 	printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
 
-	//plot grid in h5?
-//    strcpy(sm.grid->filename, "residtest");
-//    init_hdf5_file(sm.grid);
-//    printf("hdf5 initialized\n");
-//    sgrid_write_hdf5(sm.grid);
-//    printf("hdf5 written\n");
-//    sgrid_write_xdmf(sm.grid);
-//    printf("xmf written\n");
 
 	//return -1 if failed, 0 if good
 	

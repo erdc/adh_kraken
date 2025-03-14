@@ -172,10 +172,10 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //if it is in parallel. collect with allreduce
   rnorm = messg_dmax(rnorm);
   bnorm = messg_dmax(bnorm);
-#ifdef _DEBUG
-  printf("RNORM = %6.4e\n",rnorm);
-  printf("BNORM = %6.4e\n",bnorm);
-#endif
+//#ifdef _DEBUG
+//  printf("RNORM = %6.4e\n",rnorm);
+//  printf("BNORM = %6.4e\n",bnorm);
+//#endif
   rhop = 1.0;
   alpha = 1.0;
   omega = 1.0;
@@ -259,9 +259,9 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     //printf("Rnorm, %f\n",rnorm);
 
   }
-#ifdef _DEBUG
-  printf("BCGSTAB # IT = %d\n",it);
-#endif
+//#ifdef _DEBUG
+//  printf("BCGSTAB # IT = %d\n",it);
+//#endif
   //undo scaling (need to add in error checks)
   unscale_linear_system(x,x0,scale_vect,local_size);
 
@@ -362,10 +362,10 @@ int solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag
   int status;   /* default control parameters */
   //try this to account for CSR format, use solution as RHS
   status = umfpack_di_solve (UMFPACK_Aat, indptr_diag, cols_diag, vals_diag, x, b, Numeric, Control, Info);
-#ifdef _DEBUG
-  printf("UMFPACK SOLVER STATUS %d\n",status);
-  assert(status==0);
-#endif
+//#ifdef _DEBUG
+//  printf("UMFPACK SOLVER STATUS %d\n",status);
+//  assert(status==0);
+//#endif
   return status;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
