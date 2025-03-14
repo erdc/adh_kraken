@@ -88,7 +88,8 @@ if (DEBUG) {
 
     err = 0;
     int n_newton_tests = 10;
-
+    npx[0] = 150;
+    npy[0] = 150;
     for (int i = 0 ; i < n_jacobian_tests; i++){
         err += newton_test(npx[i],npy[i],xmin[0],xmax[0],ymin[0],ymax[0]);
         printf(" NEWTON TEST %d / %d completed \n",i,n_newton_tests);

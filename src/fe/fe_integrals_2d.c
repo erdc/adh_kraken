@@ -181,6 +181,25 @@ inline void grad2d_phi_dot_v(SVECT2D *grad_phi, SVECT2D *v, SVECT2D *grad_x, SVE
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*! \brief  Peforms following triangular integration:
+ *  \f$  \int_{0}^{1} \int_{0}^{1-\widehat{x}} \big( c \, \mathbf{\nabla} \phi_i(\widehat{x},\widehat{y}) \cdot \mathbf{v(\widehat{x},\widehat{y})}  \big)  d\widehat{y}\,d\widehat{x}\f$
+ *  \author  Corey Trahan, Ph.D.
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void integrate_triangle_gradPhi_dot_v(SVECT2D *grad_shp, double djac, double c, SVECT2D *v, double *integral) {
+    SVECT2D v_avg;
+    v_avg.x = one_3 * (v[0].x + v[1].x + v[2].x);
+    v_avg.y = one_3 * (v[0].y + v[1].y + v[2].y);
+    double results[NDONTRI] = {0., 0., 0.};
+    integrate_triangle_gradPhi_dot_vbar(grad_shp, c, djac, v_avg, results);
+    integral[0] += results[0];
+    integral[1] += results[1];
+    integral[2] += results[2];
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief  Peforms following triangular integration:
  *  \f$ \int_{-1}^{1} \int_{-1}^{1} c \, d\widehat{y}\,d\widehat{x} \f$
  *  \author  Corey Trahan, Ph.D.
  */
@@ -257,6 +276,31 @@ inline void integrate_triangle_gradPhi_dot_f_v(SVECT2D *grad_shp, double djac, d
     integral[0] += con * (grad_shp[0].x * tx + grad_shp[0].y * ty);
     integral[1] += con * (grad_shp[1].x * tx + grad_shp[1].y * ty);
     integral[2] += con * (grad_shp[2].x * tx + grad_shp[2].y * ty);
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*! \brief  Peforms following triangular integration:
+ *  \f$  \int_{0}^{1} \int_{0}^{1-\widehat{x}} \big( c \, \mathbf{\nabla}\phi_i(\widehat{x},\widehat{y}) \cdot (f(\widehat{x},\widehat{y}) \, g(\widehat{x},\widehat{y})  \, \mathbf{v(\widehat{x},\widehat{y})})  \big)  d\widehat{y}\,d\widehat{x}\f$
+ *  \author  Corey Trahan, Ph.D.
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+inline void integrate_triangle_gradPhi_dot_f_g_v(SVECT2D *grad_shp, double djac, double c, double *f, double *g, SVECT2D *v, double *integral) {
+    
+    // cjt :: integral here is broken down and solved in the following manner:
+    // grad(phi_i) dot (v1 * integral(phi_1 * f * g) + v2 * integral(phi_2 * f * g) + v3 * integral(phi_3 * f * g)) =
+    // grad(phi_i) dot (v1*b[0] + v2*b[1] + v3*b[2])
+    double b[NDONTRI] = {0.,0.,0.,};
+    integrate_triangle_phi_f_g(djac, c, f, g, b);
+    
+    // cjt :: now get average value of v * H * c
+    SVECT2D integral_vhc;
+    integral_vhc.x = (v[0].x * b[0] + v[1].x * b[1] + v[2].x * b[2]);
+    integral_vhc.y = (v[0].y * b[0] + v[1].y * b[1] + v[2].y * b[2]);
+    
+    integral[0] += integral_vhc.x * grad_shp[0].x + integral_vhc.y * grad_shp[0].y;
+    integral[1] += integral_vhc.x * grad_shp[1].x + integral_vhc.y * grad_shp[1].y;
+    integral[2] += integral_vhc.x * grad_shp[2].x + integral_vhc.y * grad_shp[2].y;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

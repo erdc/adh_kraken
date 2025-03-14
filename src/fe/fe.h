@@ -27,6 +27,8 @@ void integrate_triangle_dphi_f_f(SVECT2D *grad_shp, double djac, double c, doubl
 void integrate_triangle_phi_h_df(double djac, double c, double *h, SVECT2D df, double *integral_x, double *integral_y);
 void integrate_triangle_phi_h_g_df(double djac, double c, double *h, double *g, SVECT2D df, double *integral_x, double *integral_y);
 void integrate_triangle_phi_f_g(double djac, double c, double *f, double *g, double *integral);
+void integrate_triangle_gradPhi_dot_f_g_v(SVECT2D *grad_shp, double djac, double c, double *f, double *g, SVECT2D *v, double *integral) ;
+void integrate_triangle_gradPhi_dot_v(SVECT2D *grad_shp, double djac, double c, SVECT2D *v, double *integral);
 //quads
 void extractNodesQuad(SVECT *v, double *x1, double *x2, double *x3, double *x4, double *y1, double *y2, double *y3, double *y4);
 void extractVect2DQuad(SVECT2D *v, double *x1, double *x2, double *x3, double *x4, double *y1, double *y2, double *y3, double *y4) ;

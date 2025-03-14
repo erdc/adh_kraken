@@ -57,11 +57,6 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     double elem_u[nnodes];
     //this map only works for CG, want to generalize to DG in future
     global_to_local_dbl_ivars(elem_u, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
-    //global_to_local_dbl_cg_2(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
-    //global_to_local_dbl_cg(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
-    
-    // CJT -- COMMENT OUT FOR NOW
-    //global_to_local_dbl_cg(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->mat_physics_node);
     
     //for now let's let f be a constant so we have analytic solution to compare to
     double f[nnodes];
@@ -118,7 +113,10 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
         }
 
 
-        integrate_triangle_gradPhi_dot_f_v(grad_shp, mod->grid->elem2d[ie].djac, 1, q, grad_u_nonlinear, elem_rhs);
+        //integrate_triangle_gradPhi_dot_f_v(grad_shp, mod->grid->elem2d[ie].djac, 1, q, grad_u_nonlinear, elem_rhs);
+        integrate_triangle_gradPhi_dot_v(grad_shp, mod->grid->elem2d[ie].djac, 1.0, grad_u_nonlinear, elem_rhs);
+        integrate_triangle_gradPhi_dot_f_g_v(grad_shp, mod->grid->elem2d[ie].djac, 1.0, elem_u, elem_u, grad_u_nonlinear, elem_rhs); 
+
         //rhs of linear system (will be 0 when Jacobian is computed)
         integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1, f, elem_rhs);
     }

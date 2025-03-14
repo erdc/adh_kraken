@@ -355,8 +355,8 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
     sarray_init_value_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs, 1.0);
     dm.superModel[0].LINEAR_PROBLEM = NO;
     dm.superModel[0].max_nonlin_it = 35;
-    dm.superModel[0].tol_nonlin = 1e-9;
-	dm.superModel[0].inc_nonlin = 1e-8;
+    dm.superModel[0].tol_nonlin = 1e-7;
+	dm.superModel[0].inc_nonlin = 1e-6;
 
  	SMODEL_SUPER *sm;
 	sm = &(dm.superModel[0]);
@@ -369,8 +369,8 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
 		y_coord = dm.grid->node[local_index].y;
 		dm.superModel[0].dirichlet_data[local_index] = 0.0;
 		//make initial guess close to true solution
-		dm.superModel[0].sol_old[local_index] = 1.0;
-		dm.superModel[0].sol[local_index] = 1.0;
+		dm.superModel[0].sol_old[local_index] = 1.0 + x_coord + 2*y_coord + 0.5;
+		dm.superModel[0].sol[local_index] = 1.0 + x_coord + 2*y_coord + 0.5;
 		dm.superModel[0].lin_sys->dsol[local_index] = 0.0;
 		dm.superModel[0].bc_mask[local_index] = YES;
 	}
