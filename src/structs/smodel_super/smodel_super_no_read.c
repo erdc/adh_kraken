@@ -181,6 +181,7 @@ void smodel_super_no_read(SMODEL_SUPER *sm, char **codes, int nmat_physics, int 
     sm->sol_older = (double *) tl_alloc(sizeof(double), sm->ndofs);
     sm->dirichlet_data = (double*) tl_alloc(sizeof(double), sm->ndofs);
     sm->bc_mask = (int*) tl_alloc(sizeof(int), sm->ndofs);
+    
     sm->tol_nonlin = 1e-7;
     sm->inc_nonlin = 1e-5;
     sm->max_nonlin_linesearch_cuts = 5;

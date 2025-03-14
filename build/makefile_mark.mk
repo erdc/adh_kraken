@@ -150,7 +150,8 @@ OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
 CFLAGS              += -g -pedantic -std=c99 -O3 -Wno-incompatible-pointer-types-discards-qualifiers
-CFLAGS              += -D_PETSC -D_HDF5 -D_DEBUG #-D_MPI
+CFLAGS              += -D_PETSC
+CFLAGS              += -D_HDF5 -D_DEBUG #-D_MPI
 CFLAGS              += -L/opt/homebrew/Cellar/suite-sparse/7.8.3/lib -lumfpack -I/opt/homebrew/Cellar/suite-sparse/7.8.3/include/suitesparse
 CFLAGS              += -L/opt/homebrew/Cellar/scotch/7.0.6/lib -lscotch -I/opt/homebrew/Cellar/scotch/7.0.6/include
 CFLAGS              += -L/${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -I/${PETSC_DIR}/${PETSC_ARCH}/include

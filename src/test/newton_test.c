@@ -1,6 +1,7 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
-static double NEWTON_TEST_TOL = 1e-7;
+static double LINEAR_NEWTON_TEST_TOL = 1e-7;
+static double NONLINEAR_NEWTON_TEST_TOL = 1e-3;
 static int linear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 static int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
@@ -20,7 +21,7 @@ static void compute_exact_solution_nonlinear_poisson(double *u_exact, int ndof, 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int newton_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax){
 	int err = linear_newton_test(npx, npy, xmin, xmax, ymin, ymax);
-	//err+= nonlinear_newton_test(npx, npy, xmin, xmax, ymin, ymax);
+	err+= nonlinear_newton_test(npx, npy, xmin, xmax, ymin, ymax);
 	return err;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -209,7 +210,7 @@ int linear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, 
 
 	//return -1 if failed, 0 if good
 	
-	if(l2_err < NEWTON_TEST_TOL && linf_err < NEWTON_TEST_TOL){
+	if(l2_err < LINEAR_NEWTON_TEST_TOL && linf_err < LINEAR_NEWTON_TEST_TOL){
 		err_code=0;
 	}
 	//printf("Final error code %d\n",err_code);
@@ -354,16 +355,20 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
     sarray_init_value_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs, 1.0);
     dm.superModel[0].LINEAR_PROBLEM = NO;
     dm.superModel[0].max_nonlin_it = 35;
+    dm.superModel[0].tol_nonlin = 1e-9;
+	dm.superModel[0].inc_nonlin = 1e-8;
 
  	SMODEL_SUPER *sm;
 	sm = &(dm.superModel[0]);
 
 	printf("SETTING UP BCMASK\n");
-
+	double x_coord, y_coord;
 	// intialize dirichlet and old sol (initial guess)
 	for (int local_index=0; local_index<sm->ndofs; local_index++){
-
+		x_coord = dm.grid->node[local_index].x;
+		y_coord = dm.grid->node[local_index].y;
 		dm.superModel[0].dirichlet_data[local_index] = 0.0;
+		//make initial guess close to true solution
 		dm.superModel[0].sol_old[local_index] = 1.0;
 		dm.superModel[0].sol[local_index] = 1.0;
 		dm.superModel[0].lin_sys->dsol[local_index] = 0.0;
@@ -371,7 +376,7 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
 	}
 
 	//overwrite some of the boundary
-	double x_coord, y_coord;
+	
 	int id;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
@@ -426,8 +431,8 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
 
 
 	//compute L2 and Linf error
-	double l2_err =  l2_error(dm.superModel[0].sol, u_exact, nnodes);
-	double linf_err =  linf_error(dm.superModel[0].sol, u_exact, nnodes);
+	double l2_err =  l2_error(dm.superModel[0].sol, u_exact, nnodes)/nnodes;
+	double linf_err =  linf_error(dm.superModel[0].sol, u_exact, nnodes)/nnodes;
 
 	printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
 
@@ -442,7 +447,7 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
 
 	//return -1 if failed, 0 if good
 	
-	if(l2_err < NEWTON_TEST_TOL && linf_err < NEWTON_TEST_TOL){
+	if(l2_err < NONLINEAR_NEWTON_TEST_TOL && linf_err < NONLINEAR_NEWTON_TEST_TOL){
 		err_code=0;
 	}
 	//printf("Final error code %d\n",err_code);
