@@ -7,7 +7,7 @@
 #include "adh.h"
 
 
-void set_function_pointers( int (*resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int), int (*init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *)){
+void set_function_pointers( int (*resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int), int (*init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *), int (*forward_stepper[N_TIME_STEPPERS]) (SMODEL_SUPER*)){
 	
 
     // we can actually add empty routine as placeholder
@@ -58,5 +58,9 @@ void set_function_pointers( int (*resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER
 	//assign all values to init vector of function pointers
 	init_routines[NO_INIT] = no_init;
 	init_routines[SW2_INIT] = fe_sw2_init;
+
+	//assign all pointers to time loop
+	//so far only one but maybe RK in future
+	forward_stepper[FE_NEWTON] = fe_newton;
 
 }

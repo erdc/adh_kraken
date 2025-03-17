@@ -115,4 +115,5 @@ void print_build_info();
 //Adding function pointers that will always be needed
 int (*adh_resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int);
 int (*adh_init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *);
+int (*adh_time_stepper[N_TIME_STEPPERS]) (SMODEL_SUPER*);
 //#endif

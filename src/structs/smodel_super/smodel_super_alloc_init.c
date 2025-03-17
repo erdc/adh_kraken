@@ -46,7 +46,9 @@ void smodel_super_alloc_init(SMODEL_SUPER **superModel, int nSuperModels) {
         sm->ts = NULL;
         sm->nsubsteps = 1;
         sm->meshcode = 0;
-        sm->forward_step = 0;
+        //Eventually need to hook into front end
+        //but only FE_NEWTON time step available right now
+        sm->forward_step = FE_NEWTON;
         sm->sw = NULL;
         // sm->con = NULL;
         // sm->sed = NULL;

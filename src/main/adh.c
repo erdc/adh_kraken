@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Initialize all function pointers
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
-    set_function_pointers(adh_resid_routines, adh_init_routines);
+    set_function_pointers(adh_resid_routines, adh_init_routines, adh_time_stepper);
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Check command line arguments

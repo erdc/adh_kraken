@@ -2,7 +2,7 @@
 #define H_MODELS_
 
 
-void set_function_pointers( int (*resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int), int (*init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *));
 
+void set_function_pointers( int (*resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int), int (*init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *), int (*forward_stepper[N_TIME_STEPPERS]) (SMODEL_SUPER*));
 
 #endif

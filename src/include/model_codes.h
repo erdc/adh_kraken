@@ -16,12 +16,6 @@
 #define PERTURB_NONE -1
 
 
-//forward step pointer codes
-//see time_loop
-#define N_TIME_STEPPERS 1
-#define FE_NEWTON 0
-
-
 
 
 // Definitions for residual/init function pointer calls
@@ -76,7 +70,11 @@
 #define NO_INIT 0
 #define SW2_INIT 1
 
-
+//time step routines
+//forward step pointer codes
+//see time_loop
+#define N_TIME_STEPPERS 1
+#define FE_NEWTON 0
 
 
 
