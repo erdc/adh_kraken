@@ -255,8 +255,10 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     if (DEBUG) {
         printf(">allocating solution variables\n");
     }
-    // problem here
-    SIVAR_POSITION ip[grid->nnodes];
+    //this wont scale, need to dynammically allocate
+    //SIVAR_POSITION ip[grid->nnodes];
+    SIVAR_POSITION *ip;
+    ip = (SIVAR_POSITION *) tl_alloc(sizeof(SIVAR_POSITION), grid->nnodes);
     for (i=0; i<grid->nnodes; i++) {ip[i] = sm->mat_physics_node[i]->ivar_pos;}
     sm->ndofs = sivar_position_build_dof_map(&sm->ivar_pos,grid->nnodes,ip,&sm->ivars);
     if (DEBUG) {
@@ -287,6 +289,10 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     // Allocating dependent variables
     //++++++++++++++++++++++++++++++++++++++++++++++
     smodel_super_build_dvars(sm);
+
+    
+    //free up anything local to routine
+    ip = tl_free(sizeof(SIVAR_POSITION), grid->nnodes, ip);
     
 }
 
