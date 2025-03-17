@@ -18,6 +18,7 @@ int time_loop(SMODEL_DESIGN *dm){
 	//aliasing for convenience
 	int nsuper = dm->nSuperModels;
 	//the outer time loop
+	tc_init(dm);
 	do {
 			ts+=1;
 			//update t_prev and change dt if timeseries says to

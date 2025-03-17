@@ -1,8 +1,6 @@
 /*! \file timeloop_test.c This file tests the timeloop via heat equation */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
-static int NEWTON_TEST_NX = 100;//150;
-static int NEWTON_TEST_NY = 100;//150;
 static double alpha = 3;
 static double beta = 1.2;
 static void compute_exact_solution_heat(double *u_exact, int ndof, SGRID *grid, double t);
@@ -107,53 +105,7 @@ int timeloop_test(int npx, int npy) {
 
 
 
-	//OVER WRITE TO HEAT
-	//dm.superModel[0].mat_physics_elem[0].model[0].physics = HEAT;
-	//printf("Supermodel no read complete\n");
-
-
-	//allocate linear system
-	//doesn't currently work, need to go back and fix
-	//fe_allocate_initialize_linear_system(&sm);
-//	sm.cols_diag = NULL;
-//	sm.vals_diag = NULL;
-//	sm.cols_off_diag=NULL;
-//	sm.vals_off_diag=NULL;
-//	sm.bc_mask = NULL;
-//	sm.nnz_diag_old=0;
-//	sm.nnz_off_diag_old=0;
-//	printf("Calling sparsity split CSR\n");
-//	create_sparsity_split_CSR(&sm, sm.grid);
-	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
-
-	//do we want to stor nnz? it is stored in sm->indptr[nrows]
-    //do we want to store local_size = local_range[1]-local_range[0]
-//    printf("NNZ = %d = %d\n",sm.indptr_diag[sm.my_ndofs], sm.nnz_diag);
-//    sarray_init_dbl(sm.vals_diag, sm.indptr_diag[sm.my_ndofs]);//
-
-//	//manually set up some solver parameters
-//	sm.macro_ndofs = sm.ndofs;
-//	sm.dsol = (double*) tl_alloc(sizeof(double), sm.ndofs);
-//	
-//	sm.dirichlet_data = (double*) tl_alloc(sizeof(double), sm.ndofs);
-//	sm.scale_vect = (double*) tl_alloc(sizeof(double), sm.ndofs);
-////    for(int i=0;i<sm.ndofs;i++){
-////    	sm.scale_vect[i] = 1.0;
-////    }
-//	sm.tol_nonlin = 1e-5;
-//	sm.inc_nonlin = 1e-3;
-//	sm.max_nonlin_linesearch_cuts = 5;
-//	sm.it_count_nonlin_failed = 0;
-//	sm.max_nonlin_it = 20;
-//	sm.LINEAR_PROBLEM = NO;
-//	sm.force_nonlin_it = NO;
-//	sm.force_nonlin_it = NO;
-//	sm.nonlinear_it_total = 0;
-//	sm.nghost=0;
-//	sm.ghosts = NULL;
-//	sm.local_size = sm.ndofs;
-//	sm.sol_old = (double*) tl_alloc(sizeof(double), sm.ndofs);
-//	sm.sol_older = (double*) tl_alloc(sizeof(double), sm.ndofs);
+	
 
  	SMODEL_SUPER *sm;
 	sm = &(dm.superModel[0]);
@@ -180,87 +132,39 @@ int timeloop_test(int npx, int npy) {
 		//id = grid->node[i].id;
 		id=i;
 		//need to set IC
-		dm.superModel[0].sol[id*3+1] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
+		dm.superModel[0].sol[id] = 1 + x_coord*x_coord + alpha * y_coord*y_coord;
 		if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 			continue;
 		}else{
-			dm.superModel[0].bc_mask[id*3+1]=NO;
+			dm.superModel[0].bc_mask[id]=NO;
 		}
 		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
 	printf("BCMASK COMPLETE\n");
-	//set up bc mask
-
-//	for (int i=0;i<sm.ndofs;i++){
-//		printf("sm bc mask[%d] = %d\n",i,sm.bc_mask[i]);
-//	}
-
-
-	//see if it works
-	//apply_Dirichlet_BC(&sm);
-	//see if something is happening within newton loop or something else
-//	initialize_system(&sm);
-//	assemble_residual(&sm,sm.grid);
-//	assemble_jacobian(&sm,sm.grid);
-//	apply_Dirichlet_BC(&sm);
-//	int status;
-//	status = prep_umfpack(sm.indptr_diag,sm.cols_diag,sm.vals_diag, sm.dsol, sm.residual, sm.local_size);
-//	status = solve_umfpack(sm.dsol, sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.residual, sm.local_size);
-//	increment_function(&sm);
-	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 
 	//set forward_step and call timeloop
 	time_loop(&dm); 
+
+
 
 	//compare with analytic solution
 	//it is a scalar
 	double *u_exact;
 	u_exact = (double*) tl_alloc(sizeof(double),nnodes);
-	compute_exact_solution_heat(u_exact, nnodes, dm.grid,tf);
-//	for(int i=0;i<nnodes;i++){
-//		printf("Exact solution[%d] = %f\n",i,u_exact[i]);
-//	}
-	
-	//extract second variable here
-	double *uh;
-	uh = (double*) tl_alloc(sizeof(double), nnodes);
-	//create temporary integer array for nodes
-	int *nodes;
-	nodes = (int*) tl_alloc(sizeof(int), nnodes);
-	for(int i=0;i<nnodes;i++){
-		nodes[i] = i;
-	}
+	compute_exact_solution_heat(u_exact, nnodes, dm.grid, tf);
 
-	//global_to_local_dbl_cg_2(uh, sm.sol, nodes, nnodes, PERTURB_U, sm.node_physics_mat, sm.node_physics_mat_id);
-	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat, sm->node_physics_mat_id);
-	
-	// cjt -- commented out for now
-	//global_to_local_dbl_cg(uh, sm->sol, nodes, nnodes, PERTURB_U, sm->dof_map_local, sm->node_physics_mat);
-//not needed anymore since nodes are reordered
-//if (grid->inv_per_node!=NULL){
-//	permute_array(uh,grid->inv_per_node,nnodes);
-//}
-//	printf("Final solution:\n");
-//	for(int i=0; i<nnodes;i++){
-//		printf("sol[%d] = %f, exact sol[%d] = %f\n",i,uh[i],i,u_exact[i]);
-//	} 
+	//solution:
+	//sarray_printScreen_dbl(dm.superModel[0].sol,dm.superModel[0].ndofs,"finalsol");
+	//exact solution:
+	//sarray_printScreen_dbl(u_exact,dm.superModel[0].ndofs,"exact sol");
+
 
 	//compute L2 and Linf error
-	double l2_err =  l2_error(uh, u_exact, nnodes);
-	double linf_err =  linf_error(uh, u_exact, nnodes);
+	double l2_err =  l2_error(dm.superModel[0].sol, u_exact, nnodes);
+	double linf_err =  linf_error(dm.superModel[0].sol, u_exact, nnodes);
 
 	printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
 
-	//plot grid in h5?
-//    strcpy(sm.grid->filename, "residtest");
-//    init_hdf5_file(sm.grid);
-//    printf("hdf5 initialized\n");
-//    sgrid_write_hdf5(sm.grid);
-//    printf("hdf5 written\n");
-//    sgrid_write_xdmf(sm.grid);
-//    printf("xmf written\n");
-
-	//return -1 if failed, 0 if good
 	
 	if(l2_err < NEWTON_TEST_TOL && linf_err < NEWTON_TEST_TOL){
 		err_code=0;
@@ -269,8 +173,7 @@ int timeloop_test(int npx, int npy) {
 
 	//free memory
 	u_exact = (double *) tl_free(sizeof(double), nnodes, u_exact);
-	uh = (double *) tl_free(sizeof(double), nnodes, uh);
-	nodes = (int *) tl_free(sizeof(int), nnodes, nodes);
+
 
 
 	smodel_design_free(&dm);

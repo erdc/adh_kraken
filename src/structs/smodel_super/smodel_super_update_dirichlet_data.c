@@ -19,7 +19,8 @@ void smodel_super_update_dirichlet_data(SMODEL_SUPER *sm){
 			y_coord = grid->node[i].y;
 			//id = grid->node[i].id;
 			if ( is_near(x_coord,0.0) || is_near(x_coord,1.0) || is_near(y_coord,0.0) || is_near(y_coord,1.0) ){
-				sm->dirichlet_data[i*3+1] = 1.0 + x_coord*x_coord + alpha * y_coord*y_coord + beta*t;
+				sm->dirichlet_data[i] = 1.0 + x_coord*x_coord + alpha * y_coord*y_coord + beta*t;
+				//printf("Updating data\n");
 			}
 		}	
 	}

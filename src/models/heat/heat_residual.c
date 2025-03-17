@@ -44,20 +44,19 @@ int heat_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbati
     double elem_u[nnodes], elem_u_old[nnodes];
     double dt = mod->ts->dt;
     //this map only works for CG, want to generalize to DG in future
-    //global_to_local_dbl_cg_2(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->node_physics_mat, mod->node_physics_mat_id);
-    //global_to_local_dbl_cg(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
-    //global_to_local_dbl_cg(elem_u_old, mod->sol_old, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->node_physics_mat, mod->node_physics_mat_id);
+    global_to_local_dbl_ivars(elem_u, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
+    global_to_local_dbl_ivars(elem_u_old, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol_old);
     
-    // CJT -- COMMENT OUT FOR NOW
-    //global_to_local_dbl_cg(elem_u, mod->sol, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->mat_physics_node);
-    //global_to_local_dbl_cg(elem_u_old, mod->sol_old, elem2d->nodes, nnodes, PERTURB_U, mod->dof_map_local, mod->mat_physics_node);
-    
+    //printf("elem %d\n",ie);
+    //sarray_printScreen_dbl(elem_u, nnodes, "elemu");
+    //sarray_printScreen_dbl(elem_u, nnodes, "elemu_old");
 
+    //printf("dt = %f\n",mod->ts->dt);
     //for now let's let f be a constant so we have analytic solution to compare to
     double f[nnodes], dhdt[nnodes];
     int i;
     //perturb solution variable only, let's say we are using U
-    if (perturb_var == PERTURB_U){
+    if (perturb_var == _H){
         elem_u[perturb_node] += perturb_sign * perturbation;
     }
     for (i =0;i<nnodes;i++){
@@ -76,10 +75,14 @@ int heat_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbati
         grad_u.y += elem_u[i] * grad_shp[i].y;
     }
     integrate_triangle_gradPhi_dot_vbar(grad_shp, mod->grid->elem2d[ie].djac, 1.0,  grad_u, elem_rhs);
+    //sarray_printScreen_dbl(elem_rhs, nnodes, "elemrhs");
+    
     //time derivative, implicit Euler
     integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, 1.0, dhdt, elem_rhs);  
     //rhs of linear system (will be 0 when Jacobian is computed)
     integrate_triangle_phi_f(mod->grid->elem2d[ie].djac, -1.0, f, elem_rhs);
+
+   
 
     return 0;
 }
