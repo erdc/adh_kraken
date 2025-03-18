@@ -21,7 +21,7 @@
 // Definitions for residual/init function pointer calls
 // to simplify code, must always be contiguous
 // that way we can use array look up as map
-#define N_RESID_ROUTINES 25
+#define N_RESID_ROUTINES 40
 #define NO_RESID_ 0
 #define SW1D_ 1
 #define SW2D_ 2

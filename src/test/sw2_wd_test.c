@@ -70,9 +70,10 @@ int sw2_wd_test(int npx, int npy, int nt) {
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Fill in a simple design model
     //++++++++++++++++++++++++++++++++++++++++++++++
-	double dt = 864000.0 / nt;
+    double tf = 864000.0;
+	double dt = tf/ nt;
 	double t0 = 0.0;
-	double tf = 864000.0;
+	
 	int nSuperModels = 1;
 	int *nphysics_mats;
 	nphysics_mats = (int*) tl_alloc(sizeof(int), nSuperModels);
@@ -164,6 +165,8 @@ int sw2_wd_test(int npx, int npy, int nt) {
 	}
 
 	printf("Calling time loop\n");
+
+	int matid = dm.superModel[0].elem2d_physics_mat[0];
 	//set forward_step and call timeloop
 	time_loop(&dm); 
 
@@ -181,8 +184,12 @@ int sw2_wd_test(int npx, int npy, int nt) {
     SFLAGS dummy;
 	double initial_grid_mass = tl_find_grid_mass_elem2d(dm.superModel[0].density, NULL, NULL, init_head,dm.superModel[0].grid, dummy);
 	printf("Initial grid mass = %f\n",initial_grid_mass);
+
 	//extract second variable here
 	double total_error = write_testcase_error_wet_dry(&(dm.superModel[0]),initial_grid_mass); 
+
+
+
 	printf("Final error: %6.4e\n", total_error);
 	//plot grid in h5?
 //    strcpy(sm.grid->filename, "residtest");

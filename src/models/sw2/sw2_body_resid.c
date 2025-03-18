@@ -96,7 +96,9 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
         assert(imat > -1);
         assert(perturb_var == PERTURB_NONE || perturb_var == PERTURB_H || perturb_var == PERTURB_U || perturb_var == PERTURB_V);
     }
-#endif    
+#endif  
+
+    //printf("elem %d: alpha %f, dt %f, drying_lower_limit %f, wd_flag %d\n",ie,alpha,dt,drying_lower_limit, wd_flag);  
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // GRID VARIABLES
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/    
@@ -391,7 +393,8 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
                 printf("norm.x: %20.10e \t norm.y: %20.10e \t sh_cap_coef_u: %20.10e \t sh_cap_coef_v: %20.10e \n",norm.x,norm.y,sh_cap_coef_u,sh_cap_coef_v);
             }
 #endif
-        }    }    
+        }    
+    }    
     /*!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                    ADVECTION CONTRIBUTION
      *--------------------------------------------------------------------------------------------

@@ -136,6 +136,34 @@ if (DEBUG) {
 }
 
 
+if (DEBUG) {
+    printf("------------------------------------------------------\n");
+    printf("------------------------------------------------------\n");
+    printf("SW2 WD Tests Begin\n");
+    printf("------------------------------------------------------\n");
+    
+}
+
+    err = 0;
+    int n_sw2_wd_tests = 1;
+    npx[0] = 16;
+    npy[0] = 6;
+    nts[0] = 1440;
+
+    for (int i = 0 ; i < n_sw2_wd_tests; i++){
+        err += sw2_wd_test(npx[i],npy[i], nts[i]);
+        printf(" sw2_wd_test TEST %d / %d completed \n",i+1,n_sw2_wd_tests);
+    }
+    if(err!=0){all_err+=1;}
+
+if (DEBUG) {
+    printf("------------------------------------------------------\n");
+    printf("------------------------------------------------------\n");
+    printf("%d / %d Sw2 wd Tests Passed\n", err+n_sw2_wd_tests, n_sw2_wd_tests);
+    printf("------------------------------------------------------\n");
+    
+}
+
 
 
 
