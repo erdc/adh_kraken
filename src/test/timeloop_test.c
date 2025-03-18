@@ -19,7 +19,7 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int timeloop_test(int npx, int npy) {
+int timeloop_test(int npx, int npy, int nt) {
 
 	//++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -55,7 +55,7 @@ int timeloop_test(int npx, int npy) {
 	double axy2 = 0.0;
 	double ax2y2 = 0.0;
 	int flag3d =0;
-	int err_code=-1;
+
     *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
@@ -70,7 +70,7 @@ int timeloop_test(int npx, int npy) {
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Fill in a simple design model
     //++++++++++++++++++++++++++++++++++++++++++++++
-    double dt = 2.0/20.0;
+    double dt = 2.0/nt;
 	double t0 = 0.0;
 	double tf = 2.0;
 	int nSuperModels = 1;
@@ -167,7 +167,7 @@ int timeloop_test(int npx, int npy) {
 
 	
 	if(l2_err < NEWTON_TEST_TOL && linf_err < NEWTON_TEST_TOL){
-		err_code=0;
+		ierr=0;
 	}
 	//printf("Final error code %d\n",err_code);
 
@@ -179,7 +179,7 @@ int timeloop_test(int npx, int npy) {
 	smodel_design_free(&dm);
 
 
-	return err_code;
+	return ierr;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

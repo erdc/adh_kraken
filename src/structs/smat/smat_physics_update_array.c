@@ -70,7 +70,7 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
         	mat->model[isubModel].physics_vars[1] = uda_loc;
         	mat->model[isubModel].physics_vars[2] = vda_loc;
         	mat->model[isubModel].physics = SW2D_;
-        	mat->model[isubModel].physics_init = SW2D_;
+        	mat->model[isubModel].physics_init = SW2_INIT;
         	isubModel++;
     	}
     	if (mat->SW3_FLOW) {

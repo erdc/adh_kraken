@@ -18,18 +18,30 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int sw2_wd_test(void) {
-	//create a grid
-	SGRID *grid;
-	grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
-	//let's just do something simple
-	//3x3 triangular element grid
+int sw2_wd_test(int npx, int npy, int nt) {
+
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// return error code
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	int ierr = -1;
+
+
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Create a design model
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	SMODEL_DESIGN dm; smodel_design_defaults(&dm);
+
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Create a regular grid
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	dm.grid = (SGRID *) tl_alloc(sizeof(SGRID), 1);
 	double xmin = 0.0;
 	double xmax = 1000.0;
 	double ymin = 0.0;
 	double ymax = 500.0;
-	int npx = NEWTON_TEST_NX;
-	int npy = NEWTON_TEST_NY;
 	double theta = 0.0;
 	double dz = 1.0;
 	double a0 = 0.0;
@@ -42,49 +54,55 @@ int sw2_wd_test(void) {
 	double axy2 = 0.0;
 	double ax2y2 = 0.0;
 	int flag3d =0;
-	int err_code=-1;
-    *grid = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
+    *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
     int nnodes;
-    nnodes = grid->nnodes;
-    sgrid_reorder(grid,2);
-	//print coordinates
-//  for(int local_index =0; local_index<grid.nnodes; local_index++){
-//		printf("Node %d: (x,y) = {%f,%f}\n",grid.node[local_index].gid,grid.node[local_index].x,grid.node[local_index].y);
-//	}
-//	//print connectivity
-//	for(int local_index =0; local_index<grid.nelems2d; local_index++){
-//		printf("Element %d: (nd1,nd2,nd3) = {%d,%d,%d}\n",local_index ,grid.elem2d[local_index].nodes[0], grid.elem2d[local_index].nodes[1], grid.elem2d[local_index].nodes[2]);
-//	}
+    nnodes = dm.grid->nnodes;
 
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Reorder grid to minimize bandwidth
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    sgrid_reorder(dm.grid,2);
 
-	//create a supermodel with a grid in it
-	//SMODEL_SUPER sm;
-	//sm.grid = &grid;
-    SMODEL_DESIGN dm;
-	//specify elemental physics and other properties in super model
-	double dt = 600.0;
+	//++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Fill in a simple design model
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	double dt = 864000.0 / nt;
 	double t0 = 0.0;
 	double tf = 864000.0;
+	int nSuperModels = 1;
+	int *nphysics_mats;
+	nphysics_mats = (int*) tl_alloc(sizeof(int), nSuperModels);
+	nphysics_mats[0] = 1;
+	//elemVarCode in general is triple pointer, nSuperModels x nphyics_mat[i] x 10
+	char ***elemVarCode;
+	elemVarCode = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	for (int i = 0; i< nSuperModels; i ++){
+		elemVarCode[i] = (char **) tl_alloc(sizeof(char *), nphysics_mats[i]);
+		for (int j = 0; j< nphysics_mats[i]; j++){
+			elemVarCode[i][j] = (char *) tl_alloc(sizeof(char), 10);
+		}
+	}
+	strcpy(&elemVarCode[0][0][0],"2"); // SW2D
+	strcpy(&elemVarCode[0][0][1],"0"); // GW
+	strcpy(&elemVarCode[0][0][2],"0"); // Transport
 
-	char elemVarCode[4]; 
-	strcpy(&elemVarCode[0],"2");//SW2D
-	strcpy(&elemVarCode[1],"0"); //GW
-	strcpy(&elemVarCode[2],"0"); //Transport
-	printf("GRID NELEMS2D = %d\n",grid->nelems2d);
-	//smodel_super_no_read_simple(&sm, dt, t0, tf, 0 , 1, 0, elemVarCode);
-	//smodel_design_no_read_simple(&dm, dt, t0, tf, 1, elemVarCode, grid);
-	printf("NDOFS %d\n",dm.superModel[0].ndofs);
 
-	//OVER WRITE TO SW2
-	dm.superModel[0].mat_physics_elem[0].model[0].physics = SW2D_;
-	dm.superModel[0].mat_physics_elem[0].model[0].physics_init = SW2_INIT;
-	dm.superModel[0].mat_physics_elem[0].model[0].nvar = 3;
-    dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[0] = PERTURB_H;
-    dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[1] = PERTURB_U;
-    dm.superModel[0].mat_physics_elem[0].model[0].physics_vars[2] = PERTURB_V;
-    dm.superModel[0].LINEAR_PROBLEM = NO;
+	//mat ids
+	int **mat_ids;
+	mat_ids = (int **) tl_alloc(sizeof(int*),nSuperModels);
+	int nelems = dm.grid->nelems3d + dm.grid->nelems2d + dm.grid->nelems1d;
+	for (int i = 0; i < nSuperModels; i++){
+		mat_ids[i] = tl_alloc(sizeof(int), nelems);
+		sarray_init_int(mat_ids[i],nelems);
+	}
+
+    smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
+    
+
 
     //hack together the sw2 structure
     //allocate
@@ -97,15 +115,15 @@ int sw2_wd_test(void) {
 
     //set up the dvar map
     printf("allocating sdvar\n");
-    sdvar_alloc_init(&(sw->dvar), grid->nnodes, 0, 0, 1, grid->nnodes, grid->nelems2d);
+    sdvar_alloc_init(&(sw->dvar), nnodes, 0, 0, 1, nnodes, dm.grid->nelems2d);
     //hard code set index for wd flag
     sw->WD_FLAG = 0;
     //must also set up the dacont extra terms
     //could be clever hear and pick nnode on each element
-    sw->elem_rhs_dacont_extra_terms = (double **) tl_alloc(sizeof(double *), grid->nelems2d);
-    for (int i=0; i<grid->nelems2d; i++) {
-        sw->elem_rhs_dacont_extra_terms[i] = (double *) tl_alloc(sizeof(double), grid->elem2d[i].nnodes);
-        for (int j=0; j<grid->elem2d[i].nnodes; j++) {
+    sw->elem_rhs_dacont_extra_terms = (double **) tl_alloc(sizeof(double *), dm.grid->nelems2d);
+    for (int i=0; i<dm.grid->nelems2d; i++) {
+        sw->elem_rhs_dacont_extra_terms[i] = (double *) tl_alloc(sizeof(double), dm.grid->elem2d[i].nnodes);
+        for (int j=0; j<dm.grid->elem2d[i].nnodes; j++) {
         	sw->elem_rhs_dacont_extra_terms[i][j] = 0.;
         }
     }
@@ -126,9 +144,9 @@ int sw2_wd_test(void) {
 	int id;
 	for (int i=0; i<nnodes; i++){
 		//mark the boundary only
-		x_coord = grid->node[i].x;
-		y_coord = grid->node[i].y;
-		z_coord = grid->node[i].z;
+		x_coord = dm.grid->node[i].x;
+		y_coord = dm.grid->node[i].y;
+		z_coord = dm.grid->node[i].z;
 		//id = grid->node[i].id;
 		id=i;
 		//need to set IC
@@ -145,71 +163,6 @@ int sw2_wd_test(void) {
 		//printf("Dirichlet data node[%d] = %f\n", i, sm.dirichlet_data[i*3+1]);
 	}
 
-	//printf("Supermodel no read complete\n");
-
-
-	//allocate linear system
-	//doesn't currently work, need to go back and fix
-	//fe_allocate_initialize_linear_system(&sm);
-//	sm.cols_diag = NULL;
-//	sm.vals_diag = NULL;
-//	sm.cols_off_diag=NULL;
-//	sm.vals_off_diag=NULL;
-//	sm.bc_mask = NULL;
-//	sm.nnz_diag_old=0;
-//	sm.nnz_off_diag_old=0;
-//	printf("Calling sparsity split CSR\n");
-//	create_sparsity_split_CSR(&sm, sm.grid);
-	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
-
-	//do we want to stor nnz? it is stored in sm->indptr[nrows]
-    //do we want to store local_size = local_range[1]-local_range[0]
-//    printf("NNZ = %d = %d\n",sm.indptr_diag[sm.my_ndofs], sm.nnz_diag);
-//    sarray_init_dbl(sm.vals_diag, sm.indptr_diag[sm.my_ndofs]);//
-
-//	//manually set up some solver parameters
-//	sm.macro_ndofs = sm.ndofs;
-//	sm.dsol = (double*) tl_alloc(sizeof(double), sm.ndofs);
-//	
-//	sm.dirichlet_data = (double*) tl_alloc(sizeof(double), sm.ndofs);
-//	sm.scale_vect = (double*) tl_alloc(sizeof(double), sm.ndofs);
-////    for(int i=0;i<sm.ndofs;i++){
-////    	sm.scale_vect[i] = 1.0;
-////    }
-//	sm.tol_nonlin = 1e-5;
-//	sm.inc_nonlin = 1e-3;
-//	sm.max_nonlin_linesearch_cuts = 5;
-//	sm.it_count_nonlin_failed = 0;
-//	sm.max_nonlin_it = 20;
-//	sm.LINEAR_PROBLEM = NO;
-//	sm.force_nonlin_it = NO;
-//	sm.force_nonlin_it = NO;
-//	sm.nonlinear_it_total = 0;
-//	sm.nghost=0;
-//	sm.ghosts = NULL;
-//	sm.local_size = sm.ndofs;
-//	sm.sol_old = (double*) tl_alloc(sizeof(double), sm.ndofs);
-//	sm.sol_older = (double*) tl_alloc(sizeof(double), sm.ndofs);
-
-	//set up bc mask
-
-//	for (int i=0;i<sm.ndofs;i++){
-//		printf("sm bc mask[%d] = %d\n",i,sm.bc_mask[i]);
-//	}
-
-
-	//see if it works
-	//apply_Dirichlet_BC(&sm);
-	//see if something is happening within newton loop or something else
-//	initialize_system(&sm);
-//	assemble_residual(&sm,sm.grid);
-//	assemble_jacobian(&sm,sm.grid);
-//	apply_Dirichlet_BC(&sm);
-//	int status;
-//	status = prep_umfpack(sm.indptr_diag,sm.cols_diag,sm.vals_diag, sm.dsol, sm.residual, sm.local_size);
-//	status = solve_umfpack(sm.dsol, sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.residual, sm.local_size);
-//	increment_function(&sm);
-	//Screen_print_CSR(sm.indptr_diag, sm.cols_diag, sm.vals_diag, sm.ndofs);
 	printf("Calling time loop\n");
 	//set forward_step and call timeloop
 	time_loop(&dm); 
@@ -227,7 +180,7 @@ int sw2_wd_test(void) {
     }
     SFLAGS dummy;
 	double initial_grid_mass = tl_find_grid_mass_elem2d(dm.superModel[0].density, NULL, NULL, init_head,dm.superModel[0].grid, dummy);
-	//printf("Initial grid mass = %f\n",initial_grid_mass);
+	printf("Initial grid mass = %f\n",initial_grid_mass);
 	//extract second variable here
 	double total_error = write_testcase_error_wet_dry(&(dm.superModel[0]),initial_grid_mass); 
 	printf("Final error: %6.4e\n", total_error);
@@ -243,7 +196,7 @@ int sw2_wd_test(void) {
 	//return -1 if failed, 0 if good
 	
 	if(total_error < NEWTON_TEST_TOL){
-		err_code=0;
+		ierr=0;
 	}
 	//printf("Final error code %d\n",err_code);
 
@@ -253,7 +206,7 @@ int sw2_wd_test(void) {
 	smodel_design_free(&dm);
 
 
-	return err_code;
+	return ierr;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

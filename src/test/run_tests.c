@@ -92,7 +92,7 @@ if (DEBUG) {
     npy[9] = 10;
     for (int i = 0 ; i < n_newton_tests; i++){
         err += newton_test(npx[i],npy[i],xmin[0],xmax[0],ymin[0],ymax[0]);
-        printf(" NEWTON TEST %d / %d completed \n",i,n_newton_tests);
+        printf(" NEWTON TEST %d / %d completed \n",i+1,n_newton_tests);
     }
 
 if (DEBUG) {
@@ -116,9 +116,10 @@ if (DEBUG) {
     int n_timeloop_tests = 10;
     npx[9] = 300;
     npy[9] = 350;
+    int nts[] = {50, 20, 10, 15, 16, 30, 7, 18, 13, 20};
     for (int i = 0 ; i < n_timeloop_tests; i++){
-        err += timeloop_test(npx[i],npy[i]);
-        printf(" Timeloop TEST %d / %d completed \n",i,n_timeloop_tests);
+        err += timeloop_test(npx[i],npy[i], nts[i]);
+        printf(" Timeloop TEST %d / %d completed \n",i+1,n_timeloop_tests);
     }
 
 if (DEBUG) {

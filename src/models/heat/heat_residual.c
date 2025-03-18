@@ -56,7 +56,7 @@ int heat_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbati
     double f[nnodes], dhdt[nnodes];
     int i;
     //perturb solution variable only, let's say we are using U
-    if (perturb_var == _H){
+    if (perturb_var == mod->ivar_pos.var[_H]){
         elem_u[perturb_node] += perturb_sign * perturbation;
     }
     for (i =0;i<nnodes;i++){

@@ -44,7 +44,7 @@ void initialize_system(SMODEL_SUPER *sm) {
             //call wrapper for init function
             //as long as it is not unset
             if (inc_index!=UNSET_INT){
-                adh_init_routines[offset+j](sm);
+                adh_init_routines[inc_index](sm);
             }
         }
     }

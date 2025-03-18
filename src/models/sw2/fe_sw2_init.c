@@ -27,17 +27,22 @@
 //needs to be called inside an init routine
 int fe_sw2_init(SMODEL_SUPER *sm) {
     fe_sw2_wdflag_legacy(sm);
-    // update Dirchlet condition for nodes with depth less than zero
+    // update Dirichlet condition for nodes with depth less than zero
     //how are mappings going to look??
     //this should work for now
     int i,temp,tempu,tempv;
+    int h_loc = sm->ivar_pos.var[_H];
+    int u_loc = sm->ivar_pos.var[_UDA];
+    int v_loc = sm->ivar_pos.var[_VDA];
     //only want to loop over active nodes here not all nodes!!!! Will lead to bug
     for (i=0; i<sm->grid->nnodes; i++) {
-        //temp = get_cg_dof(PERTURB_H, i, sm->dof_map_local, sm->node_physics_mat);
+        //will only work for CG, will need to generalize
+        temp = sm->ivars[h_loc][i];
+        
         if (sm->sol_old[temp] <= 0.) {
             //get the two corresponding u and v entries
-            //tempu = get_cg_dof(PERTURB_U, i, sm->dof_map_local, sm->node_physics_mat);
-            //tempv = get_cg_dof(PERTURB_V, i, sm->dof_map_local, sm->node_physics_mat);
+            tempu = sm->ivars[u_loc][i];
+            tempv = sm->ivars[v_loc][i];
             sm->bc_mask[tempu] = YES;
             sm->bc_mask[tempv] = YES;
         }

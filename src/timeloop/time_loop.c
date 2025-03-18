@@ -110,7 +110,7 @@ int update_dt(SMODEL_DESIGN *dm){
 	//need to add a check and swap to new dt if necessary
 	//dm->dt_old = dm->dt
 
-	if(dm->ts.t_prev >= dm->ts.t_final){
+	if(dm->ts.t_prev + NOT_QUITE_SMALL >= dm->ts.t_final){
 		return FALSE;
 	}
 
