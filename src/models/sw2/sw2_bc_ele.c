@@ -94,17 +94,18 @@ int fe_sw2_bc_ele(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbati
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // INDEPENDENT VARIABLES
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-    if (perturb_var == PERTURB_NONE) perturb_sign = 0;
     double elem_head[nnodes];
-    //global_to_local_dbl_cg(elem_head, mod->sol, elem1d.nodes, nnodes, PERTURB_H, mod->dof_map_local, mod->node_physics_mat);
-    if (perturb_var == PERTURB_H) elem_head[perturb_node] += perturb_sign * perturbation;
     SVECT2D elem_vel[nnodes];
-    //global_to_local_SVECT2D_cg(elem_vel, mod->sol, elem1d.nodes, nnodes, PERTURB_U, PERTURB_V, mod->dof_map_local, mod->node_physics_mat);
-    if (perturb_var == PERTURB_U) {
+    global_to_local_dbl_ivars(elem_head, elem1d.nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
+    global_to_local_SVECT2D_ivars(elem_vel, elem1d.nodes, nnodes, mod->ivars, mod->ivar_pos.var[_UDA] , mod->ivar_pos.var[_VDA], mod->sol);
+    if (perturb_var == PERTURB_NONE){ 
+        perturb_sign = 0;
+    }else if(perturb_var == mod->ivar_pos.var[_H]){
+        elem_head[perturb_node] += perturb_sign * perturbation;
+    }else if (perturb_var == mod->ivar_pos.var[_UDA]) {
         elem_vel[perturb_node].x += perturb_sign * perturbation;
         PRESSURE_FLAG = OFF;
-    }
-    if (perturb_var == PERTURB_V) {
+    }else if (perturb_var == mod->ivar_pos.var[_VDA]) {
         elem_vel[perturb_node].y += perturb_sign * perturbation;
         PRESSURE_FLAG = OFF;
     }

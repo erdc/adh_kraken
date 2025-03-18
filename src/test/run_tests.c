@@ -16,6 +16,7 @@ static int DEBUG = ON;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int run_tests(void){
 
+    int all_err = 0;
     int err = 0;
 
 if (DEBUG) {
@@ -44,6 +45,7 @@ if (DEBUG) {
         err += residual_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
     }
 
+    if(err!=0){all_err+=1;}
 
 if (DEBUG) {
     printf("------------------------------------------------------\n");
@@ -68,6 +70,7 @@ if (DEBUG) {
         err += jacobian_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
 
     }
+    if(err!=0){all_err+=1;}
 
 if (DEBUG) {
     printf("------------------------------------------------------\n");
@@ -94,6 +97,7 @@ if (DEBUG) {
         err += newton_test(npx[i],npy[i],xmin[0],xmax[0],ymin[0],ymax[0]);
         printf(" NEWTON TEST %d / %d completed \n",i+1,n_newton_tests);
     }
+    if(err!=0){all_err+=1;}
 
 if (DEBUG) {
     printf("------------------------------------------------------\n");
@@ -121,6 +125,7 @@ if (DEBUG) {
         err += timeloop_test(npx[i],npy[i], nts[i]);
         printf(" Timeloop TEST %d / %d completed \n",i+1,n_timeloop_tests);
     }
+    if(err!=0){all_err+=1;}
 
 if (DEBUG) {
     printf("------------------------------------------------------\n");
@@ -132,6 +137,24 @@ if (DEBUG) {
 
 
 
-	return err; 
+
+
+if (DEBUG) {
+    if (all_err == 0){
+        printf("------------------------------------------------------\n");
+        printf("------------------------------------------------------\n");
+        printf("All Unit Tests Passed\n");
+        printf("------------------------------------------------------\n");
+    }else{
+        printf("------------------------------------------------------\n");
+        printf("------------------------------------------------------\n");
+        printf("Some Unit Tests Failed\n");
+        printf("------------------------------------------------------\n");
+    }
+    
+}
+
+
+	return all_err; 
 
 }
