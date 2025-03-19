@@ -72,6 +72,8 @@ int advance_time(SMODEL_DESIGN *dm, int nsuper){
 			//update sol_old and sol_older
 			// prep solutions
  			smodel_super_prep_sol(sm);
+ 			//update forcing data
+ 			sseries_setall_ts_valuesAVG(sm->series_head, sm->ts->t_prev -  sm->ts->dt, sm->ts->t_prev);
 			//update dirichlet data
 			smodel_super_update_dirichlet_data(sm);
 

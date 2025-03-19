@@ -80,7 +80,6 @@ void fe_sw2_1d_explicit_flow(double *elem_rhs, SELEM_1D elem1d, int ie, SVECT2D 
         elem_rhs[i*3+1] += t1 * rhs_x_eq[i];
         elem_rhs[i*3+2] += t1 * rhs_y_eq[i];
     }
-    
 #ifdef _DEBUG
     if (DEBUG == ON || DEBUG_LOCAL == ON) {
         double rhs[NDONSEG*3];

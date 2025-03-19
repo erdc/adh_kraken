@@ -12,6 +12,8 @@ typedef struct {
     int *ivar_loc; //arry of n who's entries are location in **ivar array
     int nSubmodels;
     SMODEL *model; // [nSubModels] length array
+    int nbc;
+    int *bc_ids;
 
     bool SW_FLOW;   // 1, 2, 3
     bool SW1_FLOW;  // 1

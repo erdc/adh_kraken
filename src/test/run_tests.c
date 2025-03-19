@@ -40,12 +40,12 @@ if (DEBUG) {
     double xmax[] = {1.0, 1.0, 2.0, 3.0, 0.0, -5.0, 4.0, -98.5, 32.0, 24.0};
     double ymin[] = {0.0, -2.0, -5.0, 1.2, -10.0, 25.0, 100.0, -1000.0, 0.0, 1.25};
     double ymax[] = {1.0, 1.0, 2.0, 1.8, -8.5, 26.3, 102.5, -998.5, 5.0, 3.75};
-
+    int nts[] = {50, 20, 10, 15, 16, 30, 7, 18, 13, 20};
     for (int i = 0 ; i < n_resid_tests; i++){
         err += residual_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
     }
 
-    if(err!=0){all_err+=1;}
+   if(err!=0){all_err+=1;}
 
 if (DEBUG) {
     printf("------------------------------------------------------\n");
@@ -64,11 +64,10 @@ if (DEBUG) {
 }
 
     err = 0;
-    int n_jacobian_tests = 10;
+    int n_jacobian_tests = 10;//
 
     for (int i = 0 ; i < n_jacobian_tests; i++){
-        err += jacobian_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
-
+        err += jacobian_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);//
     }
     if(err!=0){all_err+=1;}
 
@@ -79,7 +78,6 @@ if (DEBUG) {
     printf("------------------------------------------------------\n");
     
 }
-
 
 if (DEBUG) {
     printf("------------------------------------------------------\n");
@@ -107,7 +105,6 @@ if (DEBUG) {
     
 }
 
-
 if (DEBUG) {
     printf("------------------------------------------------------\n");
     printf("------------------------------------------------------\n");
@@ -120,7 +117,7 @@ if (DEBUG) {
     int n_timeloop_tests = 10;
     npx[9] = 300;
     npy[9] = 350;
-    int nts[] = {50, 20, 10, 15, 16, 30, 7, 18, 13, 20};
+    
     for (int i = 0 ; i < n_timeloop_tests; i++){
         err += timeloop_test(npx[i],npy[i], nts[i]);
         printf(" Timeloop TEST %d / %d completed \n",i+1,n_timeloop_tests);
@@ -134,7 +131,6 @@ if (DEBUG) {
     printf("------------------------------------------------------\n");
     
 }
-
 
 if (DEBUG) {
     printf("------------------------------------------------------\n");
@@ -160,6 +156,32 @@ if (DEBUG) {
     printf("------------------------------------------------------\n");
     printf("------------------------------------------------------\n");
     printf("%d / %d Sw2 wd Tests Passed\n", err+n_sw2_wd_tests, n_sw2_wd_tests);
+    printf("------------------------------------------------------\n");
+    
+}
+
+if (DEBUG) {
+    printf("------------------------------------------------------\n");
+    printf("------------------------------------------------------\n");
+    printf("SW2 NB Tests Begin\n");
+    printf("------------------------------------------------------\n");
+    
+}
+
+    err = 0;
+    int n_sw2_nb_tests = 1;
+    nts[0] = 10;
+
+    for (int i = 0 ; i < n_sw2_nb_tests; i++){
+        err += sw2_nb_test(nts[i]);
+        printf(" sw2_nb_test TEST %d / %d completed \n",i+1,n_sw2_nb_tests);
+    }
+    if(err!=0){all_err+=1;}
+
+if (DEBUG) {
+    printf("------------------------------------------------------\n");
+    printf("------------------------------------------------------\n");
+    printf("%d / %d Sw2 nb Tests Passed\n", err+n_sw2_nb_tests, n_sw2_nb_tests);
     printf("------------------------------------------------------\n");
     
 }

@@ -67,6 +67,7 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
     if (DEBUG_PICKETS == ON) tl_check_all_pickets(__FILE__,__LINE__);
     time_t time1;  time(&time1);
 #endif
+
     // aliases
     SSW *sw2 = mod->sw;
     SELEM_1D elem1d = mod->grid->elem1d[ie];
@@ -130,6 +131,7 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
         printScreen_debug_svec2d("elem_vel", elem_vel, nnodes, elem1d.nodes);
     }
 #endif
+
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     /*!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -142,12 +144,14 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
      * \note
      *********************************************************************************************/
     //int isers = str_values[string].ol_flow.isigma; //how to replace
-    int isers=0;
-    //int isers = mod->elem1d_physics_mat[string].bc_index[0];//hard coded for now but should be an ivar pos
+    int isers = mod->mat_physics_elem[mod->elem1d_physics_mat[string]].bc_ids[0];//hard coded for now but should be an ivar pos
     //negative now outside of individual routines
     //double flux = -1.0 * sseries_get_value(isers, mod->series_head, 0);
-    double flux = 1.0 * sseries_get_value(isers, mod->series_head, 0);
+    //printf("series = %d\n",isers);
+    double flux = -1.0 * sseries_get_value(isers, mod->series_head, 0);
+    //printf("flux = %f\n",flux);
     fe_sw2_1d_explicit_flow(elem_rhs, elem1d, ie, nrml, djac, dt, flux, h_avg, u, v, DEBUG, DEBUG_LOCAL);
+    //sarray_printScreen_dbl(elem_rhs,2, "elemrhs");
 #ifdef _DEBUG
         if (DEBUG == ON || DEBUG_LOCAL == ON) printf("DEBUG BC FLUX :: flux: %20.10e \n",flux);
 #endif
