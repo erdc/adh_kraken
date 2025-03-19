@@ -94,13 +94,6 @@ typedef struct {
     double initial_grid_mass;
     double grid_mass_error;    
 
-    //can we dynamically allocate isntead?
-    //using macro for now
-    //int *resid_ptr; //an array of nmat_physics giving start index
-    //int (*fe_resid[N_MAX_RESID_SM])(struct sm *, double *, int, double, int, int, int, int);
-    //int *init_ptr; //an array of nmat_physics giving start index
-    //int (*fe_init[N_MAX_RESID_SM])(struct sm *);
-
     //just to build without bug
     STR_VALUE *str_values;
 

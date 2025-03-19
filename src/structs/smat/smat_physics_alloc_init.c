@@ -222,6 +222,100 @@ void smat_physics_alloc_init(SMAT_PHYSICS *mat, char *codes) {
     sarray_init_value_int(tmp2,mat->nSubmodels,UNSET_INT);
     smodel_alloc_init_array(&(mat->model), tmp, tmp2, mat->nSubmodels, nSubMod_nvar); 
 
-    //Remainder of models will be filled in in smat_physics_update_array.c
+    int isubModel = 0;
+    // fill in model info, physics var is relative to 
+    // poisiton in smat physics
+    if (mat->SW1_FLOW) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_H];
+        mat->model[isubModel].physics_vars[1] = mat->ivar_pos.var[_UDA];
+        mat->model[isubModel].physics = SW1D_; // for body residuals
+        mat->model[isubModel].physics_init = SW1D_; 
+        isubModel++;
+    }
+    if (mat->SW2_FLOW) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_H];
+        mat->model[isubModel].physics_vars[1] = mat->ivar_pos.var[_UDA];
+        mat->model[isubModel].physics_vars[2] = mat->ivar_pos.var[_VDA];
+        mat->model[isubModel].physics = SW2D_;
+        mat->model[isubModel].physics_init = SW2_INIT;
+        isubModel++;
+    }
+    if (mat->SW3_FLOW) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_DPL];
+        mat->model[isubModel].physics_vars[1] = mat->ivar_pos.var[_U];
+        mat->model[isubModel].physics_vars[2] = mat->ivar_pos.var[_V];
+        mat->model[isubModel].physics = SW3D_;
+        mat->model[isubModel].physics_init = SW3D_;
+        isubModel++;
+    }
+    if (mat->NS3_FLOW) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_U];
+        mat->model[isubModel].physics_vars[1] = mat->ivar_pos.var[_V];
+        mat->model[isubModel].physics_vars[2] = mat->ivar_pos.var[_W];
+        mat->model[isubModel].physics_vars[3] = mat->ivar_pos.var[_PRS];
+        mat->model[isubModel].physics = NS3D_;
+        mat->model[isubModel].physics_init = NS3D_;
+        isubModel++;
+    }
+    if (mat->NS3_SPLIT) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_U];
+        mat->model[isubModel].physics_vars[1] = mat->ivar_pos.var[_V];
+        mat->model[isubModel].physics_vars[2] = mat->ivar_pos.var[_W];
+        mat->model[isubModel].physics = NS3DSPLIT_;
+        mat->model[isubModel].physics_init = NS3DSPLIT_;
+        isubModel++;
+    }
+    if (mat->DW_FLOW) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_H];
+        mat->model[isubModel].physics = DW2D_;
+        mat->model[isubModel].physics_init = DW2D_;
+        isubModel++;
+    }
+    if (mat->WVEL_SPLIT) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_W];
+        mat->model[isubModel].physics = WVEL_;
+        mat->model[isubModel].physics_init = WVEL_;
+        isubModel++;
+    }
+    if (mat->PRESSURE) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_PRS];
+        mat->model[isubModel].physics = PRS_;
+        mat->model[isubModel].physics_init = PRS_;
+        isubModel++;
+    }
+    if (mat->GW_FLOW) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_H];
+        mat->model[isubModel].physics = GW3D_;
+        mat->model[isubModel].physics_init = GW3D_;
+        isubModel++;
+    }
+    if (mat->POISSON) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_H];
+        mat->model[isubModel].physics = POISSON2D_;
+        //leave unset
+        //mat->model[isubModel].physics_init = NO_INIT_;
+        isubModel++;
+    }
+    if (mat->HEAT) {
+        mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[_H];
+        mat->model[isubModel].physics = HEAT2D_;
+        //leave unset
+        //mat->model[isubModel].physics_init = NO_INIT_;
+        isubModel++;
+    }
+
+    for (int itrns=0; itrns<mat->ivar_pos.ntrns; itrns++) {
+        if (mat->TRANSPORT[itrns]) {
+            mat->model[isubModel].physics_vars[0] = mat->ivar_pos.var[N_IVARS + itrns];
+            mat->model[isubModel].physics = TRNS_;
+            mat->model[isubModel].physics_init = TRNS_;
+            isubModel++;
+        }  
+    }
+
+
+    assert(isubModel == mat->nSubmodels);
+
+    //Remainder of models will be filled in in smat_physics_update_array.c since it requires **ivar map
 }
 

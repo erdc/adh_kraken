@@ -1,7 +1,7 @@
 /*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
-static double LINEAR_NEWTON_TEST_TOL = 1e-7;
-static double NONLINEAR_NEWTON_TEST_TOL = 1e-3;
+static double LINEAR_NEWTON_TEST_TOL = 1e-8;
+static double NONLINEAR_NEWTON_TEST_TOL = 1e-6;
 static int linear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
 static void compute_exact_solution_poisson(double *u_exact, int ndof, SGRID *grid);
 static int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax);
@@ -387,8 +387,8 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
 
 
 	//compute L2 and Linf error
-	double l2_err =  l2_error(dm.superModel[0].sol, u_exact, nnodes)/nnodes;
-	double linf_err =  linf_error(dm.superModel[0].sol, u_exact, nnodes)/nnodes;
+	double l2_err =  l2_error(dm.superModel[0].sol, u_exact, nnodes);
+	double linf_err =  linf_error(dm.superModel[0].sol, u_exact, nnodes);
 
 	printf("Final errors: %6.4e , %6.4e\n", l2_err,linf_err);
 
