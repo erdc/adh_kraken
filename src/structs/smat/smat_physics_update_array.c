@@ -33,23 +33,11 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
 
 		//temporary variable, copy pointer
 		mat = &(m[imat]);
-        if (mat->ivar_pos.var[_H]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_H]; ctr++;}
-        if (mat->ivar_pos.var[_U]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_U]; ctr++;}
-        if (mat->ivar_pos.var[_V]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_V]; ctr++;}
-        if (mat->ivar_pos.var[_W]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_W]; ctr++;}
-        if (mat->ivar_pos.var[_UDA]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_UDA]; ctr++;}
-        if (mat->ivar_pos.var[_VDA]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_VDA]; ctr++;}
-        if (mat->ivar_pos.var[_DPL]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_DPL]; ctr++;}
-        if (mat->ivar_pos.var[_PRS]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_PRS]; ctr++;}     
-        if (mat->ivar_pos.var[_HEAT] != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_HEAT]; ctr++;}
-        if (mat->ivar_pos.var[_SAL]  != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[_SAL]; ctr++;}   
-        for (int nt = 0; nt<mat->ntrns ;nt++){
-            mat->ivar_loc[ctr] = ivar_pos->var[N_IVARS + nt];
-            ctr++;
+        for (int var= 0 ; var<N_IVARS_TOTAL; var++){
+            //if variable is active on element, get its position in **ivars
+            if (mat->ivar_pos.var[var]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[var]; ctr++;}
         }
-
         ctr=0;
-        
 	}
 
 }
