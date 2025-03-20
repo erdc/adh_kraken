@@ -1,9 +1,9 @@
 /*! \file sw2_nb_test.c This file tests the sw2 engine */
 #include "adh.h"
-static double NEWTON_TEST_TOL = 1e-7;
+static double NEWTON_TEST_TOL = 2e-3;
 static int NEWTON_TEST_NX = 101;//16;
 static int NEWTON_TEST_NY = 6;//6;
-static double write_testcase_error_wet_dry(SMODEL_SUPER *mod, double initial_grid_mass);
+static double write_testcase_error_nb(SMODEL_SUPER *mod);
 static void permute_array(double *arr,int *p, int n);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -94,7 +94,7 @@ int sw2_nb_test(int nt) {
 	SVECT nds[nnodes_on_elem]; svect_init_array(nds, nnodes_on_elem);
 
 	//Downstream Edges
-	int node_ids[2] = {0,1};
+	int node_ids[2] = {5,4};
 	for (int i=0;i<nnodes_on_elem;i++){
 		nds[i].x = dm.grid->node[node_ids[i]].x;
     	nds[i].y = dm.grid->node[node_ids[i]].y;
@@ -102,7 +102,7 @@ int sw2_nb_test(int nt) {
     }
 	selem1d_load(&(dm.grid->elem1d[0]), 0, 0, 2, node_ids, 0, nds, 0);
 	
-	node_ids[0] = 1; node_ids[1] = 2;
+	node_ids[0] = 4; node_ids[1] = 3;
 	for (int i=0;i<nnodes_on_elem;i++){
 		nds[i].x = dm.grid->node[node_ids[i]].x;
     	nds[i].y = dm.grid->node[node_ids[i]].y;
@@ -110,7 +110,7 @@ int sw2_nb_test(int nt) {
     }
 	selem1d_load(&(dm.grid->elem1d[1]), 0, 0, 2, node_ids, 0, nds, 0);
 	
-	node_ids[0] = 2; node_ids[1] = 3;
+	node_ids[0] = 3; node_ids[1] = 2;
 	for (int i=0;i<nnodes_on_elem;i++){
 		nds[i].x = dm.grid->node[node_ids[i]].x;
     	nds[i].y = dm.grid->node[node_ids[i]].y;
@@ -118,7 +118,7 @@ int sw2_nb_test(int nt) {
     }
 	selem1d_load(&(dm.grid->elem1d[2]), 0, 0, 2, node_ids, 0, nds, 0);
 
-	node_ids[0] = 3; node_ids[1] = 4;
+	node_ids[0] = 2; node_ids[1] = 1;
 	for (int i=0;i<nnodes_on_elem;i++){
 		nds[i].x = dm.grid->node[node_ids[i]].x;
     	nds[i].y = dm.grid->node[node_ids[i]].y;
@@ -126,7 +126,7 @@ int sw2_nb_test(int nt) {
     }
 	selem1d_load(&(dm.grid->elem1d[3]), 0, 0, 2, node_ids, 0, nds, 0);
 
-	node_ids[0] = 4; node_ids[1] = 5;
+	node_ids[0] = 1; node_ids[1] = 0;
 	for (int i=0;i<nnodes_on_elem;i++){
 		nds[i].x = dm.grid->node[node_ids[i]].x;
     	nds[i].y = dm.grid->node[node_ids[i]].y;
@@ -412,11 +412,10 @@ int sw2_nb_test(int nt) {
     	init_vel[inode].x = dm.superModel[0].dirichlet_data[inode*3+1];
     	init_vel[inode].y = dm.superModel[0].dirichlet_data[inode*3+2];
     }
-    SFLAGS dummy;
-	double initial_grid_mass = tl_find_grid_mass_elem2d(dm.superModel[0].density, NULL, NULL, init_head,dm.superModel[0].grid, dummy);
+
 	//printf("Initial grid mass = %f\n",initial_grid_mass);
 	//extract second variable here
-	double total_error = write_testcase_error_wet_dry(&(dm.superModel[0]),initial_grid_mass); 
+	double total_error = write_testcase_error_nb(&(dm.superModel[0])); 
 	printf("Final error: %6.4e\n", total_error);
 	//plot grid in h5?
 //    strcpy(sm.grid->filename, "residtest");
@@ -455,75 +454,24 @@ int sw2_nb_test(int nt) {
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-double write_testcase_error_wet_dry(SMODEL_SUPER *mod, double initial_grid_mass) {
-    int inode;
-    double error_vx = 0., error_vy = 0., error_h = 0., max_head = 0., max_u = 0., max_v = 0., total_time_mass_flux= 0.0;
-    double error_vx_max, error_vy_max, error_h_max, max_head_grid, max_u_grid, max_v_grid;
-
-    for (inode=0; inode<mod->grid->my_nnodes; inode++) {
-        error_vx += fabs(mod->sol[inode*3+1]); // water initially at rest
-        error_vy += fabs(mod->sol[inode*3+2]); // water initially at rest
-        error_h  += fabs(mod->sol[inode*3] - mod->dirichlet_data[inode*3]);
-        if (fabs(mod->dirichlet_data[inode*3]) > max_head) max_head = fabs(mod->dirichlet_data[inode*3]);
-    }
-    //NEED TO DO
-    double *head;
-    head = (double *) tl_alloc(sizeof(double), mod->grid->nnodes);
-    SVECT2D *vel;
-    vel = (SVECT2D *) tl_alloc(sizeof(SVECT2D), mod->grid->nnodes);
-    //fill in temp arrays
-    for (inode=0; inode<mod->grid->my_nnodes; inode++){
-    	head[inode] = mod->sol[inode*3];
-    	vel[inode].x = mod->sol[inode*3+1];
-    	vel[inode].y = mod->sol[inode*3+2];
-    }
-    SFLAGS dummy;
-    double grid_mass_error = tl_find_grid_mass_error_elem2d(mod->density, head, vel, mod->grid, dummy, initial_grid_mass, NULL, NULL, mod->ts->dt, &total_time_mass_flux);
+// note :: may get natural errors from water head not remaining flat at in flow edge
+double write_testcase_error_nb(SMODEL_SUPER *mod) {
     
-    printf("Grid mass error %6.4e\n", grid_mass_error);
-
-
-    head = tl_free(sizeof(double),mod->grid->nnodes,head);
-    vel = tl_free(sizeof(SVECT2D),mod->grid->nnodes,vel);
-
-    return error_vx + error_vy + error_h;
-
-//    if (max_head < 1e-6) max_head = 1.;
-//    if (max_u < 1e-6) max_u = 1.;
-//    if (max_v < 1e-6) max_v = 1.;
-//#ifdef _MESSG
-//    error_vx_max=messg_dsum(error_vx,mod->grid->smpi->ADH_COMM);
-//    error_vy_max=messg_dsum(error_vy,mod->grid->smpi->ADH_COMM);
-//    error_h_max=messg_dsum(error_h,mod->grid->smpi->ADH_COMM);
-//    max_head_grid=messg_dmax(max_head,mod->grid->smpi->ADH_COMM);
-//    max_u_grid=messg_dmax(max_u,mod->grid->smpi->ADH_COMM);
-//    max_v_grid=messg_dmax(max_v,mod->grid->smpi->ADH_COMM);
-//    error_vx=error_vx_max;
-//    error_vy=error_vy_max;
-//    error_h=error_h_max;
-//    max_head=max_head_grid;
-//    max_u=max_u_grid;
-//    max_v=max_v_grid;
-//#endif
-//    if(mod->grid->smpi->myid==0){
-//        FILE *fp;
-//        fp = fopen("error.out", "w");
-//        fprintf(fp,"x-velocity abs error: %30.20e :: relative error: %30.20e \n",error_vx/mod->grid->macro_nnodes,error_vx/mod->grid->macro_nnodes/max_u);
-//        fprintf(fp,"y-velocity abs error: %30.20e :: relative error: %30.20e \n",error_vy/mod->grid->macro_nnodes,error_vy/mod->grid->macro_nnodes/max_v);
-//        fprintf(fp,"head abs error: %30.20e :: relative error: %30.20e \n",error_h/mod->grid->macro_nnodes,error_h/mod->grid->macro_nnodes/max_head);
-//        fprintf(fp,"grid_mass_error: %30.20e :: relative error: %30.20e \n",grid_mass_error, grid_mass_error/mod->initial_grid_mass);
-//        fclose(fp);
-//    }
-}
-void permute_array(double *arr,int *p, int n){
-	double *temp;
-	temp = (double *) tl_alloc(sizeof(double),n);
-	for(int i =0;i<n;i++){
-		temp[p[i]] = arr[i];
-	}
-	// Copy permuted elements back to the original array
-    for (int i = 0; i < n; i++) {
-        arr[i] = temp[i];
+    int inode;
+    double convert_to_rads = 3.141592653589793 / 180.;
+    
+    // the inflow is 0.1 m/s at a 45 degree angle
+    double analytic_vx = 0.1/sqrt(2.);
+    double analytic_vy = analytic_vx;
+    
+    double error_vx = 0., error_vx_max;
+    double error_vy = 0., error_vy_max;
+    double error_h = 0., error_h_max;
+    for (inode=0; inode<mod->grid->my_nnodes; inode++) {
+        error_vx += fabs(mod->sol[inode*3+1] - analytic_vx);
+        error_vy += fabs(mod->sol[inode*3+2] - analytic_vy);
+        error_h  += fabs(mod->sol[inode*3] - 1.);  // this is just to see how far from rigid lid
     }
-	temp = (double *) tl_free(sizeof(double),n,temp);
+
+    return error_vx/mod->grid->macro_nnodes/analytic_vx + error_vy/mod->grid->macro_nnodes/analytic_vy + error_h/mod->grid->macro_nnodes/1.;
 }
