@@ -247,7 +247,7 @@ int sw2_nb_test(int nt) {
 	SMODEL_SUPER *sm = &(dm.superModel[0]);
     
 	//overwrite inflow
-    sm->mat_physics_elem[sm->elem1d_physics_mat[0]].model[0].physics = SW2_BC_H_;
+    sm->mat_physics_elem[sm->elem1d_physics_mat[0]].model[0].physics = SW2_BC_FLUX_;
     sm->mat_physics_elem[sm->elem1d_physics_mat[0]].model[0].physics_init = UNSET_INT;
 
     //overwrite outflow
@@ -310,22 +310,22 @@ int sw2_nb_test(int nt) {
 		sm->sol_old[id*3] = 1.0 - z_coord;
 		sm->sol_older[id*3] = 1.0 - z_coord;
 		//velocity too
-//		sm->sol[id*3+1] = 0.070710678;
-//		sm->sol[id*3+2] = 0.070710678;
-//		sm->sol_old[id*3+1] = 0.070710678;
-//		sm->sol_older[id*3+2] = 0.070710678;
-//		sm->dirichlet_data[id*3] = 1.0 - z_coord;
-//		sm->dirichlet_data[id*3+1] = 0.070710678;
-//		sm->dirichlet_data[id*3+2] = 0.070710678;
+		sm->sol[id*3+1] = 0.070710678;
+		sm->sol[id*3+2] = 0.070710678;
+		sm->sol_old[id*3+1] = 0.070710678;
+		sm->sol_older[id*3+2] = 0.070710678;
+		sm->dirichlet_data[id*3] = 1.0 - z_coord;
+		sm->dirichlet_data[id*3+1] = 0.070710678;
+		sm->dirichlet_data[id*3+2] = 0.070710678;
 
 		//overwrite to 0
-		sm->sol[id*3+1] = 0.0;
-		sm->sol[id*3+2] = 0.0;
-		sm->sol_old[id*3+1] = 0.0;
-		sm->sol_older[id*3+2] = 0.0;
-		sm->dirichlet_data[id*3] = 1.0 - z_coord;
-		sm->dirichlet_data[id*3+1] = 0.0;
-		sm->dirichlet_data[id*3+2] = 0.0;
+//		sm->sol[id*3+1] = 0.0;
+//		sm->sol[id*3+2] = 0.0;
+//		sm->sol_old[id*3+1] = 0.0;
+//		sm->sol_older[id*3+2] = 0.0;
+//		sm->dirichlet_data[id*3] = 1.0 - z_coord;
+//		sm->dirichlet_data[id*3+1] = 0.0;
+//		sm->dirichlet_data[id*3+2] = 0.0;
 		//no dirichlet condition
 		//if ( is_near(x_coord,xmin) || is_near(x_coord,xmax) || is_near(y_coord,ymin) || is_near(y_coord,ymax) ){
 		//	continue;
@@ -360,10 +360,10 @@ int sw2_nb_test(int nt) {
 	series->outfact = 1;
 	series->entry[0].time = 0.0;
   	series->entry[0].time *= series->infact;
-  	series->entry[0].value[0] = -0.1;
+  	series->entry[0].value[0] = 0.1;
   	series->entry[1].time = 15000;
     series->entry[1].time *= series->infact;
-    series->entry[1].value[0] = -0.1;
+    series->entry[1].value[0] = 0.1;
     // sanity check the series
   	sseries_check(*series);
   	printf("attempting to add series to linked list\n");
@@ -371,14 +371,30 @@ int sw2_nb_test(int nt) {
   	sm->series_curr = NULL;
   	// add to linked list (which will allocate another, so we can delete this one)
     sseries_add(series, &(sm->series_head), &(sm->series_curr), TRUE); 
+	series->id = 1;
+	series->infact = 1;
+	series->outfact = 1;
+	series->entry[0].time = 0.0;
+  	series->entry[0].time *= series->infact;
+  	series->entry[0].value[0] = 1.0;
+  	series->entry[1].time = 15000;
+    series->entry[1].time *= series->infact;
+    series->entry[1].value[0] = 1.0;
+    sseries_add(series, &(sm->series_head), &(sm->series_curr), TRUE); 
+
     sseries_free(series);
 
     //create string that points to it!
     //this will be inside elem mat physics now!
     sm->mat_physics_elem[sm->elem1d_physics_mat[0]].bc_ids = (int*) tl_alloc(sizeof(int), 1);
-	sm->mat_physics_elem[sm->elem1d_physics_mat[0]].bc_ids[0] = 0;    
+	sm->mat_physics_elem[sm->elem1d_physics_mat[0]].bc_ids[0] = 0;   
 
+	sm->mat_physics_elem[sm->elem1d_physics_mat[5]].bc_ids = (int*) tl_alloc(sizeof(int), 1);
+	sm->mat_physics_elem[sm->elem1d_physics_mat[5]].bc_ids[0] = 1;
+ 
 
+	printf("Initial condition: \n");
+	sarray_printScreen_dbl(sm->sol,sm->ndofs, "sol");
 
 
 	printf("Calling time loop\n");

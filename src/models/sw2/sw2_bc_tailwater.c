@@ -151,7 +151,7 @@ int fe_sw2_bc_tailwater(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pert
 #endif
         double tail_elev = 0.;
         double elem_depth[2] = { 0., 0. };  
-        int isers = str_values[string].ol_flow.isigma;
+        int isers = mod->mat_physics_elem[string].bc_ids[0];
         tail_elev = sseries_get_value(isers, mod->series_head,0);
         elem_depth[0] = tail_elev - elem_node_z[0];
         elem_depth[1] = tail_elev - elem_node_z[0];

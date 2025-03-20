@@ -98,6 +98,7 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
     SVECT2D elem_vel[nnodes];
     global_to_local_dbl_ivars(elem_head, elem1d.nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
     global_to_local_SVECT2D_ivars(elem_vel, elem1d.nodes, nnodes, mod->ivars, mod->ivar_pos.var[_UDA] , mod->ivar_pos.var[_VDA], mod->sol);
+    
     if (perturb_var == PERTURB_NONE){ 
         perturb_sign = 0;
     }else if(perturb_var == mod->ivar_pos.var[_H]){
@@ -113,6 +114,9 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
     double u[NDONSEG], v[NDONSEG];
     for (i=0; i<nnodes; i++) { u[i] = elem_vel[i].x; v[i] = elem_vel[i].y; }
     double h_avg = one_2 * (elem_head[0] + elem_head[1]); if (h_avg < SMALL) h_avg = SMALL;
+    //printf("element %d:\n",ie);
+    //sarray_printScreen_dbl(elem_head,nnodes,"elem head");
+    
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // DEBUG SCREEN PRINT
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -144,12 +148,8 @@ int fe_sw2_bc_flux(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbat
      * \note
      *********************************************************************************************/
     //int isers = str_values[string].ol_flow.isigma; //how to replace
-    int isers = mod->mat_physics_elem[mod->elem1d_physics_mat[string]].bc_ids[0];//hard coded for now but should be an ivar pos
-    //negative now outside of individual routines
-    //double flux = -1.0 * sseries_get_value(isers, mod->series_head, 0);
-    //printf("series = %d\n",isers);
+    int isers = mod->mat_physics_elem[string].bc_ids[0];//hard coded for now but should be an ivar pos
     double flux = -1.0 * sseries_get_value(isers, mod->series_head, 0);
-    //printf("flux = %f\n",flux);
     fe_sw2_1d_explicit_flow(elem_rhs, elem1d, ie, nrml, djac, dt, flux, h_avg, u, v, DEBUG, DEBUG_LOCAL);
     //sarray_printScreen_dbl(elem_rhs,2, "elemrhs");
 #ifdef _DEBUG

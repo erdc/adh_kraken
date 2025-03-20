@@ -151,10 +151,14 @@ int fe_sw2_bc_h(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation
         double h_data = 0.;
         double elem_depth[2] = { 0., 0. };  
         //int isers = str_values[string].ol_flow.isigma;
-        //h_data = sseries_get_value(isers, mod->series_head,0);
-        elem_depth[0] = 1.0;//h_data;
-        elem_depth[1] = 1.0;//h_data;
-        if (elem_depth[0] < SMALL || elem_depth[1] < SMALL || elem_head[0] < SMALL || elem_head[1] < SMALL) return 0;
+        int isers = mod->mat_physics_elem[string].bc_ids[0];
+        h_data = sseries_get_value(isers, mod->series_head,0);
+        elem_depth[0] = h_data;
+        elem_depth[1] = h_data;
+        if (elem_depth[0] < SMALL || elem_depth[1] < SMALL || elem_head[0] < SMALL || elem_head[1] < SMALL){
+           printf("Dry at open boundary warning!!!\n");
+           return 0; 
+        } 
         //Mark NOTE: SHOULDNT THIS BE ELEM_DEPTH NOT ELEM_HEAD?? Trying now
         fe_sw2_1d_implicit_flow(elem_rhs, elem1d, ie, nrml, djac, dt, elem_vel, elem_depth, DEBUG, DEBUG_LOCAL);
         if (PRESSURE_FLAG == ON) {

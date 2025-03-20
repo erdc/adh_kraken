@@ -83,9 +83,10 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double djac = elem2d->djac;
     double g = mod->gravity; //where to put this
     double drying_lower_limit = sw2->drying_lower_limit;
-    int imat = elem2d->mat; // this will need to be mod->coverage->coverage_2d[SW2_INDEX][ie]
+    int imat = mod->elem2d_physics_mat[ie]; // this will need to be mod->coverage->coverage_2d[SW2_INDEX][ie]
     STR_VALUE str_values = mod->str_values[elem2d->string]; //still in use?
     int wd_flag = sw2->dvar.elem_flags[sw2->WD_FLAG][ie]; //WARNING, ie is not always correct, could be sw2->dvar.dvar_elem_map[ie] need to use Coreys map eventually? how to avoid conditional. a function pointer?
+    //printf("g: %f, alpha: %f, dt: %f, drying lower: %f, wd_flag: %d, imat: %d\n ", g,alpha,dt,drying_lower_limit,wd_flag,imat);
     //only make for quadrilateral elements?
     SQUAD *quad = grid->quad_rect; // for quadrilateral quadrature calculations
     int isTriangle = NO;  if (nnodes == NDONTRI) isTriangle = YES;
@@ -98,7 +99,6 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     }
 #endif  
 
-    //printf("elem %d: alpha %f, dt %f, drying_lower_limit %f, wd_flag %d\n",ie,alpha,dt,drying_lower_limit, wd_flag);  
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     // GRID VARIABLES
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/    
@@ -238,7 +238,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double elem_old_vel_wd_avg_mag = svect2d_mag(elem_old_vel_wd_avg);  
     // friction variables
     double h_fric = MAX(elem_h_wd_avg, SMALL);
-    double roughness = 0.03;//fe_sw2_get_roughness(mod, h_fric, elem_vel_wd_avg_mag, elem2d->string, UNUSED);
+    double roughness = 0.002;//fe_sw2_get_roughness(mod, h_fric, elem_vel_wd_avg_mag, elem2d->string, UNUSED);
     // loads the diffusion eddy tensor
     double ev_st = 0., ev_tr = 0.;
     STENSOR2DAI ev; stensor2dai_init(&ev);
