@@ -1,4 +1,4 @@
-/*! \file newton_test.c This file tests the PETSc solver for split CSR matrix */
+/*! \file test_newton.c This file tests the PETSc solver for split CSR matrix */
 #include "adh.h"
 static double LINEAR_NEWTON_TEST_TOL = 1e-7;
 static double NONLINEAR_NEWTON_TEST_TOL = 1e-6;
@@ -19,7 +19,7 @@ static void compute_exact_solution_nonlinear_poisson(double *u_exact, int ndof, 
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int newton_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax){
+int test_newton(int npx, int npy, double xmin, double xmax, double ymin, double ymax){
 	int err = linear_newton_test(npx, npy, xmin, xmax, ymin, ymax);
 	err+= nonlinear_newton_test(npx, npy, xmin, xmax, ymin, ymax);
 	return err;

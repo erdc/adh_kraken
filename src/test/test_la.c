@@ -1,4 +1,4 @@
-/*! \file la_test.c This file tests the linear algebra engine */
+/*! \file test_la.c This file tests the linear algebra engine */
 #include "adh.h"
 static int bcgstab_test(void);
 static int petsc_test(void);
@@ -14,7 +14,7 @@ static int petsc_test(void);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int la_test(void){
+int test_la(void){
   int err = bcgstab_test();
   err += petsc_test();
   return err;

@@ -1,11 +1,13 @@
-/*! \file jacobian_test.c This file tests the assembly of a Jacobian matrix */
+/*! \file test_residual.c This file tests the residual assembly */
 #include "adh.h"
-static int check_jacobian(SMODEL_SUPER *sm);
+static void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double hx, double hy);
+static double RESID_TEST_TOL = 1e-12;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     This function tests assembly of the Jacobian matrix
+ *  \brief     This function tests the assembly of a residual vector
+ *  solution
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
  *  \bug       none
@@ -13,7 +15,7 @@ static int check_jacobian(SMODEL_SUPER *sm);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int jacobian_test(int npx, int npy, double xmin, double xmax, double ymin, double ymax) {
+int test_residual(int npx, int npy, double xmin, double xmax, double ymin, double ymax) {
 	//++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// return error code
@@ -50,12 +52,13 @@ int jacobian_test(int npx, int npy, double xmin, double xmax, double ymin, doubl
     *(dm.grid) = create_rectangular_grid(xmin, xmax, ymin, ymax, npx, npy,
  	theta, dz, a0, ax, ax2, ay, ay2, axy,
     ax2y, axy2, ax2y2, flag3d );
-
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Reorder grid to minimize bandwidth
     //++++++++++++++++++++++++++++++++++++++++++++++
+
     sgrid_reorder(dm.grid,2);
+
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Fill in a simple design model
@@ -92,102 +95,80 @@ int jacobian_test(int npx, int npy, double xmin, double xmax, double ymin, doubl
 
     smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
     
-    //sarray_init_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs);
-    sarray_init_value_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs, 1.0);
+    sarray_init_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs);
     dm.superModel[0].LINEAR_PROBLEM = YES;
 
 
-	assemble_jacobian(&(dm.superModel[0]));
+	assemble_residual(&(dm.superModel[0]), dm.grid);
+
+	//print final residual
+	//sarray_printScreen_dbl(dm.superModel[0].lin_sys->residual, dm.superModel[0].ndofs, "residual");
+
+	double *exact_sol;
+	int nnodes = dm.grid->nnodes;
+	double hx = (xmax - xmin)/(npx-1);
+	double hy = (ymax - ymin)/(npy-1);
+	exact_sol = (double *) tl_alloc(sizeof(double), nnodes);
+	sarray_init_dbl(exact_sol, nnodes);
+
+	find_analytic_residual_linear_poisson(exact_sol, dm.grid, hx, hy);
+
+	//compute L2 and Linf error
+	double l2_err =  l2_error(dm.superModel[0].lin_sys->residual, exact_sol, nnodes);
+	double linf_err =  linf_error(dm.superModel[0].lin_sys->residual, exact_sol, nnodes);
 
 
-	ierr = check_jacobian(&(dm.superModel[0]));
 
-	//free stuff
+	//return -1 if failed, 0 if good
+	
+	if(l2_err < RESID_TEST_TOL && linf_err < RESID_TEST_TOL){
+		ierr=0;
+	}
+
+
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+	// Free Memory
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    exact_sol = tl_free(sizeof(double), nnodes, exact_sol);
     smodel_design_free(&dm);
+    
+#ifdef _DEBUG
+    printf(">assemble residual error code %d : l2err = %16.4e, linf err=%16.4e \n", ierr, l2_err, linf_err);
+#endif
 	return ierr;
 }
 
 
-int check_jacobian(SMODEL_SUPER *sm){
-	int *indptr = sm->lin_sys->indptr_diag;
-	int *cols = sm->lin_sys->cols_diag;
-	double *vals = sm->lin_sys->vals_diag;
-	int nrow = *(sm->lin_sys->local_size);
-	int nnz = sm->lin_sys->nnz_diag;
-	int n_connections;
-	int NNZ = 0;
-	int err = 0;
-	//check if number of columns on each row makes sense
-	int nnodes = sm->grid->nnodes;
-	int nd1, nd2, nd3;
-	int *nodes;
-	int *n_con;
-	int nnodes_on_elem;
-	int current_node;
-	int other_node;
-	n_con = (int *) tl_alloc(sizeof(int), nnodes);
-	sarray_init_int(n_con, nnodes);
 
-	int i,j,k;
+void find_analytic_residual_linear_poisson(double *resid, SGRID *grid, double hx, double hy){
+	//computes the integral int_f_v_dx where f=-6
+	//h is the element width
 
-	//we know max nodes this can be connected to will be 9
-	int max_con = 9;
-	int **temp_edgetab;
-	temp_edgetab = (int**) tl_alloc(sizeof(int*), nnodes);
-    for(int j=0;j<nnodes;j++){
-        temp_edgetab[j] = (int*) tl_alloc(sizeof(int), max_con);
-        for(int k=0;k<max_con;k++){
-            temp_edgetab[j][k]=INT_MAX;
-        }
-    }
+	//this will be (n elements connected to node) * -6 * (h^2)/6
+
+	//get connections per node
+	int nd1,nd2,nd3;
+	int *n_connections;
+	int nnodes = grid->nnodes;
+	n_connections = (int *) tl_alloc(sizeof(int), nnodes);
+	sarray_init_int(n_connections, nnodes);
+
+	for (int ie = 0; ie<grid->nelems2d ; ie++ ){
+		nd1 = grid->elem2d[ie].nodes[0];
+		nd2 = grid->elem2d[ie].nodes[1];
+		nd3 = grid->elem2d[ie].nodes[2];
+
+		n_connections[nd1]++;
+		n_connections[nd2]++;
+		n_connections[nd3]++;
+	} 
 
 
-    //First set of loops is solely to establish how many nodes are connected to each node
-    for (i=0;i<sm->grid->nelems2d;i++){
-    	//nnodes on the element
-        nnodes_on_elem = sm->grid->elem2d[i].nnodes;
-        //Could get stuff for node weights from physics mat
-       	//for this element, find nodes
-        nodes = sm->grid->elem2d[i].nodes;
-        //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
-        for (j=0;j<nnodes_on_elem;j++){
-            //each node inside an element, add this to the count
-            current_node = nodes[j];
-            //loop through each node and add
-            for (k=0;k<nnodes_on_elem;k++){
-            	other_node = nodes[k];
-                temp_edgetab[current_node][n_con[current_node]]=other_node;
-                n_con[current_node]+=1;
-            }
-      
-        }
-    }
-
-
-	for (i=0;i<nnodes;i++){
-        // sort the column indices (j-entries)
-        //use stdlib.h qsort
-        qsort(temp_edgetab[i], n_con[i], sizeof(int), compare_ints);
-        //this should hopefully remove duplicates?
-        n_connections = sarray_unique_int(temp_edgetab[i], n_con[i]);
-        //overwrite nnz row with sarray_unique_int?
-        n_con[i] = n_connections;
-        //add nnz in a row to the NNZ
-        //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
-        NNZ+=n_connections;
-    }
-
-
-
-	for (int i = 0;i<nrow;i++){
-		if ( (indptr[i+1] - indptr[i]) != n_con[i]){
-			err+=1;
-		}
-
+	for (int i = 0; i<nnodes; i++){
+		resid[i] = n_connections[i]*(-6.0)*hx*hy/6.0;
 	}
 
-	if (err!=0){err=1;} 
-
-	return err;
+	return;
 
 }

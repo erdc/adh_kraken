@@ -1,4 +1,4 @@
-/*! \file sw2_nb_test.c This file tests the sw2 engine */
+/*! \file test_sw2_nb.c This file tests the sw2 engine */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 2e-3;
 static int NEWTON_TEST_NX = 101;//16;
@@ -18,7 +18,7 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int sw2_nb_test(int nt) {
+int test_sw2_nb(int nt) {
 	//++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// return error code

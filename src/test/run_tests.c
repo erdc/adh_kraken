@@ -42,7 +42,7 @@ if (DEBUG) {
     double ymax[] = {1.0, 1.0, 2.0, 1.8, -8.5, 26.3, 102.5, -998.5, 5.0, 3.75};
     int nts[] = {50, 20, 10, 15, 16, 30, 7, 18, 13, 20};
     for (int i = 0 ; i < n_resid_tests; i++){
-        err += residual_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
+        err += test_residual(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);
     }
 
    if(err!=0){all_err+=1;}
@@ -67,7 +67,7 @@ if (DEBUG) {
     int n_jacobian_tests = 10;//
 
     for (int i = 0 ; i < n_jacobian_tests; i++){
-        err += jacobian_test(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);//
+        err += test_jacobian(npx[i],npy[i],xmin[i],xmax[i],ymin[i],ymax[i]);//
     }
     if(err!=0){all_err+=1;}
 
@@ -90,7 +90,7 @@ if (DEBUG) {
     err = 0;
     int n_newton_tests = 10;
     for (int i = 0 ; i < n_newton_tests; i++){
-        err += newton_test(npx[i],npy[i],xmin[0],xmax[0],ymin[0],ymax[0]);
+        err += test_newton(npx[i],npy[i],xmin[0],xmax[0],ymin[0],ymax[0]);
         printf(" NEWTON TEST %d / %d completed \n",i+1,n_newton_tests);
     }
     if(err!=0){all_err+=1;}
@@ -117,7 +117,7 @@ if (DEBUG) {
     npy[9] = 350;
     
     for (int i = 0 ; i < n_timeloop_tests; i++){
-        err += timeloop_test(npx[i],npy[i], nts[i]);
+        err += test_timeloop(npx[i],npy[i], nts[i]);
         printf(" Timeloop TEST %d / %d completed \n",i+1,n_timeloop_tests);
     }
     if(err!=0){all_err+=1;}
@@ -145,7 +145,7 @@ if (DEBUG) {
     nts[0] = 1440;
 
     for (int i = 0 ; i < n_sw2_wd_tests; i++){
-        err += sw2_wd_test(npx[i],npy[i], nts[i]);
+        err += test_sw2_wd(npx[i],npy[i], nts[i]);
         printf(" sw2_wd_test TEST %d / %d completed \n",i+1,n_sw2_wd_tests);
     }
     if(err!=0){all_err+=1;}
@@ -171,7 +171,7 @@ if (DEBUG) {
     nts[0] = 10;
 
     for (int i = 0 ; i < n_sw2_nb_tests; i++){
-        err += sw2_nb_test(nts[i]);
+        err += test_sw2_nb(nts[i]);
         printf(" sw2_nb_test TEST %d / %d completed \n",i+1,n_sw2_nb_tests);
     }
     if(err!=0){all_err+=1;}

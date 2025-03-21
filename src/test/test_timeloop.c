@@ -1,4 +1,4 @@
-/*! \file timeloop_test.c This file tests the timeloop via heat equation */
+/*! \file test_timeloop.c This file tests the timeloop via heat equation */
 #include "adh.h"
 static double NEWTON_TEST_TOL = 1e-7;
 static double alpha = 3;
@@ -19,7 +19,7 @@ static void permute_array(double *arr,int *p, int n);
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int timeloop_test(int npx, int npy, int nt) {
+int test_timeloop(int npx, int npy, int nt) {
 
 	//++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
