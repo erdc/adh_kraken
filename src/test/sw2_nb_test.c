@@ -445,7 +445,7 @@ int sw2_nb_test(int nt) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     Computes analytic solution used to calculate error
+ *  \brief     Computes analytic solution used to calculate error for nb
  *  solution
  *  \author    Count Corey J. Trahan
  *  \author    Mark Loveland
