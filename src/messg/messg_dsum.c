@@ -6,14 +6,22 @@
    \param[in,out] x (double) - Value in
    \returns Sum of Value Across Processors
  */
-double messg_dsum(double x)
+double messg_dsum(double x
+  #ifdef _MESSG
+                  , MPI_Comm ADH_COMM
+#endif
+                  )
 {
 #ifdef _MESSG
-  double x_send = 0.0;        /* the variables for the pass */
+  double x_send = DZERO;        /* the variables for the pass */
   int ierr_code = MPI_ERR_UNKNOWN;  /* the error code from an mpi call */
 
   x_send = x;
-  ierr_code = MPI_Allreduce(&x_send, &x, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  ierr_code = MPI_Allreduce(&x_send, &x, 1, MPI_DOUBLE, MPI_SUM, ADH_COMM);
+  if (ierr_code != MPI_SUCCESS)
+    {
+      messg_err(ierr_code);
+    }
 #endif
   return (x);
 }

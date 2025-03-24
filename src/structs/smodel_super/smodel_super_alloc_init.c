@@ -32,8 +32,8 @@ void smodel_super_alloc_init(SMODEL_SUPER **superModel, int nSuperModels) {
         strcpy(sm->filebase,"");
 
 #ifdef _MESSG
-        sm->myid = messg_comm_rank(sm->model_comm);
-        sm->npes = messg_comm_size(sm->model_comm);
+        sm->myid = messg_comm_rank(sm->grid->smpi->ADH_COMM);
+        sm->npes = messg_comm_size(sm->grid->smpi->ADH_COMM);
 #else
         sm->myid = 0;
         sm->npes = 1;

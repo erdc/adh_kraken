@@ -202,7 +202,11 @@ int bcgstab_test(void) {
 
   //actually solve matrix
   status = solve_linear_sys_bcgstab(sol, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag,
-     vals_off_diag, resid, scale_vect, m, n+nghost,rank, ghosts, nghost);
+     vals_off_diag, resid, scale_vect, m, n+nghost,rank, ghosts, nghost
+#ifdef _MESSG
+     , MPI_COMM_WORLD
+#endif
+     );
 
   //print scale vec to see
   //for(k=0;k<m+nghost;k++){

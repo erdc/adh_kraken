@@ -38,7 +38,6 @@ $(wildcard $(MASTER_SRC_DIR)/friction) \
 $(wildcard $(MASTER_SRC_DIR)/xdmf) \
 $(wildcard $(MASTER_SRC_DIR)/dofmaps) \
 $(wildcard $(MASTER_SRC_DIR)/tokens) \
-$(wildcard $(MASTER_SRC_DIR)/messg) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sfile) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sdvar) \
 $(wildcard $(MASTER_SRC_DIR)/structs/svect) \
@@ -49,6 +48,7 @@ $(wildcard $(MASTER_SRC_DIR)/structs/squad) \
 $(wildcard $(MASTER_SRC_DIR)/structs/selem_physics) \
 $(wildcard $(MASTER_SRC_DIR)/structs/slist_items) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smpi) \
+$(wildcard $(MASTER_SRC_DIR)/messg) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smeteor) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sflags) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sstr_value) \
@@ -87,7 +87,6 @@ $(MASTER_SRC_DIR)/friction \
 $(MASTER_SRC_DIR)/xdmf \
 $(MASTER_SRC_DIR)/dofmaps \
 $(MASTER_SRC_DIR)/tokens \
-$(MASTER_SRC_DIR)/messg \
 $(MASTER_SRC_DIR)/structs/sdt \
 $(MASTER_SRC_DIR)/structs/sdvar \
 $(MASTER_SRC_DIR)/structs/sfile \
@@ -99,6 +98,7 @@ $(MASTER_SRC_DIR)/structs/squad \
 $(MASTER_SRC_DIR)/structs/selem_physics \
 $(MASTER_SRC_DIR)/structs/slist_items \
 $(MASTER_SRC_DIR)/structs/smpi \
+$(MASTER_SRC_DIR)/messg \
 $(MASTER_SRC_DIR)/structs/smeteor \
 $(MASTER_SRC_DIR)/structs/sflags \
 $(MASTER_SRC_DIR)/structs/sstr_value \
@@ -151,6 +151,7 @@ IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
 CFLAGS              += -g -pedantic -std=c99 -O3 -Wno-incompatible-pointer-types-discards-qualifiers
 CFLAGS              += -D_PETSC
+#CFLAGS              += -D_MESSG
 CFLAGS              += -D_HDF5 -D_DEBUG #-D_MPI
 CFLAGS              += -L/opt/homebrew/Cellar/suite-sparse/7.8.3/lib -lumfpack -I/opt/homebrew/Cellar/suite-sparse/7.8.3/include/suitesparse
 CFLAGS              += -L/opt/homebrew/Cellar/scotch/7.0.6/lib -lscotch -I/opt/homebrew/Cellar/scotch/7.0.6/include

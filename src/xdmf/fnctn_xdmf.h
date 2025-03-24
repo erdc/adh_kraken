@@ -1,15 +1,16 @@
 #ifndef H_XDMF_
 #define H_XDMF_
 
-FILE *xmf_init(char *fbase, char *dn, char *gn);
-void xmf_finalize(FILE *xmf);
-void xmf_header(FILE *xmf, char *dn, char *gn);
-void xmf_tail(FILE *xmf);
+FILE *xmf_init(char *fbase, char *dn, char *gn, int myid);
+void xmf_finalize(FILE *xmf, int myid);
+void xmf_header(FILE *xmf, char *dn, char *gn, int myid);
+void xmf_tail(FILE *xmf, int myid);
 void xmf_write_ts_header(int myid, FILE *xmf, char *fbase, double time);
-void xmf_write_ts_tail(FILE *xmf);
+void xmf_write_ts_tail(FILE *xmf, int myid);
 void xmf_write_geometry(SGRID *g, FILE *xmf, char *fbase, int mesh_no);
 void xmf_write_topology(SGRID *g, FILE *xmf, char *fbase, int mesh_no);
 void xmf_write_ts_attribute(SGRID *g, FILE *xmf, char *fbase, char *name, int ndim, int nt, bool isNodal);
+
 
 
 void hdf5_init(SGRID *g, char *fbase);

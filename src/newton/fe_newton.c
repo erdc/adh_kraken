@@ -62,7 +62,7 @@ int fe_newton(SMODEL_SUPER* sm)
 
 //figure out MPI later
 #ifdef _MESSG
-        MPI *smpi = grid->smpi
+        SMPI *smpi = grid->smpi;
 #endif
 
     
@@ -271,6 +271,9 @@ int fe_newton(SMODEL_SUPER* sm)
     get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
         &imax_dof, &iinc_dof, include_dof,
         my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
+#ifdef _MESSG
+        ,sm->grid->smpi
+#endif
         );
 
 
@@ -385,9 +388,9 @@ int fe_newton(SMODEL_SUPER* sm)
 #ifdef _DEBUG
         if (DEBUG_FULL) {
 #ifdef _MESSG
-            for(proc_count=0;proc_count<supersmpi->npes;proc_count++){
-                if(proc_count==supersmpi->myid){
-                    printf("*********** myid %d nnodes: %d nsys: nsys %d :: ",supersmpi->myid,nnodes,nsys);
+            for(proc_count=0;proc_count<smpi->npes;proc_count++){
+                if(proc_count==smpi->myid){
+                    printf("*********** myid %d nnodes: %d nsys: nsys %d :: ",smpi->myid,nnodes,my_nnodes);
 #endif
                     printf("BEFORE SOLVE!\n");
                     printScreen_dble_array("sol before solving", sm->sol, ndofs, __LINE__, __FILE__);
@@ -574,9 +577,9 @@ int fe_newton(SMODEL_SUPER* sm)
 #ifndef _PETSC
         if (DEBUG_FULL) {
 #ifdef _MESSG
-            for(proc_count=0;proc_count<supersmpi->npes;proc_count++){
-                if(proc_count==supersmpi->myid){
-                    printf("***********myid %d ",supersmpi->myid);
+            for(proc_count=0;proc_count<smpi->npes;proc_count++){
+                if(proc_count==smpi->myid){
+                    printf("***********myid %d ",smpi->myid);
 #endif
                     printf("AFTER SOLVE!\n");
                     printScreen_dble_array("sol after solving", sm->sol, ndofs, __LINE__, __FILE__);
@@ -612,6 +615,9 @@ int fe_newton(SMODEL_SUPER* sm)
         get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
         &imax_dof, &iinc_dof, include_dof,
         my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
+#ifdef _MESSG
+        ,sm->grid->smpi
+#endif
         );
 #ifdef _DEBUG
         if (DEBUG_FULL) {
@@ -632,7 +638,7 @@ int fe_newton(SMODEL_SUPER* sm)
 //Mark, do we really need UMFAIL too? Commenting out for now       
 #ifdef _MESSG
         //UMFail_max = messg_imax(solver->UMFail, supersmpi->ADH_COMM);
-        solv_flag_min = messg_imin(solv_flag, supersmpi->ADH_COMM);
+        solv_flag_min = messg_imin(solv_flag, smpi->ADH_COMM);
 #else
         //UMFail_max = messg_imax(solver->UMFail);
         solv_flag_min = messg_imin(solv_flag);
@@ -663,8 +669,8 @@ int fe_newton(SMODEL_SUPER* sm)
 //#endif
 //        } else {
 #ifdef _MESSG
-            inc_max_norm = messg_dmax(inc_max_norm, supersmpi->ADH_COMM);
-            resid_max_norm = messg_dmax(resid_max_norm, supersmpi->ADH_COMM);
+            inc_max_norm = messg_dmax(inc_max_norm, smpi->ADH_COMM);
+            resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
 #endif
 //        }
         
@@ -718,11 +724,14 @@ int fe_newton(SMODEL_SUPER* sm)
             get_residual_norms(&resid_max_norm, &resid_l2_norm, &inc_max_norm,
             &imax_dof, &iinc_dof, include_dof,
             my_ndofs, ndofs, macro_ndofs, residual, dsol, sm->bc_mask
+#ifdef _MESSG
+            ,sm->grid->smpi
+#endif
             );
             
 #ifdef _MESSG
-            resid_max_norm = messg_dmax(resid_max_norm, supersmpi->ADH_COMM);
-            inc_max_norm = messg_dmax(inc_max_norm, supersmpi->ADH_COMM);
+            resid_max_norm = messg_dmax(resid_max_norm, smpi->ADH_COMM);
+            inc_max_norm = messg_dmax(inc_max_norm, smpi->ADH_COMM);
 #endif
             /* increments the line search counter */
             linesearch_cuts++;
@@ -763,9 +772,9 @@ int fe_newton(SMODEL_SUPER* sm)
 	#ifdef _DEBUG
         if (DEBUG_FULL) {
 #ifdef _MESSG
-            for(proc_count=0;proc_count<supersmpi->npes;proc_count++){
-                if(proc_count==supersmpi->myid){
-                    printf("***********myid %d ",supersmpi->myid);
+            for(proc_count=0;proc_count<smpi->npes;proc_count++){
+                if(proc_count==smpi->myid){
+                    printf("***********myid %d ",smpi->myid);
 #endif
                     printf("\nsolver variables:\n");
                     printf("inc_max_norm: %30.20f \t inc_nonlin: %30.20f \n",inc_max_norm,sm->inc_nonlin);
@@ -821,7 +830,7 @@ int fe_newton(SMODEL_SUPER* sm)
 
 
 #ifdef _MESSG  // make sure that if one subdomain fails, they all do (cjt)
-        MPI_Allreduce(&check, &keep_chugging, 1, MPI_INT, MPI_MAX, supersmpi->ADH_COMM);
+        MPI_Allreduce(&check, &keep_chugging, 1, MPI_INT, MPI_MAX, smpi->ADH_COMM);
 #else
         keep_chugging = check;
 #endif
@@ -878,7 +887,7 @@ int fe_newton(SMODEL_SUPER* sm)
         
         tc_scale(&sm->ts->dt
 #ifdef _MESSG
-                 , supersmpi->ADH_COMM
+                 , smpi->ADH_COMM
 #endif
                  );
         //i dont think this exists anymore, check with Corey

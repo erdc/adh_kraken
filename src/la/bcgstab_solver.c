@@ -65,7 +65,11 @@ static int max_it = 100;
 int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, 
   int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *b, 
   double *scale_vect, int local_size, int size, int rank,
-  int *ghosts, int nghost){
+  int *ghosts, int nghost
+#ifdef _MESSG
+  , MPI_Comm ADH_COMM
+#endif
+  ){
   int it;                     /* loop counter over the cg iterations */
   //int iapprox_update_flag;    /* flag for performing an update of the approximation */
   //int iresid_update_flag;     /* flag for performing an update of the residual */
@@ -170,8 +174,16 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   rnorm = sarray_l_infty_norm(r, local_size);
   bnorm = sarray_l_infty_norm(b, local_size);
   //if it is in parallel. collect with allreduce
-  rnorm = messg_dmax(rnorm);
-  bnorm = messg_dmax(bnorm);
+  rnorm = messg_dmax(rnorm
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+    );
+  bnorm = messg_dmax(bnorm
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+    );
 //#ifdef _DEBUG
 //  printf("RNORM = %6.4e\n",rnorm);
 //  printf("BNORM = %6.4e\n",bnorm);
@@ -183,7 +195,11 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
 
   rho = sarray_dot_dbl(r, q, local_size);
   //if in parallel sum among processors
-  rho = messg_dsum(rho);
+  rho = messg_dsum(rho
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+    );
   //printf("RHO = %f\n",rho);
   //start itertative loop
   while (rnorm > (min_conv_tol + bnorm * conv_tol) && it < max_it){
@@ -217,7 +233,11 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
 
     // (e) //
     gamma = sarray_dot_dbl(q, Ap, local_size);
-    gamma = messg_dsum(gamma);
+    gamma = messg_dsum(gamma
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+      );
     alpha = rho / gamma;
     //printf("gamma, alpha %f, %f\n",gamma,alpha);
 
@@ -236,14 +256,26 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     omega = sarray_dot_dbl(As, s, local_size);
     gamma = sarray_dot_dbl(As, As, local_size);
     //if MPI is on
-    omega = messg_dsum(omega);
-    gamma = messg_dsum(gamma);
+    omega = messg_dsum(omega
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+      );
+    gamma = messg_dsum(gamma
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+      );
 
     omega = omega / gamma;
     rhop = rho;
     rho = -1.0 * omega * sarray_dot_dbl(As, q, local_size);
     //only MPI
-    rho = messg_dsum(rho);
+    rho = messg_dsum(rho
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+      );
 
     /* (h) */
     sarray_y_plus_ax_dbl(x, alpha, p, size);
@@ -255,7 +287,11 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     /*rnorm = solv_l2_norm_scaled(my_ndof_solv, r, (double)(global_nnode)); */
     rnorm = sarray_l_infty_norm(r, local_size);
     //only do this in parallel
-    rnorm = messg_dmax(rnorm);
+    rnorm = messg_dmax(rnorm
+#ifdef _MESSG
+    , ADH_COMM
+#endif
+      );
     //printf("Rnorm, %f\n",rnorm);
 
   }

@@ -20,8 +20,14 @@ void check_diag(SMODEL_SUPER *sm);
 
 // bcgstab solver routines
 int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, 
-  int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *b,
-   double *scale_vect, int local_size, int size, int rank,int *ghosts, int nghost);
+  int *indptr_off_diag, int *cols_off_diag,double *vals_off_diag, double *b, 
+  double *scale_vect, int local_size, int size, int rank,
+  int *ghosts, int nghost
+#ifdef _MESSG
+  , MPI_Comm ADH_COMM
+#endif
+  );
+
 void free_bcgstab(void);
 int prep_umfpack(int *indptr_diag, int *cols_diag, double *vals_diag, int nrow);
 int solve_umfpack(double *x, int *indptr_diag, int *cols_diag, double *vals_diag, double *b, int nrow);

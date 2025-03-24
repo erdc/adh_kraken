@@ -31,7 +31,7 @@ void data_extract_vec3d(double *sol, int **ivars, int varpos1, int varpos2, int 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_design_xmf_init(SMODEL_DESIGN *dm, char *filename, char *domain_name) {
-    dm->xmf = xmf_init(filename,domain_name,filename);
+    dm->xmf = xmf_init(filename,domain_name,filename, dm->grid->smpi->myid);
     assert(dm->xmf != NULL);
     hdf5_init(dm->grid, filename);       // initialize HDF5
     hdf5_write_grid(dm->grid, filename); // write grid file
@@ -158,7 +158,7 @@ void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no) {
     //++++++++++++++++++++++++++++++
     // close xmf time-step info
     //++++++++++++++++++++++++++++++
-    xmf_write_ts_tail(dm->xmf);
+    xmf_write_ts_tail(dm->xmf, myid);
     
 #endif
 }

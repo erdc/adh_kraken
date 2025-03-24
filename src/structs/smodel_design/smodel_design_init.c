@@ -56,7 +56,7 @@ int smodel_design_init(SMODEL_DESIGN *dmod, char *filebase, bool input_check
         printf("------------------------------------------------------\n");
     }
 #ifdef _MESSG
-    sgrid_read(&(dmod->grid),dmod->filename_grid,model_comm);
+    sgrid_read(&(dmod->grid),dmod->filename_grid,comm);
 #else
     sgrid_read(&(dmod->grid),dmod->filename_grid);
 #endif

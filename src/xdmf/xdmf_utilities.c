@@ -24,13 +24,13 @@ static int DEBUG = OFF;
  * \note Tutorial at: https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/_ex_a_p_i.html
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-FILE *xmf_init(char *fbase, char *dn, char *gn) {
+FILE *xmf_init(char *fbase, char *dn, char *gn, int myid) {
 #ifdef _HDF5
     char fn_xmf[50];
     strcpy(fn_xmf,fbase);
     strcat(fn_xmf, ".xmf");
     FILE *xmf = fopen(fn_xmf, "w");
-    xmf_header(xmf,dn,gn);
+    xmf_header(xmf,dn,gn, myid);
     return xmf;
 #else
     return NULL;
@@ -52,9 +52,9 @@ FILE *xmf_init(char *fbase, char *dn, char *gn) {
  * \note Tutorial at: https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/_ex_a_p_i.html
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void xmf_finalize(FILE *xmf) {
+void xmf_finalize(FILE *xmf, int myid) {
 #ifdef _HDF5
-    xmf_tail(xmf);
+    xmf_tail(xmf, myid);
     fclose(xmf);
 #endif
 }
@@ -76,7 +76,7 @@ void xmf_finalize(FILE *xmf) {
  * \note Tutorial at: https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/_ex_a_p_i.html
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void xmf_header(FILE *xmf, char *dn, char *gn){
+void xmf_header(FILE *xmf, char *dn, char *gn, int myid){
 #ifdef _HDF5
 #ifdef _MESSG
     if(myid==0)
@@ -103,7 +103,7 @@ void xmf_header(FILE *xmf, char *dn, char *gn){
  * \note Tutorial at: https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/_ex_a_p_i.html
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void xmf_tail(FILE *xmf){
+void xmf_tail(FILE *xmf, int myid){
 #ifdef _HDF5
 #ifdef _MESSG
     if(myid==0)
@@ -161,7 +161,7 @@ void xmf_write_ts_header(int myid, FILE *xmf, char *fbase, double time) {
  * \note Tutorial at: https://docs.hdfgroup.org/hdf5/v1_14/v1_14_4/_ex_a_p_i.html
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void xmf_write_ts_tail(FILE *xmf) {
+void xmf_write_ts_tail(FILE *xmf, int myid) {
 #ifdef _HDF5
 #ifdef _MESSG
     if(myid==0)

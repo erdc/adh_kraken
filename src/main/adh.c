@@ -25,26 +25,28 @@ int main(int argc, char *argv[]) {
     
     bool input_check = false;
     int i, myid = 0, npes = 1, ierr_code = UNSET_INT;
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Initialize the AdH memory debugger
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
-#ifdef _MESSG
-    debug_initialize(cstorm_comm);
-#else
-    debug_initialize();
-#endif
-    
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Initialize MPI
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _MESSG
     MPI_Comm comm_world = MPI_COMM_WORLD;
-    int ierr_code = MPI_Init(argc, argv);
+    ierr_code = MPI_Init(&argc, argv);
     if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
-    ierr_code = MPI_Comm_rank(cstorm_comm, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
-    ierr_code = MPI_Comm_size(cstorm_comm, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
+    //ierr_code = MPI_Comm_rank(cstorm_comm, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
+    //ierr_code = MPI_Comm_size(cstorm_comm, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
+    ierr_code = MPI_Comm_rank(comm_world, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
+    ierr_code = MPI_Comm_size(comm_world, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
 #endif
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Initialize the AdH memory debugger
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef _MESSG
+    debug_initialize(comm_world);
+#else
+    debug_initialize();
+#endif
+    
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Initialize PETSC
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -211,7 +213,7 @@ int main(int argc, char *argv[]) {
 //#endif
 //
 #ifdef _HDF5
-    xmf_finalize(dmod.xmf);
+    xmf_finalize(dmod.xmf, dmod.grid->smpi->myid);
 #endif
 #ifdef _PETSC
     PetscFinalize();

@@ -1,7 +1,3 @@
-#ifdef _MESSG
-#include "mpi.h"
-#include <time.h>
-#endif
 #ifndef H_SMPI_
 #define H_SMPI_
 

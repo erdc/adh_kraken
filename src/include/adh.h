@@ -22,10 +22,10 @@ void print_build_info();
 #include <hdf5.h>
 #endif
 
-#ifdef _MPI
+#ifdef _MESSG
 #include <mpi.h>
 #endif
-#include "messg.h"
+
 
 #include "vars.h"
 #include "define.h"
@@ -81,6 +81,7 @@ void print_build_info();
 #include "smodel_super.h"
 #include "smodel_design.h"
 
+#include "messg.h"
 
 //Mark added physics module
 #include "fe.h"

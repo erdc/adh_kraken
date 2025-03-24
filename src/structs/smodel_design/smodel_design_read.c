@@ -103,9 +103,18 @@ void smodel_design_read(SMODEL_DESIGN *dmod, char *filename) {
             if (strcmp(token,"DT") == 0) {
                 dmod->series_dt = sseries_read_allocate(NULL,NULL,DT_SERIES,&token,UNSET_INT); 
             } else if (strcmp(token,"WRITE") == 0) {
+                
+#ifdef _MESSG
+                tag(dmod->grid->smpi->ADH_COMM);
+#else
                 tag();
+#endif
                 dmod->series_out = sseries_read_allocate(NULL,NULL,OUTPUT_SERIES,&token,UNSET_INT); 
+#ifdef _MESSG
+                tag(dmod->grid->smpi->ADH_COMM);
+#else
                 tag();
+#endif
             } else if (strcmp(token,"AWRITE") == 0) {
                 //dmod->series_out = sseries_read_allocate(NULL, NULL,OUTPUT_SERIES,&token,UNSET_INT); 
             }

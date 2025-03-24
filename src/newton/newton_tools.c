@@ -299,7 +299,11 @@ void increment_function(SMODEL_SUPER *sm){
 
 void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *inc_max_norm,
          int *imax_dof, int *iinc_dof, int *include_dof,
-         int my_ndofs, int ndofs, int macro_ndofs, double *residual, double *dsol, int *bc_mask){
+         int my_ndofs, int ndofs, int macro_ndofs, double *residual, double *dsol, int *bc_mask
+#ifdef _MESSG
+         , SMPI *smpi 
+#endif
+         ){
     
     int i, include_dof_flag;
     double partial_l2_norm = 0.;
@@ -308,7 +312,7 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
     int ierr = 0;
     
 #ifdef _MESSG
-    int myid = supersmpi->myid; /* gkc temp warning come back later and check. */
+    int myid = smpi->myid; /* gkc temp warning come back later and check. */
 #else
     int myid = 0;
 #endif
@@ -357,7 +361,7 @@ void get_residual_norms(double *resid_max_norm, double *resid_l2_norm, double *i
     
     // CJT ::  below should only include include_node == YES, but is shouldn't make a huge difference
 #ifdef _MESSG
-    *resid_l2_norm = sqrt(messg_dsum(partial_l2_norm, supersmpi->ADH_COMM) / (macro_ndofs);
+    *resid_l2_norm = sqrt(messg_dsum(partial_l2_norm, smpi->ADH_COMM)) / (macro_ndofs);
 #else
     *resid_l2_norm = sqrt(partial_l2_norm)/ndofs;//sqrt(messg_dsum(partial_l2_norm) / (nnodes * nsys));
 #endif
