@@ -157,11 +157,11 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Find where start/stop nodes are for each PE
     int *nodes_per_pe = (int *) tl_alloc(sizeof(int), npes);
-    int *start_node_id = (int *) tl_alloc(sizeof(int), npes);
-    int *end_node_id   = (int *) tl_alloc(sizeof(int), npes);
+    //int *start_node_id = (int *) tl_alloc(sizeof(int), npes);
+    //int *end_node_id   = (int *) tl_alloc(sizeof(int), npes);
     sarray_init_value_int(nodes_per_pe, npes, UNSET_INT);
-    sarray_init_value_int(start_node_id, npes, UNSET_INT);
-    sarray_init_value_int(end_node_id, npes, UNSET_INT);
+    //sarray_init_value_int(start_node_id, npes, UNSET_INT);
+    //sarray_init_value_int(end_node_id, npes, UNSET_INT);
     //Mark, replace start and end with single array of npes+1
     //same used in CSR stuff
     int *node_ind_ptr = (int *) tl_alloc(sizeof(int), npes+1);
@@ -176,12 +176,12 @@ void sgrid_read(SGRID **pgrid, char *root_filename
 #ifdef _MESSG
         
 
-        start_node_id[0] = 0;
-        for (ipe=1; ipe<npes; ipe++) {
-            start_node_id[ipe] = ipe * nodesOnPe;
-            end_node_id[ipe-1] = start_node_id[ipe] - 1;
-        }
-        end_node_id[npes-1] = g->macro_nnodes - 1;
+        //start_node_id[0] = 0;
+        //for (ipe=1; ipe<npes; ipe++) {
+        //    start_node_id[ipe] = ipe * nodesOnPe;
+        //    end_node_id[ipe-1] = start_node_id[ipe] - 1;
+        //}
+        //end_node_id[npes-1] = g->macro_nnodes - 1;
 
 
 
@@ -208,9 +208,15 @@ void sgrid_read(SGRID **pgrid, char *root_filename
                     sscanf(line_save, "%s %d %lf %lf %lf %d",cdum,&idum,&fdum,&fdum,&fdum,&node_surf);
                     //if (idum - 1 > end_node_id[ipe] && node_surf != last_node_surf) {
                     //Logic needs some work here ...
+                    //    end_node_id[ipe] = idum - 2;
+                    //    start_node_id[ipe+1] = idum - 1;
+                    //    ipe++;
+                    //}
+
+                    //Logic needs some jelp
                     if (idum > node_ind_ptr[ipe+1] && node_surf != last_node_surf) {
-                        end_node_id[ipe] = idum - 2;
-                        start_node_id[ipe+1] = idum - 1;
+                        //Logic needs some work here ...
+                        node_ind_ptr[ipe+1] = idum - 1;
                         ipe++;
                     }
                     last_node_surf = node_surf;
@@ -320,7 +326,8 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         strcpy(line_save,line);
         token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
         if (strcmp(token, "ND") == 0) {
-            sgrid_read_node(g,line_save,start_node_id,end_node_id,ghost_nodes);
+            //sgrid_read_node(g,line_save,start_node_id,end_node_id,ghost_nodes);
+            sgrid_read_node(g,line_save,node_ind_ptr,ghost_nodes);
         }
     }
     rewind(fp);
@@ -483,6 +490,10 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Done reading and storing grid
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    nodes_per_pe = (int *) tl_free(sizeof(int), npes, nodes_per_pe);
+    //start_node_id = (int *) tl_free(sizeof(int), npes, start_node_id);
+    //end_node_id   = (int *) tl_free(sizeof(int), npes, end_node_id);
+    node_ind_ptr = (int *) tl_free(sizeof(int), npes+1,node_ind_ptr);
 #ifdef _DEBUG
     if (DEBUG && myid == 0) printf("\n-- Finished reading geo file: %s\n",root_filename);
 #endif
@@ -491,7 +502,8 @@ void sgrid_read(SGRID **pgrid, char *root_filename
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void sgrid_read_node(SGRID *g, char *line, int *start_node_id, int *end_node_id, NODE_LIST_ITEM *ghost_nodes) {
+//void sgrid_read_node(SGRID *g, char *line, int *start_node_id, int *end_node_id, NODE_LIST_ITEM *ghost_nodes) {
+void sgrid_read_node(SGRID *g, char *line, int *node_ind_ptr, NODE_LIST_ITEM *ghost_nodes) {
     
     int i, owner, local_index, resident_id, gid, column_flag;
     int npes = g->smpi->npes; // alias
@@ -510,14 +522,14 @@ void sgrid_read_node(SGRID *g, char *line, int *start_node_id, int *end_node_id,
     if (npes > 1) {
         local_index = search_ghost_node(ghost_nodes, gid); //printf("local_index: %d\n",local_index);
         for (i=0; i<npes; i++) {
-            if((gid >= start_node_id[i]) && (gid <= end_node_id[i])) owner = i;
+            if((gid >= node_ind_ptr[i]) && (gid < node_ind_ptr[i+1])) owner = i;
         }
         if (owner == myid) {
-            local_index = gid - start_node_id[myid];
+            local_index = gid - node_ind_ptr[myid];
             resident_id = local_index;
-            if (local_index > end_node_id[myid]) {tl_error("Nodal index appears to be out of range.");}
+            if (local_index >= node_ind_ptr[myid+1]) {tl_error("Nodal index appears to be out of range.");}
         } else if (local_index >= 0) {
-            resident_id = gid - start_node_id[owner];
+            resident_id = gid - node_ind_ptr[owner];
         } else {
             return;  // this node is not a part of my subdomain
         }
