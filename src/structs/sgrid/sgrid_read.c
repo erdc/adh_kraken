@@ -24,7 +24,6 @@ void sgrid_read(SGRID **pgrid, char *root_filename
                 ,MPI_Comm model_comm
 #endif
 ) {
-    
     int i, j, k, id, idum, ipe;
     char *line = NULL, cdum[20], line_save[100];
     size_t len = 0;
@@ -32,6 +31,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     char *token, *subtoken;
     char delim[] = " ";
     double fdum;
+    int start_id, end_id;
     
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // allocate the grid
@@ -51,6 +51,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
 #else
     smpi_init(g->smpi, model_comm);
 #endif
+
     int npes = g->smpi->npes; // alias
     int myid = g->smpi->myid; // alias
     //printf("npes: %d\n",npes);
@@ -161,24 +162,37 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     sarray_init_value_int(nodes_per_pe, npes, UNSET_INT);
     sarray_init_value_int(start_node_id, npes, UNSET_INT);
     sarray_init_value_int(end_node_id, npes, UNSET_INT);
+    //Mark, replace start and end with single array of npes+1
+    //same used in CSR stuff
+    int *node_ind_ptr = (int *) tl_alloc(sizeof(int), npes+1);
     //tl_check_all_pickets(__FILE__,__LINE__);
+
+    // Even divide the total nodes among PEs
+    int nodesOnPe = g->macro_nnodes / npes;
+    sarray_init_arange_int(node_ind_ptr, 0, nodesOnPe, npes+1);
+    node_ind_ptr[npes] = g->macro_nnodes;
     
     if (npes > 1) {
 #ifdef _MESSG
         
-        // Even divide the total nodes among PEs
-        int nodesOnPe = g->macro_nnodes / npes;
+
         start_node_id[0] = 0;
         for (ipe=1; ipe<npes; ipe++) {
             start_node_id[ipe] = ipe * nodesOnPe;
             end_node_id[ipe-1] = start_node_id[ipe] - 1;
         }
         end_node_id[npes-1] = g->macro_nnodes - 1;
+
+
+
+
         
         // Debug
         if (myid == 0) for (ipe=0; ipe<npes; ipe++) {
+//            printf("g->macro_nnodes: %d || pe: %d || start_node_id: %d || end_node_id: %d \n",
+//                   g->macro_nnodes,ipe,start_node_id[ipe],end_node_id[ipe]);
             printf("g->macro_nnodes: %d || pe: %d || start_node_id: %d || end_node_id: %d \n",
-                   g->macro_nnodes,ipe,start_node_id[ipe],end_node_id[ipe]);
+                   g->macro_nnodes,ipe,node_ind_ptr[ipe],node_ind_ptr[ipe+1]-1);
         }
         //tl_check_all_pickets(__FILE__,__LINE__);
         messg_barrier(g->smpi->ADH_COMM);
@@ -192,7 +206,9 @@ void sgrid_read(SGRID **pgrid, char *root_filename
                 token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
                 if (strcmp(token, "ND") == 0) {
                     sscanf(line_save, "%s %d %lf %lf %lf %d",cdum,&idum,&fdum,&fdum,&fdum,&node_surf);
-                    if (idum - 1 > end_node_id[ipe] && node_surf != last_node_surf) {
+                    //if (idum - 1 > end_node_id[ipe] && node_surf != last_node_surf) {
+                    //Logic needs some work here ...
+                    if (idum > node_ind_ptr[ipe+1] && node_surf != last_node_surf) {
                         end_node_id[ipe] = idum - 2;
                         start_node_id[ipe+1] = idum - 1;
                         ipe++;
@@ -204,17 +220,23 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         }
         
         // Nodes per PE after columnar grid changes
+//        for (ipe=0; ipe<npes; ipe++) {
+//            nodes_per_pe[ipe] = end_node_id[ipe] - start_node_id[ipe] + 1;
+//        }
         for (ipe=0; ipe<npes; ipe++) {
-            nodes_per_pe[ipe] = end_node_id[ipe] - start_node_id[ipe];
+            nodes_per_pe[ipe] = node_ind_ptr[ipe+1] - node_ind_ptr[ipe];
         }
-        
+
         // Grid residential nodes
-        g->my_nnodes = end_node_id[myid] - start_node_id[myid] + 1; // residential nodes
+        //Mark, isnt this same as nodes_per_pe[myid]??
+        //g->my_nnodes = end_node_id[myid] - start_node_id[myid] + 1; // residential nodes
+        g->my_nnodes = node_ind_ptr[myid+1] - node_ind_ptr[myid];
 #endif
     } else {
-        
-        start_node_id[0] = 0;
-        end_node_id[0] = g->macro_nnodes - 1;
+        //Mark, maybe no longer necessary
+        //start_node_id[0] = 0;
+        //end_node_id[0] = g->macro_nnodes - 1;
+
         
         g->nnodes = g->macro_nnodes;
         g->my_nnodes = g->macro_nnodes;
@@ -251,20 +273,21 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         g->nelems1d = 0; g->nelems2d = 0; g->nelems3d = 0;
         //mark also add
         g->nTris=0; g->nQuads=0; g->nTets=0; g->nPrisms=0;
-
+        start_id = node_ind_ptr[myid];
+        end_id = node_ind_ptr[myid+1];
         while ((read = getline(&line, &len, fp)) != -1) {
             strcpy(line_save,line);
             token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
             if        (strcmp(token, "SEG") == 0) {
-                g->nelems1d += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,2,1,true);
+                g->nelems1d += sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,2,1,true);
             } else if (strcmp(token, "TRI") == 0) {
-                g->nTris += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,3,2,true);
+                g->nTris += sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,3,2,true);
             } else if (strcmp(token, "QUAD") == 0) {
-                g->nQuads += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,2,true);
+                g->nQuads += sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,4,2,true);
             } else if (strcmp(token, "TET") == 0) {
-                g->nTets += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,3,true);
+                g->nTets += sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,4,3,true);
             } else if (strcmp(token, "PRISM") == 0) {
-                g->nPrisms += sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,6,3,true);
+                g->nPrisms += sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,6,3,true);
             }
         }
         //Mark add at end to get totals
@@ -321,32 +344,34 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->haveSegs = false; g->haveTets = false;
     g->havePrisms = false; g->haveQuads = false;
     int temp=0;
+    start_id = node_ind_ptr[myid];
+    end_id = node_ind_ptr[myid+1];
     while ((read = getline(&line, &len, fp)) != -1) {
         strcpy(line_save,line);
         token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
         if (strcmp(token, "SEG") == 0) {
             g->haveSegs = true;
-            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,2,1,false);
+            temp = sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,2,1,false);
             g->nelems1d += temp;
             if(g->elem1d[g->nelems1d-1].resident_pe == myid){g->my_nSegs+=temp;}
         } else if (strcmp(token, "TRI") == 0) {
             g->haveTris = true;
-            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,3,2,false);
+            temp = sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,3,2,false);
             g->nelems2d += temp;
             if(g->elem2d[g->nelems2d-1].resident_pe == myid){g->my_nTris+=temp;}
         } else if (strcmp(token, "QUAD") == 0) {
             g->haveQuads = true;
-            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,2,false);
+            temp = sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,4,2,false);
             g->nelems2d += temp;
             if(g->elem2d[g->nelems2d-1].resident_pe == myid){g->my_nQuads+=temp;}
         } else if (strcmp(token, "TET") == 0) {
             g->haveTets = true;
-            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,4,3,false);
+            temp = sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,4,3,false);
             g->nelems3d += temp;
             if(g->elem3d[g->nelems3d-1].resident_pe == myid){g->my_nTets+=temp;}
         } else if (strcmp(token, "PRISM") == 0) {
             g->havePrisms = true;
-            temp = sgrid_read_elem(g,line_save,start_node_id,end_node_id,&num_ghosts,&ghost_nodes,6,3,false);
+            temp = sgrid_read_elem(g,line_save,start_id,end_id,&num_ghosts,&ghost_nodes,6,3,false);
             g->nelems3d += temp;
             if(g->elem3d[g->nelems3d-1].resident_pe == myid){g->my_nPrisms+=temp;}
         }
@@ -530,8 +555,10 @@ void sgrid_read_node(SGRID *g, char *line, int *start_node_id, int *end_node_id,
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // calculates nnodes, nelems1d/2d/3d and creates list of nodes
 // CJT :: Must read nodes first before fully loading this!
-int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, int *num_ghosts, NODE_LIST_ITEM **ghost_nodes, int nnodes_on_elem, int elem_dim, bool JUST_COUNT) {
-    
+
+//Mark, if we just access start_node_id and end_node_id on our PE then why are we passing whole array
+//int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, int *num_ghosts, NODE_LIST_ITEM **ghost_nodes, int nnodes_on_elem, int elem_dim, bool JUST_COUNT) {
+int sgrid_read_elem(SGRID *g, char *line, int start_id, int end_id, int *num_ghosts, NODE_LIST_ITEM **ghost_nodes, int nnodes_on_elem, int elem_dim, bool JUST_COUNT) {    
     //printf("sgrid_read_elem || line: %s || JUST COUNT: %d\n",line,JUST_COUNT);
     
     int i, bflag = UNSET_INT, id = UNSET_INT, mat = UNSET_INT;
@@ -563,7 +590,7 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
         
         // determine which pe owns each node of element
         for (i=0; i<nnodes_on_elem; i++) {
-            if((nd[i] >= start_node_id[myid]) && (nd[i] <= end_node_id[myid])) doIown[i] = YES;
+            if((nd[i] >= start_id) && (nd[i] < end_id)) doIown[i] = YES;
         }
         
         // if no nodes are residential to my pe, then bail
@@ -599,7 +626,7 @@ int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, 
             // find local node numbers
             for (i = 0; i < nnodes_on_elem; i++) {
                 if (doIown[i] == YES) {
-                    local_id[i] = nd[i] - start_node_id[myid];
+                    local_id[i] = nd[i] - start_id;
                 } else {
                     local_id[i] = search_ghost_node(*ghost_nodes, nd[i]);
                     if(local_id[i] < 0 && JUST_COUNT == true){tl_error("Ghost node being added after node count!\n");}

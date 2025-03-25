@@ -38,7 +38,10 @@ int test_grid_read_partition(int npx, int npy, int nt){
     strcpy(dm.filename_grid, filename);
     printf("filename: %s\n", dm.filename_grid);
 #ifdef _MESSG
-    sgrid_read(&(dm.grid),dm.filename_grid,dm.grid->smpi->ADH_COMM);
+    MPI_Comm ADH_COMM;
+    ADH_COMM = MPI_COMM_WORLD;
+    sgrid_read(&(dm.grid),dm.filename_grid,ADH_COMM);
+    ierr=0;
 #else
     sgrid_read(&(dm.grid),dm.filename_grid);
 #endif

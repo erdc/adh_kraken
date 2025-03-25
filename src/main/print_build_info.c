@@ -79,7 +79,7 @@ void print_build_info() {
 #endif
 
   /* external libraries */
-#ifdef _MPI
+#ifdef _MESSG
   printf(" Built with MPI enabled\n");
 #endif
 

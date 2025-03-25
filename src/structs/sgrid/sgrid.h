@@ -153,7 +153,8 @@ typedef struct {
 /* struct methods ---------------------------------------- */
 
 void sgrid_read_node(SGRID *g, char *line, int *start_node_id, int *end_node_id, NODE_LIST_ITEM *ghost_nodes);
-int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, int *num_ghosts, NODE_LIST_ITEM **ghost_nodes, int nnodes_on_elem, int elem_dim, bool JUST_COUNT);
+//int sgrid_read_elem(SGRID *g, char *line, int *start_node_id, int *end_node_id, int *num_ghosts, NODE_LIST_ITEM **ghost_nodes, int nnodes_on_elem, int elem_dim, bool JUST_COUNT);
+int sgrid_read_elem(SGRID *g, char *line, int start_id, int end_id, int *num_ghosts, NODE_LIST_ITEM **ghost_nodes, int nnodes_on_elem, int elem_dim, bool JUST_COUNT);
 void sgrid_free(SGRID *);
 void sgrid_printScreen(SGRID *);
 #ifdef _MESSG

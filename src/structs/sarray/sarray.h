@@ -17,6 +17,7 @@ void sarray_init2one_int(int *, int);
 void sarray_init2one_dbl(double *, int);
 
 void sarray_init_range_int(int *array, int size);
+void sarray_init_arange_int(int *array, int start, int step, int size);
 
 void sarray_copy_int(int *to, int *from, int nsize);
 void sarray_copy_dbl(double *to, double *from, int nsize);

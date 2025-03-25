@@ -95,6 +95,12 @@ void sarray_init_range_int(int *array, int size) {
         array[i] = i;
     }
 }
+void sarray_init_arange_int(int *array, int start, int step, int size){
+    array[0] = start;
+    for (int i=1; i<size; i++) {
+        array[i] = array[i-1] + step;
+    }
+}
 //----------------------------------------------------//
 //Mark, is memcpy faster??
 //void sarray_copy_dbl(double *to, double *from, int nsize) {

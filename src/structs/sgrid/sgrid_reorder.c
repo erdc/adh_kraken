@@ -33,7 +33,7 @@ static int reverse_cuthill_mckee(SGRID *grid, int *permtab, int *peritab);
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int sgrid_reorder(SGRID *grid, int option){
-#ifdef _MPI
+#ifdef _MESSG
 	return 0;
 #else
 	int seed=0;

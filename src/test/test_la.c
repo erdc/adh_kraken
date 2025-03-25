@@ -43,7 +43,7 @@ int bcgstab_test(void) {
   int nnz_off_diag=0;
   int rank=0;
   
-#ifdef _MPI
+#ifdef _MESSG
   int npe=1;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &npe);
