@@ -199,13 +199,13 @@ void sgrid_read(SGRID **pgrid, char *root_filename
         
         // Make sure a full column resides on a PE if columnar grid
         if (g->columnar) {
-            int node_surf = UNSET_INT, last_node_surf = UNSET_INT;
+            int col_id = UNSET_INT, last_col_id = UNSET_INT;
             ipe = 0;
             while ((read = getline(&line, &len, fp)) != -1) {
                 strcpy(line_save,line);
                 token = strtok(line,delim); token[strcspn(token, "\n")] = 0;
                 if (strcmp(token, "ND") == 0) {
-                    sscanf(line_save, "%s %d %lf %lf %lf %d",cdum,&idum,&fdum,&fdum,&fdum,&node_surf);
+                    sscanf(line_save, "%s %d %lf %lf %lf %d",cdum,&idum,&fdum,&fdum,&fdum,&col_id);
                     //if (idum - 1 > end_node_id[ipe] && node_surf != last_node_surf) {
                     //Logic needs some work here ...
                     //    end_node_id[ipe] = idum - 2;
@@ -214,12 +214,30 @@ void sgrid_read(SGRID **pgrid, char *root_filename
                     //}
 
                     //Logic needs some jelp
-                    if (idum > node_ind_ptr[ipe+1] && node_surf != last_node_surf) {
-                        //Logic needs some work here ...
-                        node_ind_ptr[ipe+1] = idum - 1;
+
+                    //Mark, propose if columns are contained within grid
+                    // the columns numbers will be an extra column in geo file 
+                    // at every node (including parts that are not columnar)
+                    // for nodes that dont belong to column, the column number will
+                    // be -1, if it is part of column it will be the columnn
+                    // number (starting at 1) and assumed to be 1-ncol
+                    // with no gaps in numbering
+
+                    //We need entire column to be contained in same owned process
+                    //this will require adjustment of node_ind_ptr after
+                    //initial even split
+
+                    //Simple approach for now, at last node_ind_ptr for each PE
+                    //if it is part of a column, add the remainder of column to PE
+
+                    //Should work but logic may need some work here ...
+                    //checks if it has hit the even split
+                    //and checks that it is not in middle of column
+                    if (idum >= node_ind_ptr[ipe+1] && (col_id != last_col_id || col_id < 0)) {
+                        node_ind_ptr[ipe+1] = idum;
                         ipe++;
                     }
-                    last_node_surf = node_surf;
+                    last_col_id = col_id;
                 }
             }
             rewind(fp);
@@ -268,6 +286,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     // for local allocation
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // allocate ghost node listing
+    // linked list because we dont know size
     int num_ghosts = 0;
     NODE_LIST_ITEM *ghost_nodes = tl_alloc(sizeof(NODE_LIST_ITEM), 1);
     ghost_nodes->local=UNSET_INT;

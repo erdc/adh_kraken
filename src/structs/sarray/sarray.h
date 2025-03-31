@@ -86,4 +86,7 @@ int sarray_argsort_int(int *my_int_arr, int *my_index_arr, int size);
 int sarray_shuffle_int(int *my_int_arr, int *my_index_arr, int size);
 int sarray_reverse_argsort_int(int *my_int_arr, int *my_index_arr, int size);
 
+int sarray_num_nonzero_int(int *arr, int size);
+int sarray_get_indeces_nonzero_int(int *result, int *arr, int size);
+
 #endif

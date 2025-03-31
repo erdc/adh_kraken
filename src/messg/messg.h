@@ -103,4 +103,7 @@ void messg_asend(MESSG_BUFFER * buffer, /* the message */
 
 void messg_wait(SMPI *smpi);
 
+void comm_set_keys(SGRID *grid);
+
+int comm_create_neighborhood(SGRID *grid);
 #endif

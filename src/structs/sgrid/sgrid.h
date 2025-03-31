@@ -160,6 +160,7 @@ void sgrid_free(SGRID *);
 void sgrid_printScreen(SGRID *);
 #ifdef _MESSG
 void sgrid_read(SGRID **pgrid, char *filename, MPI_Comm model_comm);
+int sgrid_repartition_ptscotch(SGRID *g);
 #else
 void sgrid_read(SGRID **pgrid, char *filename);
 #endif

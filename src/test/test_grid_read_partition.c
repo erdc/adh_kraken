@@ -46,6 +46,13 @@ int test_grid_read_partition(int npx, int npy, int nt){
     sgrid_read(&(dm.grid),dm.filename_grid);
 #endif
 
+    // all seems to work
+    // in actual init
+    // all other grid based fields will need to be filled here
+    // then do a bandwidth minimizing partition
+    ierr = comm_create_neighborhood(&(dm.grid));
+    //void partition_main(SMODEL *mod, int flag)
+
     sgrid_printScreen(dm.grid);
 
 	return ierr;

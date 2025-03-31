@@ -93,6 +93,8 @@ typedef struct {
   int max_nmsg_request;    /* the number of request structures allocated */
 
   MPI_Comm ADH_COMM;   /* Alias for actual communicator used */
+  MPI_Comm ADH_NEIGH;
+
   MPI_Status *msg_status;  /* return flag for MPI receives */
   MPI_Request *msg_request;    /* request handle for asynchronous communication */
 

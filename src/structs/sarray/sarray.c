@@ -708,3 +708,26 @@ int sarray_argmin_int(int *arr, int n) {
 
     return min_index;
 }
+
+int sarray_num_nonzero_int(int *arr, int size){
+    int val = 0;
+    for (int i = 0; i < size; i++){
+        if( arr[i] != 0 ){
+            val+=1;
+        }
+    }
+    return val;
+}
+
+int sarray_get_indeces_nonzero_int(int *result, int *arr, int size){
+    int nnz = 0;
+    for(int i = 0; i<size; i++){
+        if (arr[i] != 0){
+            result[nnz] = i;
+            nnz+=1;
+        } 
+    }
+    return nnz;
+
+}
+
