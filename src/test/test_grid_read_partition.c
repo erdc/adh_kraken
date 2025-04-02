@@ -53,6 +53,19 @@ int test_grid_read_partition(int npx, int npy, int nt){
     printf("attempting to construct comm create neigh\n");
     ierr = comm_create_neighborhood(dm.grid);
     //see how to use neighborhood communicator
+    double *arr = tl_alloc(sizeof(double), dm.grid->nnodes);
+    sarray_init_value_dbl(arr, dm.grid->nnodes, dm.grid->smpi->myid);
+
+    for (int i = dm.grid->my_nnodes ; i < dm.grid->nnodes ; i++){
+        printf("Rank %d : Original array[%d] : %f\n", dm.grid->smpi->myid, i, arr[i]);
+    }
+
+    ierr = comm_update_ghost(arr, dm.grid->smpi, MPI_DOUBLE);
+
+
+    for (int i = dm.grid->my_nnodes ; i < dm.grid->nnodes ; i++){
+        printf("Rank %d : Updated array[%d] : %f\n", dm.grid->smpi->myid, i, arr[i]);
+    }
     
     
     //void partition_main(SMODEL *mod, int flag)

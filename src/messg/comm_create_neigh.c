@@ -49,6 +49,7 @@ int comm_create_neighborhood(SGRID *grid){
 
 
     smpi->sources = tl_alloc(sizeof(int), npes);
+    smpi->recv_ind = grid->my_nnodes; //starting index to recieve data
     int* source_weights_temp = tl_alloc(sizeof(int), npes);
     sarray_init_int(source_weights_temp, npes);
     //first ghost will be unique
@@ -93,17 +94,9 @@ int comm_create_neighborhood(SGRID *grid){
         smpi->source_displs[i+1] = smpi->source_displs[i] + smpi->source_weights[i];
     }
     smpi->source_weights[indegree-1] = source_weights_temp[grid->smpi->sources[indegree-1]];
-
+    smpi->nrecv_neigh =  smpi->source_displs[indegree-1] + smpi->source_weights[indegree-1];
     //free memory
     source_weights_temp = tl_free(sizeof(int), npes, source_weights_temp);
-
-    printf("PE: %d\n",myid);
-    sarray_printScreen_int(smpi->sources, indegree, "sources");
-    sarray_printScreen_int(smpi->source_weights, indegree, "source weights");
-
-    
-    
-
 
     // Now need info on outgoing messages (which nodes process owns but is ghost on other process)
     // isnt it symmetric? but weights just different
@@ -187,7 +180,7 @@ int comm_create_neighborhood(SGRID *grid){
             //store the dest_pes into the temp_edgetab
             for (int j = 0; j < n_send; j++){
                 temp_edgetab[i][j] = dest_pes[j];
-                //check if unique and if so add to dest_weights_temp
+                //add to dest_weights_temp
                 dest_weights_temp[dest_pes[j]] += 1;
             }
 
@@ -195,6 +188,7 @@ int comm_create_neighborhood(SGRID *grid){
 
 
     }
+
 
     //analyze dest_weights_temp to get outdegree, dest_weights, dest
     smpi->outdegree =  sarray_num_nonzero_int(dest_weights_temp, npes);
@@ -218,10 +212,54 @@ int comm_create_neighborhood(SGRID *grid){
     }
     smpi->dest_weights[smpi->outdegree-1] = dest_weights_temp[smpi->dest[smpi->outdegree-1]];
     
+
+
     //free memory
     dest_weights_temp = tl_free(sizeof(int), npes, dest_weights_temp);
 
-    //now flatten the temp_edgetab into what we actually want, how do we want to store this?
+    //use temp_edgetab to fill out the actual table we want
+    int n_indices = smpi->dest_displs[smpi->outdegree-1] + smpi->dest_weights[smpi->outdegree-1];
+    smpi->nsend_neigh = n_indices;
+    smpi->dest_indices = (int*) tl_alloc(sizeof(int), n_indices);
+
+    int *temp_map = (int *) tl_alloc(sizeof(int), npes);
+    sarray_init_value_int(temp_map, npes, UNSET_INT);
+    for(int i = 0; i < smpi->outdegree ; i++){
+        temp_map[ smpi->dest[i] ] = i;
+    }
+
+    int neighbor_no;
+    int *temp_count = tl_alloc(sizeof(int), smpi->outdegree);
+    sarray_init_int(temp_count, smpi->outdegree);
+
+
+    for(int i = 0; i < my_nnodes; i++){
+        for(int j = 0; j < temp_nedges[i]; j++){
+            neighbor_no = temp_map[temp_edgetab[i][j]];
+            smpi->dest_indices[ smpi->dest_displs[neighbor_no] + temp_count[neighbor_no] ] = i;
+            temp_count[neighbor_no]++;
+        }
+    }
+
+
+    //for(int i = 0; i<n_indices; i++ ){
+    //    printf("Rank [%d] dest_indices [%d] = %d \n", myid, i, smpi->dest_indices[i]);
+    //}
+    // do we need temp_edgetab? for now i guess not. We have structure in snode to stor
+    // for now don't see need
+
+
+    //clear out temporary variables
+    for(int j=0;j<my_nnodes;j++){
+        temp_edgetab[j] = (int*) tl_free(sizeof(int), MAX(temp_nedges[j],MAX_NEIGH), temp_edgetab[j]);
+    }
+    temp_edgetab = (int**) tl_free(sizeof(int*), my_nnodes,temp_edgetab);
+    temp_nedges = (int*) tl_free(sizeof(int), my_nnodes, temp_nedges);
+    temp_map = (int *) tl_free(sizeof(int), npes, temp_map);
+    temp_count = (int*) tl_free(sizeof(int), smpi->outdegree, temp_count);
+
+
+
 
 
     //could optionally include source weights or assume all equal with MPI_UNWEIGHTED
@@ -231,6 +269,7 @@ int comm_create_neighborhood(SGRID *grid){
                                            smpi->outdegree, smpi->dest,
                                            smpi->dest_weights,
                                            info, reorder, &(smpi->ADH_NEIGH));
+
 
 
 

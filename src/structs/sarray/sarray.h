@@ -78,6 +78,7 @@ void sarray_init_double_2d(double **to, int nrows, int ncols);
 
 void sarray_y_plus_ax_dbl(double *y, double alpha, double *x,  int n);
 double sarray_dot_dbl(double *x, double *y,int n);
+
 double sarray_l_infty_norm(double *v1, int n);
 int sarray_unique_int(int *arr, int size);
 int sarray_is_in_int(int *arr, int size, int val);
