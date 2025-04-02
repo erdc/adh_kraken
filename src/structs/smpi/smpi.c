@@ -15,6 +15,11 @@ void smpi_init(SMPI *smpi
         messg_err(ierr_code);
     }
     
+    smpi->ADH_NEIGH = NULL;
+    messg_buffer_init(&(smpi->buffer_send_neigh), i_processor);
+    messg_buffer_init(&(smpi->buffer_recv_neigh), i_processor);
+
+
     smpi->msg_status = (MPI_Status *) NULL;
     
     smpi->msg_request = (MPI_Request *) NULL;

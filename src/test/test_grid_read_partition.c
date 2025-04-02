@@ -50,7 +50,11 @@ int test_grid_read_partition(int npx, int npy, int nt){
     // in actual init
     // all other grid based fields will need to be filled here
     // then do a bandwidth minimizing partition
-    ierr = comm_create_neighborhood(&(dm.grid));
+    printf("attempting to construct comm create neigh\n");
+    ierr = comm_create_neighborhood(dm.grid);
+    //see how to use neighborhood communicator
+    
+    
     //void partition_main(SMODEL *mod, int flag)
 
     sgrid_printScreen(dm.grid);

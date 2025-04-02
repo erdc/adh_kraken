@@ -93,7 +93,27 @@ typedef struct {
   int max_nmsg_request;    /* the number of request structures allocated */
 
   MPI_Comm ADH_COMM;   /* Alias for actual communicator used */
+
+  //Mark adding this, may need to go into its own structure
+  //all neighborhood communicators
   MPI_Comm ADH_NEIGH;
+  MESSG_BUFFER buffer_send_neigh;
+  MESSG_BUFFER buffer_recv_neigh;
+  int indegree; //number of PEs in neighborhood we will recieve from
+  int *sources; //array [indegree] of the PEs that are sources (NEEDS TO BE ORDERED!!!)
+  int *source_weights; // array [indegree] of the PEs that are the number of data to recieve from each PE
+  int *source_displs; // array [indegree] of the indices to read in the buffer from each PE
+  //the source_indices are just nodes my_nnodes:nnodes for nodal variables
+
+  int outdegree; //number of PEs in neighborhood we will send to
+  int *dest; // array [outdegree] of the PEs that are destinations (local node ghosted on other PE)
+  int *dest_weights; // array[outdegree] of the number of indices per neighbor PE it is sending to
+                     // will double as the sendcounts argument
+  int *dest_displs; // array of [outdegree] that we will send to each Neighboring PE
+                     // info is redundant with dest_weights but needed for MPI Calls
+  int *dest_indices; // array of (sum dest_weights) OR (dest_displs[outdegree-1]) that will be
+                     // used to extract data from a data source and pack into buffer
+
 
   MPI_Status *msg_status;  /* return flag for MPI receives */
   MPI_Request *msg_request;    /* request handle for asynchronous communication */

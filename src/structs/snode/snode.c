@@ -47,6 +47,10 @@ void snode_init(SNODE *node) {
     node->resident_pe = 0;
     node->resident_id = UNSET_INT;
 #endif
+
+    //Mark added
+    node->n_ghosted = 0;
+    node->ghosted_arr = NULL;
 }
 
 /***********************************************************/

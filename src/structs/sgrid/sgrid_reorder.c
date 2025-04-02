@@ -206,224 +206,20 @@ int sgrid_reorder(SGRID *grid, int option){
 //helper function that creates nodal graph (not the bipartite one)
 //just node to node connections
 SCOTCH_Graph sgrid_to_scotch_graph(SGRID *grid){
-	int i,j,k;
-	int err;
-	int n_connections;
+
 	SCOTCH_Graph grafdat;
-	err = SCOTCH_graphInit(&grafdat);
-	int nelems3d = grid->nelems3d;
-	int nelems2d = grid->nelems2d;
-	int nelems1d = grid->nelems1d;
-	int current_node, other_node;
-	int count=0;
+	int err = SCOTCH_graphInit(&grafdat);
+	
 	//nodes always start at 0
 	SCOTCH_Num baseval=0;
 	SCOTCH_Num vertnbr=grid->nnodes;
-	int nnodes_on_elem;
-	int *nodes; //for aliasing
-	int Nedges=0;
-	int *n_con;
-	int *n_con_no_dup;
-	int *edgetab;
-	int **temp_edgetab;
-	int *verttab;
-	//quickly compute number of edges in the mesh
-	//the nodes will not be as trivial, need to know how many elements each node is connected to
-	//loop through elements and add up
-	//need nodal array to store this
-
-	//really one in the same as slin_sys_init_sparsity_mono
-	//need two nodal arrays
-	//these will store the number of nodes each node is connected to
-	n_con = (int *) tl_alloc(sizeof(int), vertnbr);
-    n_con_no_dup = (int *) tl_alloc(sizeof(int), vertnbr);
-    verttab = (int *) tl_alloc(sizeof(int),vertnbr+1);
-    sarray_init_int(n_con, vertnbr);
-    sarray_init_int(n_con_no_dup, vertnbr);
-    //First set of loops is solely to establish how many nodes are connected to each node
-    for (i=0;i<nelems3d;i++){
-    	//nnodes on the element
-        nnodes_on_elem = grid->elem3d[i].nnodes;
-        //Could get stuff for node weights from physics mat
-       	//for this element, find nodes
-        nodes = grid->elem3d[i].nodes;
-        //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
-        for (j=0;j<nnodes_on_elem;j++){
-            //each node inside an element, add this to the count
-            current_node = nodes[j];
-            //loop through each node that is not the node itself
-            //nodes before current node
-            for (k=0;k<j;k++){
-            	//other_node = nodes[k];
-                n_con[current_node]+=1;
-            }
-            for(k=j+1;k<nnodes_on_elem;k++){
-            	//other_node = nodes[k];
-            	n_con[current_node]+=1;
-            }
-        }
-    }
-    for (i=0;i<nelems2d;i++){
-    	//nnodes on the element
-        nnodes_on_elem = grid->elem2d[i].nnodes;
-        //Could get stuff for node weights from physics mat
-       	//for this element, find nodes
-        nodes = grid->elem2d[i].nodes;
-        //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
-        for (j=0;j<nnodes_on_elem;j++){
-            //each node inside an element, add this to the count
-            current_node = nodes[j];
-            //loop through each node that is not the node itself
-            //nodes before current node
-            for (k=0;k<j;k++){
-            	//other_node = nodes[k];
-                n_con[current_node]+=1;
-            }
-            for(k=j+1;k<nnodes_on_elem;k++){
-            	//other_node = nodes[k];
-            	n_con[current_node]+=1;
-            }
-        }
-    }
-    for (i=0;i<nelems1d;i++){
-    	//nnodes on the element
-        nnodes_on_elem = grid->elem1d[i].nnodes;
-        //Could get stuff for node weights from physics mat
-       	//for this element, find nodes
-        nodes = grid->elem1d[i].nodes;
-        //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
-        for (j=0;j<nnodes_on_elem;j++){
-            //each node inside an element, add this to the count
-            current_node = nodes[j];
-            //loop through each node that is not the node itself
-            //nodes before current node
-            for (k=0;k<j;k++){
-            	//other_node = nodes[k];
-                n_con[current_node]+=1;
-            }
-            for(k=j+1;k<nnodes_on_elem;k++){
-            	//other_node = nodes[k];
-            	n_con[current_node]+=1;
-            }
-        }
-    }
-    //use nnz_rows to dynamically allocate
-    //int temp_cols_diag[nrows][nCon3d];
-    temp_edgetab = (int**) tl_alloc(sizeof(int*), vertnbr);
-    for(j=0;j<vertnbr;j++){
-        temp_edgetab[j] = (int*) tl_alloc(sizeof(int), n_con[j]);
-        for(k=0;k<n_con[j];k++){
-            temp_edgetab[j][k]=INT_MAX;
-        }
-    }
-    //Seems redundant but must reuse as indexing
-    sarray_init_int(n_con, vertnbr);
-    //First set of loops is solely to establish how many nodes are connected to each node
-    for (i=0;i<nelems3d;i++){
-    	//nnodes on the element
-        nnodes_on_elem = grid->elem3d[i].nnodes;
-        //Could get stuff for node weights from physics mat
-       	//for this element, find nodes
-        nodes = grid->elem3d[i].nodes;
-        //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
-        for (j=0;j<nnodes_on_elem;j++){
-            //each node inside an element, add this to the count
-            current_node = nodes[j];
-            //loop through each node that is not the node itself
-            //nodes before current node
-            for (k=0;k<j;k++){
-            	other_node = nodes[k];
-                temp_edgetab[current_node][n_con[current_node]]=other_node;
-                n_con[current_node]+=1;
-            }
-            for(k=j+1;k<nnodes_on_elem;k++){
-            	other_node = nodes[k];
-            	temp_edgetab[current_node][n_con[current_node]]=other_node;
-                n_con[current_node]+=1;
-            }
-        }
-    }
-    for (i=0;i<nelems2d;i++){
-    	//nnodes on the element
-        nnodes_on_elem = grid->elem2d[i].nnodes;
-        //Could get stuff for node weights from physics mat
-       	//for this element, find nodes
-        nodes = grid->elem2d[i].nodes;
-        //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
-        for (j=0;j<nnodes_on_elem;j++){
-            //each node inside an element, add this to the count
-            current_node = nodes[j];
-            //loop through each node that is not the node itself
-            //nodes before current node
-            for (k=0;k<j;k++){
-            	other_node = nodes[k];
-                temp_edgetab[current_node][n_con[current_node]]=other_node;
-                n_con[current_node]+=1;
-            }
-            for(k=j+1;k<nnodes_on_elem;k++){
-            	other_node = nodes[k];
-            	temp_edgetab[current_node][n_con[current_node]]=other_node;
-                n_con[current_node]+=1;
-            }
-        }
-    }
-    for (i=0;i<nelems1d;i++){
-    	//nnodes on the element
-        nnodes_on_elem = grid->elem1d[i].nnodes;
-        //Could get stuff for node weights from physics mat
-       	//for this element, find nodes
-        nodes = grid->elem1d[i].nodes;
-        //keep sparsity pattern in temp_cols_diag, temp_cols_off_diag
-        for (j=0;j<nnodes_on_elem;j++){
-            //each node inside an element, add this to the count
-            current_node = nodes[j];
-            //loop through each node that is not the node itself
-            //nodes before current node
-            for (k=0;k<j;k++){
-            	other_node = nodes[k];
-                temp_edgetab[current_node][n_con[current_node]]=other_node;
-                n_con[current_node]+=1;
-            }
-            for(k=j+1;k<nnodes_on_elem;k++){
-            	other_node = nodes[k];
-            	temp_edgetab[current_node][n_con[current_node]]=other_node;
-                n_con[current_node]+=1;
-            }
-        }
-    }
-    for (i=0;i<vertnbr;i++){
-        // sort the column indices (j-entries)
-        //use stdlib.h qsort
-        qsort(temp_edgetab[i], n_con[i], sizeof(int), compare_ints);
-        //this should hopefully remove duplicates?
-        n_connections = sarray_unique_int(temp_edgetab[i], n_con[i]);
-        //overwrite nnz row with sarray_unique_int?
-        n_con_no_dup[i] = n_connections;
-        //add nnz in a row to the NNZ
-        //maybe overwrire nnz_rows[i] instead if we want this stored, and then sum it
-        Nedges+=n_connections;
-    }
-    //allocate adjacency data
-    edgetab = (int *) tl_alloc(sizeof(int), Nedges);
-    int *nodal_edges; //alias
-
-    //now use info to fill in indptr and cols
-    for(i=0;i<vertnbr;i++){
-        //printf("filling in index ptr and column entries, row %d\n",i);
-        verttab[i] = count;
-        //printf("filling in index ptr and column entries, row %d\n",i);
-        nodal_edges = temp_edgetab[i];
-        //think about how to do this since each temp_rows may be different size
-        for(j=0;j<n_con_no_dup[i];j++){
-            edgetab[count] = nodal_edges[j];
-            count++;
-        }
-    }
-    //also last entry
-    verttab[vertnbr] = count;
-
+	
+    //pull the n2n graph from grid
+    //assumes node_to_node graph has been called
+    assert(grid->n2n_ind_ptr != NULL && grid->n2n_edge_tab != NULL);
+    int Nedges = grid->n2n_ind_ptr[vertnbr];
     //build graph
-    err = SCOTCH_graphBuild(&grafdat,baseval,vertnbr,verttab,verttab+1,NULL,NULL,Nedges,edgetab,NULL);
+    err = SCOTCH_graphBuild(&grafdat,baseval,vertnbr,grid->n2n_ind_ptr,grid->n2n_ind_ptr+1,NULL,NULL,Nedges,grid->n2n_edge_tab,NULL);
 #ifdef _DEBUG
     assert(err==0);
 #endif
@@ -431,16 +227,6 @@ SCOTCH_Graph sgrid_to_scotch_graph(SGRID *grid){
 #ifdef _DEBUG
     assert(err==0);
 #endif
-    //freeing memory
-    n_con_no_dup = (int *) tl_free(sizeof(int), vertnbr, n_con_no_dup);
-    for(j=0;j<vertnbr;j++){
-        temp_edgetab[j] = (int*) tl_free(sizeof(int), n_con[j],temp_edgetab[j]);
-    }
-    temp_edgetab = (int**) tl_free(sizeof(int*), vertnbr,temp_edgetab);
-    n_con = (int *) tl_free(sizeof(int), vertnbr, n_con);
-    //not freeing here, hopefully this gets freed when graph free is called later
-    //verttab = (int *) tl_free(sizeof(int), vertnbr, verttab);
-    //edgetab = (int *) tl_free(sizeof(int), Nedges,edgetab);
     return grafdat;
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

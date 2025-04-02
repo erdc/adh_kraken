@@ -65,6 +65,7 @@ int test_timeloop(int npx, int npy, int nt) {
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Reorder grid to minimize bandwidth
     //++++++++++++++++++++++++++++++++++++++++++++++
+    sgrid_create_node_to_node_graph(dm.grid);
     sgrid_reorder(dm.grid,2);
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++

@@ -79,6 +79,7 @@ int linear_newton_test(int npx, int npy, double xmin, double xmax, double ymin, 
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Reorder grid to minimize bandwidth
     //++++++++++++++++++++++++++++++++++++++++++++++
+    sgrid_create_node_to_node_graph(dm.grid);
     sgrid_reorder(dm.grid,2);
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -291,6 +292,7 @@ int nonlinear_newton_test(int npx, int npy, double xmin, double xmax, double ymi
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Reorder grid to minimize bandwidth
     //++++++++++++++++++++++++++++++++++++++++++++++
+    sgrid_create_node_to_node_graph(dm.grid);
     sgrid_reorder(dm.grid,2);
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++

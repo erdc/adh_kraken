@@ -55,6 +55,7 @@ int test_jacobian(int npx, int npy, double xmin, double xmax, double ymin, doubl
     //++++++++++++++++++++++++++++++++++++++++++++++
 	// Reorder grid to minimize bandwidth
     //++++++++++++++++++++++++++++++++++++++++++++++
+    sgrid_create_node_to_node_graph(dm.grid);
     sgrid_reorder(dm.grid,2);
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++

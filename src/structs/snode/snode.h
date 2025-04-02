@@ -32,6 +32,8 @@ typedef struct {
     int resident_pe;        /* (sd) owning processor */
     int resident_id;        /* (rnode) node number on OWNING precessor - if this is     ghost, this will be different than calling node */
 
+    int *ghosted_arr; // array of n_ghosted that contains which PEs the local node is ghosted on
+    int n_ghosted;
 } SNODE;
 
 

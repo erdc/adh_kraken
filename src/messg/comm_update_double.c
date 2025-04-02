@@ -3,7 +3,8 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
- *  \brief     hard coded for comm update double for the standalone test, will delete later
+ *  \brief     Updates ghost dofs by sending values from owning process
+ *             for double, using neighborhood AlltoAllv
  *  \author    Mark Loveland
  *  \bug       none
  *  \warning   none
@@ -11,72 +12,56 @@
  * \note The general routine should update ghost values on each process from the owners
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void comm_update_double(double *vec,  /* the vector to be updated */
-                        int size_v,
-                        int npe,
-                        int rank //number of processors
-  )
+//void comm_update_ghost(void *arr_like,
+//                       SMPI *smpi,
+//                       SGRID *grid
+//#ifdef _MESSG
+//                       , MPI_Datatype data_type 
+//#endif
+//  )
+void comm_update_double(double *vec, int size_v, int npe, int rank)
 {
-#ifdef _MESSG
+//#ifdef _MESSG
+//  //choose the neighborhood communicator
+//  //should we copy or just copy adress??
+//  MPI_Comm ADH_NEIGH = smpi->ADH_NEIGH;
+//  //for proof of concept, just nodal quantity for now
+//  int nghost = grid->nnodes - grid->my_nnodes;//
+//
+//
 
-  //double *bpntr = NULL;         /* pointer to allow for de-referencing */
-  int i_processor = 0, j_processor = 0, ii=0;  /* loop counter */
+//  //for now realloc buffer stuff in here, need to put somewhere else
+//  messg_buffer_alloc(nghost,  /* the number of items to be stored in the buffer */
+//                    sizeof(data_type), /* the size of the items */
+//                    smpi->buffer_recv_neigh   /* the buffer to be packed */
+//  );
+//  //simple double for testing then will be the weights from prior//
+//
+//
 
-  //just send whole vector i guess?
-  double temp_send[7],temp_recv[7];
-  for (ii = 0;ii<7;ii++){
-    if(ii<size_v){
-      temp_send[ii] = vec[ii];
-      temp_recv[ii] = 0;
-    }else{temp_send[ii] = 0;
-          temp_recv[ii] = 0;}
-  }
+//  messg_buffer_alloc(nghost,  /* the number of items to be stored in the buffer */
+//                    sizeof(data_type), /* the size of the items */
+//                    smpi->buffer_send_neigh   /* the buffer to be packed */
+//  );//
+//
 
+//  //for now make simple reciever
+//  int *rdispls = (int*) tl_alloc(sizeof(int),smpi->indegree);
+//  int ctr=0;
+//  for(int i = 0; i < smpi->indegree; i++ ){
+//    rdispls[i] = ctr;
+//    ctr+=grid->smpi->source_weights[i];
+//  }//
 
-  /* Post the Receives */
-  for (i_processor = 0; i_processor < npe; i_processor++){
-    if (rank ==i_processor){
-      for (j_processor = 0; j_processor < npe; j_processor++){
-        if (rank != j_processor){
-          MPI_Send(temp_send, 7, MPI_DOUBLE, j_processor, j_processor, MPI_COMM_WORLD);
-        }
-      }
-    }else{
-       MPI_Recv(temp_recv, 7, MPI_DOUBLE, i_processor, rank, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-       //now move temp entries to appropriate vec!!!
-       if (rank==0){
-          if(i_processor == 1){
-            vec[3] = temp_recv[0];
-            vec[4] = temp_recv[1];
-          }else if(i_processor == 2){
-            vec[5] = temp_recv[0];
-            vec[6] = temp_recv[1];
+//  double *recvbuf = (double *) tl_alloc(sizeof(double), ctr);//
+//
+//
 
-          }
-       }else if(rank==1){
-          if(i_processor == 0){
-            vec[3] = temp_recv[0];
-            vec[4] = temp_recv[1];
-            vec[5] = temp_recv[2];
-          }else if(i_processor == 2){
-            vec[6] = temp_recv[0];
-
-          }
-       }else if(rank==2){
-        if(i_processor == 0){
-            vec[2] = temp_recv[0];
-            vec[3] = temp_recv[1];
-            vec[4] = temp_recv[2];
-          }else if(i_processor == 1){
-            vec[5] = temp_recv[0];
-            vec[6] = temp_recv[1];
-            vec[7] = temp_recv[2];
-
-          }
-
-       }
-    }
-  }
-#endif
+//  int ierr = MPI_Neighbor_alltoallv(arr_like, const int sendcounts[],
+//    const int sdispls[], data_type,
+//    recvbuf, grid->smpi->source_weights,
+//    rdispl, data_type, smpi->ADH_NEIGH);
+//  
+//#endif
   return;
 }

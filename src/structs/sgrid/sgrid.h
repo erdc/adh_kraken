@@ -146,6 +146,11 @@ typedef struct {
 
     //Mark added for now, need to ask
     int **nd_on_QuadEdge;
+
+    //Mark added for if we ever build a node-to-node graph
+    //could wrap into some simple graph class
+    int *n2n_ind_ptr; //array of nnode+1 if called
+    int *n2n_edge_tab; //array of n_ind_ptr[-1]
     
 } SGRID;
 
@@ -172,6 +177,7 @@ void sgrid_read(SGRID **pgrid, char *filename);
 //void sgrid_write_xdmf_elemental_pe(SGRID *g);
 void sgrid_read_nodal_attribute(SGRID *g);
 int sgrid_reorder(SGRID *grid, int option);
+int sgrid_create_node_to_node_graph(SGRID *grid);
 
 /***********************************************************/
 /***********************************************************/

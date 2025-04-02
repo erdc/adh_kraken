@@ -731,3 +731,27 @@ int sarray_get_indeces_nonzero_int(int *result, int *arr, int size){
 
 }
 
+int sarray_isordered_int(int *arr, int size){
+    int prev_val = arr[0];
+    for(int i = 1; i<size; i++){
+        if(prev_val >= arr[i] ){
+            return 0;
+        }
+        prev_val = arr[i];
+    }
+    return 1;
+}
+
+int sarray_max_distance_int(int *arr, int size){
+    int max_dist = 0;
+    int dist;
+    for( int i = 0 ; i<size-1 ; i++){
+        //assumes arr is ordered
+        dist = arr[i+1]-arr[i];
+        if( dist > max_dist){
+            max_dist = dist;
+        }
+    }
+    return max_dist;
+}
+
