@@ -19,6 +19,7 @@ int comm_update_ghost(void *arr_like,
 #endif
   )
 {
+    int ierr = 0;
 #ifdef _MESSG
 
   if(smpi->npes == 1){return 0;}
@@ -75,7 +76,7 @@ int comm_update_ghost(void *arr_like,
 
  
 
-  int ierr = MPI_Neighbor_alltoallv(smpi->buffer_send_neigh.buffer, 
+  ierr = MPI_Neighbor_alltoallv(smpi->buffer_send_neigh.buffer, 
     smpi->dest_weights, smpi->dest_displs, data_type,
     smpi->buffer_recv_neigh.buffer, smpi->source_weights,
     smpi->source_displs, data_type, smpi->ADH_NEIGH);
