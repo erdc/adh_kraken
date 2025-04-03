@@ -50,27 +50,31 @@ int test_grid_read_partition(int npx, int npy, int nt){
     // in actual init
     // all other grid based fields will need to be filled here
     // then do a bandwidth minimizing partition
-    printf("attempting to construct comm create neigh\n");
     ierr = comm_create_neighborhood(dm.grid);
+
+
     //see how to use neighborhood communicator
     double *arr = tl_alloc(sizeof(double), dm.grid->nnodes);
     sarray_init_value_dbl(arr, dm.grid->nnodes, dm.grid->smpi->myid);
-
-    for (int i = dm.grid->my_nnodes ; i < dm.grid->nnodes ; i++){
-        printf("Rank %d : Original array[%d] : %f\n", dm.grid->smpi->myid, i, arr[i]);
+    ierr += comm_update_ghost(arr, dm.grid->smpi, MPI_DOUBLE);
+    //after ghost update, all vals should match with .resident_pe
+    //verify this condition
+    for (int i = 0 ; i<dm.grid->nnodes ; i++){
+        if (arr[i] != dm.grid->node[i].resident_pe){ierr+=1;}
     }
 
-    ierr = comm_update_ghost(arr, dm.grid->smpi, MPI_DOUBLE);
 
-
-    for (int i = dm.grid->my_nnodes ; i < dm.grid->nnodes ; i++){
-        printf("Rank %d : Updated array[%d] : %f\n", dm.grid->smpi->myid, i, arr[i]);
+    int *iarr = tl_alloc(sizeof(double), dm.grid->nnodes);
+    sarray_init_value_int(iarr, dm.grid->nnodes, dm.grid->smpi->myid);
+    ierr += comm_update_ghost(iarr, dm.grid->smpi, MPI_INT);
+    for (int i = 0 ; i<dm.grid->nnodes ; i++){
+        if (iarr[i] != dm.grid->node[i].resident_pe){ierr+=1;}
     }
-    
-    
-    //void partition_main(SMODEL *mod, int flag)
 
-    sgrid_printScreen(dm.grid);
+    //sgrid_printScreen(dm.grid);
+
+    //now to comply with unit tests either return 1 if fail or 0 if no fail
+    if(ierr!=0){ierr=1;}
 
 	return ierr;
 

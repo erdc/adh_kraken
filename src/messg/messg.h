@@ -61,12 +61,12 @@ void messg_gather_dbl(int root,
 
 void comm_update_double(double *vec, int size_v, int npe, int rank);
 
-int comm_update_ghost(double *arr_like,
+int comm_update_ghost(void *arr_like,
                        SMPI *smpi
 #ifdef _MESSG
                        ,MPI_Datatype data_type 
 #endif
-  );
+                       );
 
 #ifdef _MESSG
 void comm_update_int(int *v,    /* the vector to be updated */

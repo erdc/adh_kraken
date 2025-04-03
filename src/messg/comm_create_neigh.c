@@ -1,5 +1,5 @@
 #include "adh.h"
-static int DEBUG = 1;
+static int DEBUG = 0;
 static int MAX_NEIGH = 3; //guess for max neighboring PEs a single node could have
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -20,6 +20,9 @@ static int MAX_NEIGH = 3; //guess for max neighboring PEs a single node could ha
 int comm_create_neighborhood(SGRID *grid){
     int ierr = 0;
 #ifdef _MESSG
+
+
+
     // Define the local adjacencies for each process
     // using ghost nodes
 
@@ -45,17 +48,19 @@ int comm_create_neighborhood(SGRID *grid){
 
     int myid = smpi->myid;
     int npes = smpi->npes;
+    if (npes == 1){return 0;}
     int my_nnodes = grid->my_nnodes;
 
 
     smpi->sources = tl_alloc(sizeof(int), npes);
-    smpi->recv_ind = grid->my_nnodes; //starting index to recieve data
+    smpi->recv_ind = my_nnodes; //starting index to recieve data
     int* source_weights_temp = tl_alloc(sizeof(int), npes);
     sarray_init_int(source_weights_temp, npes);
     //first ghost will be unique
     //KEY: ASSUMES NODES ARE ORDERED IN THAT NON-OWNED
     //NODES ARE AFTER FIRST MY_NNODES
-    smpi->sources[0] = grid->node[grid->my_nnodes].resident_pe;
+
+    smpi->sources[0] = grid->node[my_nnodes].resident_pe;
     //gets unique source ranks
     for (int i = grid->my_nnodes; i < grid->nnodes; i++) {
         is_unique = 1;
