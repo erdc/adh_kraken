@@ -1,71 +1,93 @@
 #include "adh.h"
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
-   \brief Update the Ghost Node Values (Get Info From Owning Processor)
-
-   *) Integer Version
-   *) Post Receives, then Post Sends.
-   *) This has been updated to allow for the receives to post data 
-   directly to the actual location in memory where it will end
-   up, instead of doing our own temporary buffer.
+ *  \brief     Updates ghost dofs by sending values from owning process
+ *             for double, using neighborhood AlltoAllv
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ * \note The general routine should update ghost values on each process from the owners
  */
-void comm_update_int(int *v,    /* the vector to be updated */
-                     int nvalues,    /* number of values to be updated per ghost node */
-                     SMPI *smpi
-  )
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+int comm_update_int(int *arr,SMPI *smpi, int type)
 {
+        int ierr = 0;
 #ifdef _MESSG
-  int *bpntr = NULL;            /* pointer to allow de-referencing */
-  int i_processor = 0, ii = 0, jj = 0;  /* loop counter */
-  int icnt = 0;                 /* location in the buffer */
-  /* Checking */
-  assert(v != NULL);
-  assert(nvalues > 0);
 
-  /* Post the Receives */
-  for (i_processor = 0; i_processor < smpi->npes; i_processor++)
-    {
-      if (smpi->nrecv[i_processor] > 0)
-        {
-          messg_buffer_free(smpi->recv_msg + i_processor);
-          /*recv_msg[i_processor].size = 0; Set Above */
-          smpi->recv_msg[i_processor].nitem = nvalues * (smpi->nrecv[i_processor]);
-          smpi->recv_msg[i_processor].type = MESSG_INT;
-          smpi->recv_msg[i_processor].sd = i_processor;
-          smpi->recv_msg[i_processor].pos = 0;
-          smpi->recv_msg[i_processor].buffer = &(v[nvalues * smpi->recv_init[i_processor]]);
-          messg_arecv(smpi->recv_msg + i_processor, TAG_UPDATE, smpi);
-        }
+
+
+  if(smpi->npes == 1){return 0;}
+
+  messg_buffer_alloc(smpi->nrecv_neigh,  /* the number of items to be stored in the buffer */
+                    sizeof(int), /* the size of the items */
+                    &(smpi->buffer_recv_neigh)   /* the buffer to be packed */
+  );
+  messg_buffer_alloc(smpi->nrecv_neigh,  /* the number of items to be stored in the buffer */
+                    sizeof(int), /* the size of the items */
+                    &(smpi->buffer_send_neigh)   /* the buffer to be packed */
+  );
+
+
+    //typecast the vector of intrest based on data_type
+    //typecast the send buffer and set values
+    int *ptr_int;
+    int *bpntr_int;
+    int k = 0;
+    ptr_int = (int *) arr;
+    bpntr_int  = (int *) smpi->buffer_send_neigh.buffer;
+
+  if (type == NEIGHBOR){
+
+
+    //recieving buffer, assumed contiguous and in order
+    smpi->buffer_recv_neigh.buffer =  &ptr_int[smpi->recv_ind];
+    for (int i = 0; i < smpi->nsend_neigh; i++ ){
+      //fill out sending buffer
+      bpntr_int[i] =  ptr_int[smpi->dest_indices[i]];
     }
 
-  /* Load and send the Send buffers */
-  for (i_processor = 0; i_processor < smpi->npes; i_processor++)
-    {
-      if (smpi->send_key[i_processor].size > 0)
-        {
-          messg_buffer_alloc(nvalues * smpi->send_key[i_processor].size, sizeof(int), smpi->send_msg + i_processor);
-          /* send_msg[i_processor].size =; Set Above */
-          /* send_msg[i_processor].nitem =; Set Above */
-          smpi->send_msg[i_processor].type = MESSG_INT;
-          smpi->send_msg[i_processor].sd = i_processor;
-          smpi->send_msg[i_processor].pos = 0;
-          bpntr = (int *) smpi->send_msg[i_processor].buffer;
-          for (ii = 0, icnt = 0; ii < smpi->send_key[i_processor].size; ii++)
-            {
-              for (jj = 0; jj < nvalues; jj++)
-                {
-                  bpntr[icnt++] = v[smpi->send_key[i_processor].key[ii] * nvalues + jj];
-                }
-            }
-          messg_asend(smpi->send_msg + i_processor, TAG_UPDATE, smpi);
-        }
+
+    ierr = MPI_Neighbor_alltoallv(smpi->buffer_send_neigh.buffer, 
+      smpi->dest_weights, smpi->dest_displs, MPI_INT,
+      smpi->buffer_recv_neigh.buffer, smpi->source_weights,
+      smpi->source_displs, MPI_INT, smpi->ADH_NEIGH);
+  
+  }else if (type == P2P){
+
+    //recieving buffer, assumed contiguous and in order
+    for(int i = 0 ; i <smpi->indegree ; i++){
+        smpi->buffer_recv_neigh.buffer =  &ptr_int[smpi->recv_ind + smpi->source_displs[i]];
+        ierr = MPI_Irecv(smpi->buffer_recv_neigh.buffer,
+                  smpi->source_weights[i], MPI_INT, smpi->sources[i], TAG_UPDATE,
+                  smpi->ADH_COMM, &(smpi->msg_request[i]));
     }
 
-  /* Wait for the asynchronous communications to clear */
-  if (smpi->nmsg_counter > 0){
 
-    messg_wait(smpi);
+    for (int i = 0; i < smpi->outdegree; i++){
+
+        for (int j = 0; j < smpi->dest_weights[i]; j++ ){
+            //fill out sending buffer
+            bpntr_int[j] =  ptr_int[smpi->dest_indices[k]];
+            k++;
+        }
+
+        ierr = MPI_Isend(smpi->buffer_send_neigh.buffer,
+                  smpi->dest_weights[i], MPI_INT, smpi->dest[i], TAG_UPDATE,
+                  smpi->ADH_COMM, &(smpi->msg_request[i+smpi->indegree]));
+
+    }
+
+      ierr = MPI_Waitall(smpi->outdegree, smpi->msg_request, MPI_STATUS_IGNORE);
+
+
+  }else{
+    //return error code if option isnt correct
+    ierr = 1;
   }
+
 #endif
-  return;
+  return ierr;
 }

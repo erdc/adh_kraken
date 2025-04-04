@@ -9,7 +9,7 @@ int test_residual(int npx, int npy, double xmin, double xmax, double ymin, doubl
 int test_sw2_nb(int nt);
 int test_sw2_wd(int npx, int npy, int nt);
 int test_timeloop(int npx, int npy, int nt);
-int test_grid_read_partition(int npx, int npy, int nt);
+int test_comm_update(int comm_type);
 int run_tests(void);
 
 #endif

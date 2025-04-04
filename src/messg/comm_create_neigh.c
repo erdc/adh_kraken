@@ -17,7 +17,7 @@ static int MAX_NEIGH = 3; //guess for max neighboring PEs a single node could ha
  *
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int comm_create_neighborhood(SGRID *grid){
+int comm_create_neighborhood(SGRID *grid, int type){
     int ierr = 0;
 #ifdef _MESSG
 
@@ -254,6 +254,8 @@ int comm_create_neighborhood(SGRID *grid){
     // for now don't see need
 
 
+
+
     //clear out temporary variables
     for(int j=0;j<my_nnodes;j++){
         temp_edgetab[j] = (int*) tl_free(sizeof(int), MAX(temp_nedges[j],MAX_NEIGH), temp_edgetab[j]);
@@ -266,48 +268,47 @@ int comm_create_neighborhood(SGRID *grid){
 
 
 
-
-    //could optionally include source weights or assume all equal with MPI_UNWEIGHTED
-    ierr =  MPI_Dist_graph_create_adjacent(smpi->ADH_COMM,
+    if (type == P2P){
+        smpi->msg_request = (MPI_Request *) tl_alloc(sizeof(MPI_Request), smpi->indegree + smpi->outdegree);
+        ierr=0;
+    }else if (type == NEIGHBOR){
+        //could optionally include source weights or assume all equal with MPI_UNWEIGHTED
+        ierr =  MPI_Dist_graph_create_adjacent(smpi->ADH_COMM,
                                            smpi->indegree, smpi->sources,
                                            smpi->source_weights,
                                            smpi->outdegree, smpi->dest,
                                            smpi->dest_weights,
                                            info, reorder, &(smpi->ADH_NEIGH));
+        if (DEBUG){
+            assert(grid->smpi->ADH_NEIGH);
 
+            int neighbors;
+            int *in_neighbors = NULL, *out_neighbors = NULL;
+            int *in_weights = NULL, *out_weights = NULL;
 
+            MPI_Dist_graph_neighbors_count(smpi->ADH_NEIGH, &(smpi->indegree), &(smpi->outdegree), &neighbors);
 
+            in_neighbors = (int*) tl_alloc(sizeof(int), smpi->indegree);
+            in_weights = (int*) tl_alloc(sizeof(int), smpi->indegree);
+            out_neighbors = (int*) tl_alloc(sizeof(int), smpi->outdegree);
+            out_weights = (int*) tl_alloc(sizeof(int), smpi->outdegree);
 
-    if (DEBUG){
-        assert(grid->smpi->ADH_NEIGH);
-
-        int neighbors;
-        int *in_neighbors = NULL, *out_neighbors = NULL;
-        int *in_weights = NULL, *out_weights = NULL;
-
-        MPI_Dist_graph_neighbors_count(smpi->ADH_NEIGH, &(smpi->indegree), &(smpi->outdegree), &neighbors);
-
-        in_neighbors = (int*) tl_alloc(sizeof(int), smpi->indegree);
-        in_weights = (int*) tl_alloc(sizeof(int), smpi->indegree);
-        out_neighbors = (int*) tl_alloc(sizeof(int), smpi->outdegree);
-        out_weights = (int*) tl_alloc(sizeof(int), smpi->outdegree);
-
-        MPI_Dist_graph_neighbors(smpi->ADH_NEIGH, smpi->indegree, in_neighbors, in_weights,
+            MPI_Dist_graph_neighbors(smpi->ADH_NEIGH, smpi->indegree, in_neighbors, in_weights,
                                  smpi->outdegree, out_neighbors, out_weights);
 
-        printf("Rank %d: In-degree = %d, Out-degree = %d\n", myid, smpi->indegree, smpi->outdegree);
-        printf("Rank %d: In-neighbors: ", myid);
-        for (int i = 0; i < smpi->indegree; i++) {
-            printf("(%d, weight=%d) ", in_neighbors[i], in_weights[i]);
+            printf("Rank %d: In-degree = %d, Out-degree = %d\n", myid, smpi->indegree, smpi->outdegree);
+            printf("Rank %d: In-neighbors: ", myid);
+            for (int i = 0; i < smpi->indegree; i++) {
+                printf("(%d, weight=%d) ", in_neighbors[i], in_weights[i]);
+            }
+            printf("\n");
+            printf("Rank %d: Out-neighbors: ", myid);
+            for (int i = 0; i < smpi->outdegree; i++) {
+                printf("(%d, weight=%d) ", out_neighbors[i], out_weights[i]);
+            }
+            printf("\n");
         }
-        printf("\n");
-        printf("Rank %d: Out-neighbors: ", myid);
-        for (int i = 0; i < smpi->outdegree; i++) {
-            printf("(%d, weight=%d) ", out_neighbors[i], out_weights[i]);
-        }
-        printf("\n");
     }
-
 #endif
     return ierr;
 

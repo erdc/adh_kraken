@@ -621,3 +621,7 @@ typedef enum
 #define MAX_NVAR 5
 #define MAX_NNODE 6
 
+//MPI options
+#define NEIGHBOR 0
+#define P2P 1
+

@@ -59,21 +59,8 @@ void messg_gather_dbl(int root,
     );
 
 
-void comm_update_double(double *vec, int size_v, int npe, int rank);
-
-int comm_update_ghost(void *arr_like,
-                       SMPI *smpi
-#ifdef _MESSG
-                       ,MPI_Datatype data_type 
-#endif
-                       );
-
-#ifdef _MESSG
-void comm_update_int(int *v,    /* the vector to be updated */
-                     int nvalues,    /* number of values to be updated per ghost node */
-                     SMPI *smpi
-  );
-#endif
+int comm_update_double(double *arr, SMPI *smpi, int type);
+int comm_update_int(int *arr,SMPI *smpi, int type);
 
 #ifdef _MESSG
 void messg_barrier(MPI_Comm ADH_COMM);
@@ -112,5 +99,5 @@ void messg_wait(SMPI *smpi);
 
 
 
-int comm_create_neighborhood(SGRID *grid);
+int comm_create_neighborhood(SGRID *grid, int type);
 #endif

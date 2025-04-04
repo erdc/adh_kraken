@@ -148,11 +148,16 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
   //for (i=0;i<local_size;i++){
   //  printf("Rank %d, x[%d] = %f\n",rank,i,vals_off_diag[i]);
   //}
-  comm_update_double(x, local_size, 3, rank);
+
+  //NEEDS TO BE ADDED BACK IN
+  //comm_update_double(x, ;
+  //
   split_CSR_mat_vec_mult(Mp, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
    x, local_size,ghosts,nghost);
-  //update matrix vector indices. is this necessary?
-  comm_update_double(Mp, local_size, 3, rank);
+  //NEEDS TO BE ADDED BACK IN
+  //comm_update_double(x, ;
+  //
+  
   //for (i=0;i<local_size;i++){
   //  printf("Rank %d, Ax[%d] = %f\n",rank,i,Mp[i]);
   //}
@@ -214,11 +219,12 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     sarray_y_plus_ax_dbl(p, -omega, Ap,size );
     sarray_scale_replace_dbl(p,beta, size);
     sarray_y_plus_ax_dbl(p, 1, r, size);
-    //for (i=0;i<local_size;i++){
-    //printf("Rank %d, p[%d] = %f\n",rank,i,p[i]);
-    //}
+
     //need comm_update_double befor matvec mult
-    comm_update_double(p, local_size, 3, rank);
+    //NEEDS TO BE ADDED BACK IN
+    //comm_update_double(x, );
+    //
+
 
     // (d) //
     sarray_init_dbl(Mp, size);
@@ -227,7 +233,11 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     p, local_size,ghosts,nghost);
     //if MPI
     //preconfitioner is local only
-    //comm_update_double(Mp, local_size, 3, rank);
+    //need comm_update_double befor matvec mult
+    //NEEDS TO BE ADDED BACK IN
+    //comm_update_double(x, );
+    //
+
     //next, apply preconditioner to Mp, save in Ap
     solve_umfpack(Ap, indptr_diag, cols_diag, vals_diag, Mp, local_size);
 
@@ -247,7 +257,10 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
     sarray_init_dbl(Ms, size);
     sarray_init_dbl(As, size);
     //need comm_update_double befor matvec mult
-    comm_update_double(s, local_size, 3, rank);
+    //need comm_update_double befor matvec mult
+    //NEEDS TO BE ADDED BACK IN
+    //comm_update_double(x, );
+    //
     split_CSR_mat_vec_mult(Ms, indptr_diag, cols_diag, vals_diag, indptr_off_diag, cols_off_diag, vals_off_diag,
     s, local_size,ghosts,nghost);
     solve_umfpack(As, indptr_diag, cols_diag, vals_diag, Ms, local_size);
@@ -308,7 +321,12 @@ int solve_linear_sys_bcgstab(double *x, int *indptr_diag, int *cols_diag, double
 //  for (i = 0; i <local_size; i++){
 //        x[i] *= scale_vect[i]; /* UNDO SCALING */
 //    }
-  comm_update_double(x, local_size, 3, rank);
+
+//need comm_update_double befor matvec mult
+//NEEDS TO BE ADDED BACK IN
+    //comm_update_double(x, );
+//
+
  // for (i = 0; i <local_size; i++){
 //    printf("Rank %d Final u[%d] = %f\n",rank,i,x[i]);
 //  }

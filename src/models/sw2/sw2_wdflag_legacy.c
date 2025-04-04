@@ -135,6 +135,6 @@ void fe_sw2_wdflag_legacy(SMODEL_SUPER *sm) {
 
     }   
 #ifdef _MESSG
-    comm_update_int(wd_tmp, 1, grid->smpi);
+    comm_update_int(wd_tmp, grid->smpi, NEIGHBOR);
 #endif  
 }

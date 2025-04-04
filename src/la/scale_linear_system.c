@@ -59,9 +59,11 @@ void scale_linear_system(int *indptr_diag, int *cols_diag, double *vals_diag,
 
 
   //ghosts of scale vect probably needed to be communicated
-  //previously used comm_update_double
-  //hardcoded for now
-  comm_update_double(scale_vect, local_size, 3,rank);
+  //need comm_update_double befor matvec mult
+  //NEEDS TO BE ADDED BACK IN
+  //comm_update_double(x, );
+  //
+
 
   //now use scale factor as 1/sqrt(scale_vect), have check for small numbrs (may want warning statement)
   double small = SOLV_TOL;    /* too small a number for a norm */
