@@ -38,6 +38,8 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     (*pgrid) = (SGRID *) tl_alloc(sizeof(SGRID), 1);
     SGRID *g = *pgrid; // alias
+    //Default values
+    g->inv_per_node = NULL;
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // allocate MPI on this grid
@@ -47,6 +49,7 @@ void sgrid_read(SGRID **pgrid, char *root_filename
     g->part_map = NULL;
     g->n2n_ind_ptr = NULL;
     g->n2n_edge_tab = NULL;
+
     smpi_defaults(g->smpi);
 #ifndef _MESSG
     smpi_init(g->smpi);

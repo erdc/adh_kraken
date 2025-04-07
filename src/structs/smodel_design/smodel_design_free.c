@@ -28,7 +28,10 @@ void smodel_design_free(SMODEL_DESIGN *dm) {
     if (dm->superCouple != NULL) {
         dm->superCouple = (SMODEL_COUPLE *) tl_free(sizeof(SMODEL_COUPLE), dm->nSuperModels-1, dm->superCouple);
     }
-    smodel_super_free_array(dm->superModel,dm->nSuperModels);
+    
+    if (dm->nSuperModels != UNSET_INT){
+        smodel_super_free_array(dm->superModel,dm->nSuperModels);
+    }
 
     sgrid_free(dm->grid);
     //nFluxInterfaces = (int *) tl_free(sizeof(int), sm_p->nSuperModels, nFluxInterfaces);

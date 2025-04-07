@@ -24,7 +24,11 @@ void print_build_info();
 
 #ifdef _MESSG
 #include <mpi.h>
+#ifdef _SCOTCH
+#include <ptscotch.h>
 #endif
+#endif
+
 
 
 #include "vars.h"

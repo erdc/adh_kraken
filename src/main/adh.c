@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _MESSG
     MPI_Comm comm_world = MPI_COMM_WORLD;
-    ierr_code = MPI_Init(&argc, argv);
+    ierr_code = MPI_Init(&argc, &argv);
     if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
     //ierr_code = MPI_Comm_rank(cstorm_comm, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
     //ierr_code = MPI_Comm_size(cstorm_comm, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
@@ -75,6 +75,12 @@ int main(int argc, char *argv[]) {
         printf("+++++++++++++++++++++ TESTING ADH BUILD +++++++++++++++++++++\n");
         printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
         run_tests();
+#ifdef _PETSC
+    PetscFinalize();
+#endif
+#ifdef _MESSG
+    MPI_Finalize();
+#endif
         exit(0);
         
     } else if (strcmp(argv[1], "-v") == AGREE) {

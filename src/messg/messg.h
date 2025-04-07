@@ -97,7 +97,10 @@ void messg_asend(MESSG_BUFFER * buffer, /* the message */
 
 void messg_wait(SMPI *smpi);
 
-
+#ifdef _MESSG
+    int scotch_partkway(int local_nnode, int *xadj, int *adjncy, int *vwgt, int *adjwgt, 
+        int stratflag, int numflag, int npes, int balance_ratio, int *part, MPI_Comm *comm);
+#endif
 
 int comm_create_neighborhood(SGRID *grid, int type);
 #endif

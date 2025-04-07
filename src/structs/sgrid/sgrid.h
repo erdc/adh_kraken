@@ -165,10 +165,10 @@ void sgrid_free(SGRID *);
 void sgrid_printScreen(SGRID *);
 #ifdef _MESSG
 void sgrid_read(SGRID **pgrid, char *filename, MPI_Comm model_comm);
-int sgrid_repartition_ptscotch(SGRID *g);
 #else
 void sgrid_read(SGRID **pgrid, char *filename);
 #endif
+int sgrid_repartition(SGRID *g);
 //void sgrid_write_hdf5(SGRID *g, char *fbase, int mesh_no, double time);
 //void sgrid_write_xdmf(SGRID *g, FILE *xmf);
 //void sgrid_write_nodal_pe(SGRID *g);

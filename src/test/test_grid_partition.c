@@ -13,7 +13,7 @@
  *  \copyright AdH
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int test_comm_update(int comm_type){
+int test_grid_partition(int comm_type){
 
 	//++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -53,32 +53,8 @@ int test_comm_update(int comm_type){
     ierr = comm_create_neighborhood(dm.grid, comm_type);
 
 
-    //see how to use neighborhood communicator
-    double *arr = tl_alloc(sizeof(double), dm.grid->nnodes);
-    sarray_init_value_dbl(arr, dm.grid->nnodes, dm.grid->smpi->myid);
-#ifdef _MESSG
-    ierr += comm_update_double(arr, dm.grid->smpi, comm_type);
-#endif
-    //after ghost update, all vals should match with .resident_pe
-    //verify this condition
-    for (int i = 0 ; i<dm.grid->nnodes ; i++){
-        if (arr[i] != dm.grid->node[i].resident_pe){
-            printf("Rank %d Updated array [%d] = %f\n",dm.grid->smpi->myid, i, arr[i]);
-            ierr+=1;}
-    }
-
-
-    int *iarr = tl_alloc(sizeof(double), dm.grid->nnodes);
-    sarray_init_value_int(iarr, dm.grid->nnodes, dm.grid->smpi->myid);
-#ifdef _MESSG
-    ierr += comm_update_int(iarr, dm.grid->smpi, comm_type);
-#endif
-    for (int i = 0 ; i<dm.grid->nnodes ; i++){
-        if (iarr[i] != dm.grid->node[i].resident_pe){ierr+=1;}
-    }
-
+    ierr = sgrid_repartition(dm.grid);
     //sgrid_printScreen(dm.grid);
-
     //now to comply with unit tests either return 1 if fail or 0 if no fail
     if(ierr!=0){ierr=1;}
 

@@ -10,6 +10,7 @@ int test_sw2_nb(int nt);
 int test_sw2_wd(int npx, int npy, int nt);
 int test_timeloop(int npx, int npy, int nt);
 int test_comm_update(int comm_type);
+int test_grid_partition(int comm_type);
 int run_tests(void);
 
 #endif
