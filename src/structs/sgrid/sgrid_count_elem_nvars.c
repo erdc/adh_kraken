@@ -168,41 +168,41 @@ void load_vars(int score, int *elem_vars) ;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // store at t0 in physics_mat[imat]
 int count_vars(int score) {
-    int count = 0, digit, div;
-    for (div = 1; div <= score; div *= 10);
+//    int count = 0, digit, div;
+//    for (div = 1; div <= score; div *= 10);//
 
-    // surface water
-    div /= 10;
-    digit = score/div;
-    score %= div;
-    printf("surface_water: %d\n",digit);
-    if (digit == 1) {        count  += 2; // 1D SW {h,u_ad}
-    } else if (digit == 2) { count  += 3; // 2D SW {h,u_da,v_da}
-    } else if (digit == 3) { count  += 3; // 3D SW - SPLIT - HVEL -  {h,u,v}
-    } else if (digit == 4) { count  += 4; // 3D NS {u,v,w,p}
-    } else if (digit == 5) { count  += 3; // 3D NS - SPLIT - {u,v,w}
-    } else if (digit == 6) { count  += 1; // 2D OF
-    } else if (digit == 7) { count  += 1; // SW 3D - SPLIT - w
-    } else if (digit == 8) { count  += 1; // 3D NS - SPLIT - p
-    } else {
-        tl_error("physics material error\n");
-    }
+//    // surface water
+//    div /= 10;
+//    digit = score/div;
+//    score %= div;
+//    printf("surface_water: %d\n",digit);
+//    if (digit == 1) {        count  += 2; // 1D SW {h,u_ad}
+//    } else if (digit == 2) { count  += 3; // 2D SW {h,u_da,v_da}
+//    } else if (digit == 3) { count  += 3; // 3D SW - SPLIT - HVEL -  {h,u,v}
+//    } else if (digit == 4) { count  += 4; // 3D NS {u,v,w,p}
+//    } else if (digit == 5) { count  += 3; // 3D NS - SPLIT - {u,v,w}
+//    } else if (digit == 6) { count  += 1; // 2D OF
+//    } else if (digit == 7) { count  += 1; // SW 3D - SPLIT - w
+//    } else if (digit == 8) { count  += 1; // 3D NS - SPLIT - p
+//    } else {
+//        tl_error("physics material error\n");
+//    }
+//    
+//    // ground water
+//    div /= 10;
+//    digit = score/div;
+//    score %= div;
+//    printf("ground_water: %d\n",digit);
+//    count += digit; // 1D/2D/3D GROUNDWATER
+//    
+//    // transport
+//    div /= 10;
+//    digit = score/div;
+//    score %= div;
+//    printf("transport: %d\n",digit);
+//    count += digit; // 1D/2D/3D TRANSPORT
     
-    // ground water
-    div /= 10;
-    digit = score/div;
-    score %= div;
-    printf("ground_water: %d\n",digit);
-    count += digit; // 1D/2D/3D GROUNDWATER
-    
-    // transport
-    div /= 10;
-    digit = score/div;
-    score %= div;
-    printf("transport: %d\n",digit);
-    count += digit; // 1D/2D/3D TRANSPORT
-    
-    return count;
+    return 0;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -221,55 +221,55 @@ int count_vars(int score) {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // store at t0 in physics_mat[imat]
 void load_vars(int score, int *elem_vars) {
-    int kk, count = 0, digit, div;
-    
-    for (div = 1; div <= score; div *= 10);
-    
-    // surface water
-    div /= 10;
-    digit = score/div;
-    score %= div;
-    if (digit == 1) {
-        elem_vars[count] = PERTURB_H;   count++; // 1D SW
-        elem_vars[count] = PERTURB_U;   count++; // 1D SW
-    } else if (digit == 2) {
-        elem_vars[count] = PERTURB_H;   count++; // 2D SW
-        elem_vars[count] = PERTURB_U;   count++; // 2D SW
-        elem_vars[count] = PERTURB_V;   count++; // 2D SW
-    } else if (digit == 3) {
-        elem_vars[count] = PERTURB_DPL; count++; // 3D SW - SPLIT
-        elem_vars[count] = PERTURB_U;   count++; // 3D SW - SPLIT
-        elem_vars[count] = PERTURB_V;   count++; // 3D SW - SPLIT
-    } else if (digit == 4) {
-        elem_vars[count] = PERTURB_U;   count++; // 3D NS
-        elem_vars[count] = PERTURB_V;   count++; // 3D NS
-        elem_vars[count] = PERTURB_W;   count++; // 3D NS
-        elem_vars[count] = PERTURB_P;   count++; // 3D NS
-    } else if (digit == 5) {
-        elem_vars[count] = PERTURB_U;   count++; // 3D NS - SPLIT
-        elem_vars[count] = PERTURB_V;   count++; // 3D NS - SPLIT
-        elem_vars[count] = PERTURB_W;   count++; // 3D NS - SPLIT
-    } else if (digit == 6) {
-        elem_vars[count] = PERTURB_H;   count++; // 2D OF
-    } else if (digit == 7) {
-        elem_vars[count] = PERTURB_W;   count++; // 3D SW - SPLIT
-    } else if (digit == 8) {
-        elem_vars[count] = PERTURB_P;   count++; // 3D NS - SPLIT
-    } else {
-        tl_error("physics material error\n");
-    }
-    
-    // ground water
-    div /= 10;
-    digit = score/div;
-    score %= div;
-    elem_vars[count] += PERTURB_H; count++; // 1D/2D/3D GROUNDWATER
-    
-    // transport
-    div /= 10;
-    digit = score/div;
-    score %= div;
-    for (kk=0; kk<digit; kk++) {
-        elem_vars[count] += PERTURB_C; count++; // 1D/2D/3D TRANSPORT
-    }
+//    int kk, count = 0, digit, div;
+//    
+//    for (div = 1; div <= score; div *= 10);
+//    
+//    // surface water
+//    div /= 10;
+//    digit = score/div;
+//    score %= div;
+//    if (digit == 1) {
+//        elem_vars[count] = PERTURB_H;   count++; // 1D SW
+//        elem_vars[count] = PERTURB_U;   count++; // 1D SW
+//    } else if (digit == 2) {
+//        elem_vars[count] = PERTURB_H;   count++; // 2D SW
+//        elem_vars[count] = PERTURB_U;   count++; // 2D SW
+//        elem_vars[count] = PERTURB_V;   count++; // 2D SW
+//    } else if (digit == 3) {
+//        elem_vars[count] = PERTURB_DPL; count++; // 3D SW - SPLIT
+//        elem_vars[count] = PERTURB_U;   count++; // 3D SW - SPLIT
+//        elem_vars[count] = PERTURB_V;   count++; // 3D SW - SPLIT
+//    } else if (digit == 4) {
+//        elem_vars[count] = PERTURB_U;   count++; // 3D NS
+//        elem_vars[count] = PERTURB_V;   count++; // 3D NS
+//        elem_vars[count] = PERTURB_W;   count++; // 3D NS
+//        elem_vars[count] = PERTURB_P;   count++; // 3D NS
+//    } else if (digit == 5) {
+//        elem_vars[count] = PERTURB_U;   count++; // 3D NS - SPLIT
+//        elem_vars[count] = PERTURB_V;   count++; // 3D NS - SPLIT
+//        elem_vars[count] = PERTURB_W;   count++; // 3D NS - SPLIT
+//    } else if (digit == 6) {
+//        elem_vars[count] = PERTURB_H;   count++; // 2D OF
+//    } else if (digit == 7) {
+//        elem_vars[count] = PERTURB_W;   count++; // 3D SW - SPLIT
+//    } else if (digit == 8) {
+//        elem_vars[count] = PERTURB_P;   count++; // 3D NS - SPLIT
+//    } else {
+//        tl_error("physics material error\n");
+//    }
+//    
+//    // ground water
+//    div /= 10;
+//    digit = score/div;
+//    score %= div;
+//    elem_vars[count] += PERTURB_H; count++; // 1D/2D/3D GROUNDWATER
+//    
+//    // transport
+//    div /= 10;
+//    digit = score/div;
+//    score %= div;
+//    for (kk=0; kk<digit; kk++) {
+//        elem_vars[count] += PERTURB_C; count++; // 1D/2D/3D TRANSPORT
+//    }
 }

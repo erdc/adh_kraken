@@ -56,7 +56,7 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     //get the solution on this element, for now just use U
     double elem_u[nnodes];
     //this map only works for CG, want to generalize to DG in future
-    global_to_local_dbl_ivars(elem_u, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
+    global_to_local_dbl_ivars(elem_u, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[adh_def._H]], mod->sol);
     
     //for now let's let f be a constant so we have analytic solution to compare to
     double f[nnodes];
@@ -67,7 +67,9 @@ int poisson_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturb
     }
 
     //perturb solution variable only, let's say we are using U
-    if (perturb_var == mod->ivar_pos.var[_H]){
+    //shouldnt it be relative position?, come back and check
+    //if (perturb_var == mod->ivar_pos.var[_H])
+    if (perturb_var == adh_def._H){
         elem_u[perturb_node] += perturb_sign * perturbation;
     }
     //this would be mass matrix

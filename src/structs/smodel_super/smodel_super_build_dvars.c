@@ -58,27 +58,29 @@ void load_dvars(SMODEL_SUPER *sm,int *nvar_node, int *nvar_elem_dbl, int *nvar_e
     *nvar_node = 0; *nvar_elem_dbl = 0; *nvar_elem_int = 0;
     
     // use flags to decide which dependent variables are needed
-    if (sm->flags.SW_FLOW) {
-        add_dvar(just_count,npos,_DPRS,nvar_node);
-        add_dvar(just_count,npos,_DENSITY,nvar_node);
-        add_dvar(just_count,npos,_ERROR,nvar_node);
+    if (sm->flags.model[adh_def._SW1] == 1 ||
+        sm->flags.model[adh_def._SW2] == 1 ||
+        sm->flags.model[adh_def._SW3] == 1) {
+        add_dvar(just_count,npos,adh_def._DPRS,nvar_node);
+        add_dvar(just_count,npos,adh_def._DENSITY,nvar_node);
+        add_dvar(just_count,npos,adh_def._ERROR,nvar_node);
         
-        add_dvar(just_count,eposi,_WDFLAG,nvar_elem_int);
-        add_dvar(just_count,eposd,_ERROR,nvar_elem_dbl);
+        add_dvar(just_count,eposi,adh_def._WDFLAG,nvar_elem_int);
+        add_dvar(just_count,eposd,adh_def._ERROR,nvar_elem_dbl);
     }
     if (sm->flags.WIND_STRESS) {
-        add_dvar(just_count,npos,_WIND_SX,nvar_node);
-        add_dvar(just_count,npos,_WIND_SY,nvar_node);
+        add_dvar(just_count,npos,adh_def._WIND_SX,nvar_node);
+        add_dvar(just_count,npos,adh_def._WIND_SY,nvar_node);
     }
     if (sm->flags.WAVE_STRESS) {
-        add_dvar(just_count,npos,_WAVE_SX,nvar_node);
-        add_dvar(just_count,npos,_WAVE_SY,nvar_node);
+        add_dvar(just_count,npos,adh_def._WAVE_SX,nvar_node);
+        add_dvar(just_count,npos,adh_def._WAVE_SY,nvar_node);
     }
     if (sm->flags.WAVE_RADS) {
-        add_dvar(just_count,npos,_WAVE_XX,nvar_node);
-        add_dvar(just_count,npos,_WAVE_XY,nvar_node);
-        add_dvar(just_count,npos,_WAVE_YX,nvar_node);
-        add_dvar(just_count,npos,_WAVE_YY,nvar_node);
+        add_dvar(just_count,npos,adh_def._WAVE_XX,nvar_node);
+        add_dvar(just_count,npos,adh_def._WAVE_XY,nvar_node);
+        add_dvar(just_count,npos,adh_def._WAVE_YX,nvar_node);
+        add_dvar(just_count,npos,adh_def._WAVE_YY,nvar_node);
     }
      
     

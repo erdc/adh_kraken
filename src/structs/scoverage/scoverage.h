@@ -6,7 +6,9 @@
 /*!
    \file type_scoverage.h
    \brief Data Structure for AdH Physics/Parameter coverages
- */
+   \note CJT - COL 1 =  PHYSICS ---> always allocated
+   \note CJT - COL 2 =  BCS ---> always allocated
+*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

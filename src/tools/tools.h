@@ -2,6 +2,8 @@
 #define H_STOOLS_
 
 
+int is_my_node(int global_id, SGRID *g);
+
 // strings.c
 char* concat(const char *s1, const char *s2);
 bool ext_match(const char *name, const char *ext);

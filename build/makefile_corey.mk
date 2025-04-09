@@ -39,6 +39,8 @@ $(wildcard $(MASTER_SRC_DIR)/xdmf) \
 $(wildcard $(MASTER_SRC_DIR)/dofmaps) \
 $(wildcard $(MASTER_SRC_DIR)/tokens) \
 $(wildcard $(MASTER_SRC_DIR)/messg) \
+$(wildcard $(MASTER_SRC_DIR)/structs/sadh_def) \
+$(wildcard $(MASTER_SRC_DIR)/structs/sbc) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sfile) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sdvar) \
 $(wildcard $(MASTER_SRC_DIR)/structs/svect) \
@@ -62,7 +64,6 @@ $(wildcard $(MASTER_SRC_DIR)/structs/sdt) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sivar_position) \
 $(wildcard $(MASTER_SRC_DIR)/structs/scoverage) \
 $(wildcard $(MASTER_SRC_DIR)/structs/ssw) \
-$(wildcard $(MASTER_SRC_DIR)/structs/smodel) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smodel_super) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smodel_design) \
 $(wildcard $(MASTER_SRC_DIR)/models/heat) \
@@ -88,6 +89,8 @@ $(MASTER_SRC_DIR)/xdmf \
 $(MASTER_SRC_DIR)/dofmaps \
 $(MASTER_SRC_DIR)/tokens \
 $(MASTER_SRC_DIR)/messg \
+$(MASTER_SRC_DIR)/structs/sadh_def \
+$(MASTER_SRC_DIR)/structs/sbc \
 $(MASTER_SRC_DIR)/structs/sdt \
 $(MASTER_SRC_DIR)/structs/sdvar \
 $(MASTER_SRC_DIR)/structs/sfile \
@@ -108,11 +111,9 @@ $(MASTER_SRC_DIR)/structs/sivar_position \
 $(MASTER_SRC_DIR)/structs/smat \
 $(MASTER_SRC_DIR)/structs/sio \
 $(MASTER_SRC_DIR)/structs/sseries \
-$(MASTER_SRC_DIR)/structs/smodel \
 $(MASTER_SRC_DIR)/structs/scoverage \
 $(MASTER_SRC_DIR)/structs/slin_sys \
 $(MASTER_SRC_DIR)/structs/ssw \
-$(MASTER_SRC_DIR)/structs/smodel \
 $(MASTER_SRC_DIR)/structs/smodel_super \
 $(MASTER_SRC_DIR)/structs/smodel_design \
 $(MASTER_SRC_DIR)/models/heat \
@@ -150,10 +151,10 @@ OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
 CFLAGS              += -g -pedantic -std=c99 -O3
-CFLAGS              += -D_PETSC -D_HDF5 -D_DEBUG #-D_MPI
+CFLAGS              += -D_HDF5 -D_DEBUG #-D_PETSC #-D_MPI
 CFLAGS              += -L/usr/local/Cellar/suite-sparse/7.7.0/lib -lumfpack -I/usr/local/Cellar/suite-sparse/7.7.0/include/suitesparse
 CFLAGS              += -L/usr/local/Cellar/scotch/7.0.6/lib -lscotch -I/usr/local/Cellar/scotch/7.0.6/include/
-CFLAGS              += -I/${PETSC_DIR}/${PETSC_ARCH}/lib/include/petsc
+CFLAGS              += -L/${PETSC_DIR}/${PETSC_ARCH}/lib -lpetsc -I/${PETSC_DIR}/${PETSC_ARCH}/lib/include/petsc
 CFLAGS              += -I/usr/local/Cellar/metis/5.1.0/include/
 CFLAGS              += -I/usr/local/Cellar/hdf5-mpi/1.14.5/include/
 CFLAGS              += -lhdf5 -I/usr/local/Cellar/hdf5-mpi/1.14.5/include

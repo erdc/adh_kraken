@@ -44,8 +44,10 @@ int heat_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbati
     double elem_u[nnodes], elem_u_old[nnodes];
     double dt = mod->ts->dt;
     //this map only works for CG, want to generalize to DG in future
-    global_to_local_dbl_ivars(elem_u, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
-    global_to_local_dbl_ivars(elem_u_old, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol_old);
+    //global_to_local_dbl_ivars(elem_u, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
+    //global_to_local_dbl_ivars(elem_u_old, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol_old);
+    global_to_local_dbl_ivars(elem_u, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[adh_def._H]], mod->sol);
+    global_to_local_dbl_ivars(elem_u_old, elem2d->nodes, nnodes, mod->ivars[mod->ivar_pos.var[adh_def._H]], mod->sol_old);
     
     //printf("elem %d\n",ie);
     //sarray_printScreen_dbl(elem_u, nnodes, "elemu");
@@ -56,7 +58,7 @@ int heat_residual(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbati
     double f[nnodes], dhdt[nnodes];
     int i;
     //perturb solution variable only, let's say we are using U
-    if (perturb_var == mod->ivar_pos.var[_H]){
+    if (perturb_var == adh_def._H){
         elem_u[perturb_node] += perturb_sign * perturbation;
     }
     for (i =0;i<nnodes;i++){

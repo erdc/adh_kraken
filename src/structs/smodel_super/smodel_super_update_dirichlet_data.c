@@ -4,7 +4,7 @@ void smodel_super_update_dirichlet_data(SMODEL_SUPER *sm){
 	//use it to update sm->dirichlet_data
 	double t = sm->ts->t_prev;
 	//for now just a simple hard code to get things working
-	if (sm->mat_physics_elem[sm->elem2d_physics_mat[0]].model[0].physics == HEAT2D_){
+	if (sm->mat_physics_elem[sm->elem2d_physics_mat[0]].pde[0].imod == adh_def._HEAT2D){
 		double alpha = 3.0;
 		double beta = 1.2;
 		//u_{exact} = 1 + x^2 + \alpha y^2 + \beta t

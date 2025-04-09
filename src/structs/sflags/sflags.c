@@ -19,15 +19,10 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 void sflags_init(SFLAGS *f) {
-    
-    f->NS_FLOW = false;
-    f->NS2_FLOW = false;
-    f->NS3_FLOW = false;
-    f->GW_FLOW = false;
-    f->SW_FLOW = false;
-    f->SW2_FLOW = false;
-    f->SW3_FLOW = false;
-    f->DIFFUSIVE_WAVE = false;
+
+    f->model = (int *) tl_alloc(sizeof(int),adh_def.nmodels);
+    sarray_init_value_int(f->model,adh_def.nmodels,UNSET_INT);
+
     f->MG = false;
     f->BAROCLINIC = false;
     f->EOS = 0;

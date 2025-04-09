@@ -4,6 +4,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 #include "adh.h"
 static int DEBUG = OFF;
+SADH_DEF adh_def;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -32,8 +33,6 @@ int main(int argc, char *argv[]) {
     MPI_Comm comm_world = MPI_COMM_WORLD;
     ierr_code = MPI_Init(&argc, &argv);
     if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
-    //ierr_code = MPI_Comm_rank(cstorm_comm, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
-    //ierr_code = MPI_Comm_size(cstorm_comm, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
     ierr_code = MPI_Comm_rank(comm_world, &myid); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
     ierr_code = MPI_Comm_size(comm_world, &npes); if (ierr_code != MPI_SUCCESS) {messg_err(ierr_code);}
 #endif
@@ -56,9 +55,15 @@ int main(int argc, char *argv[]) {
 #endif
     
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Set AdH variable and model definitions
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+    sadh_def_init();
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Initialize all function pointers
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
-    set_function_pointers(adh_resid_routines, adh_init_routines, adh_time_stepper);
+    set_function_pointers(adh_time_stepper);
+    printf("arg[1]: %s\n",argv[1]);
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Check command line arguments

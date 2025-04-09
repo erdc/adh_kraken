@@ -23,16 +23,25 @@ static int DEBUG = ON;
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void sdvar_position_init(SDVAR_POSITION *dp) {
     dp->n = 0;
-    for (int i=0; i<N_DVARS; i++) {
+    dp->var = (int *) tl_alloc(sizeof(int),adh_def.n_dvars);
+    dp->print_flag = (bool *) tl_alloc(sizeof(bool),adh_def.n_dvars);
+    
+    for (int i=0; i<adh_def.n_dvars; i++) {
         dp->var[i] = UNSET_INT;
         dp->print_flag[i] = false;
     }
 }
+
+void sdvar_position_free(SDVAR_POSITION *dp) {
+    dp->var = (int *) tl_free(sizeof(int),adh_def.n_dvars,dp->var);
+    dp->print_flag = (bool *) tl_free(sizeof(bool),adh_def.n_dvars,dp->print_flag);
+}
+
 void sdvar_position_printScreen(SDVAR_POSITION *dp) {
     printf("SDVAR_POSITION ------------\n");
     printf("---- n: %d\n",dp->n);
-    for (int i=0; i<N_DVARS; i++) {
-        printf("---- Dependent Variable[%d]: %s || position: %d || print_flag: %d\n",i,DVAR_NAME[i],dp->var[i],dp->print_flag[i]);
+    for (int i=0; i<adh_def.n_dvars; i++) {
+        printf("---- Dependent Variable[%d]: %s - %s || position: %d || print_flag: %d\n",i,adh_def.dvar[i].name,adh_def.dvar[i].subname,dp->var[i],dp->print_flag[i]);
         
     }
 }

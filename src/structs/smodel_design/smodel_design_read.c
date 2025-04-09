@@ -101,7 +101,8 @@ void smodel_design_read(SMODEL_DESIGN *dmod, char *filename) {
             get_next_token(&token); if (token == NULL) continue;
             printf("token: %s\n",token);
             if (strcmp(token,"DT") == 0) {
-                dmod->series_dt = sseries_read_allocate(NULL,NULL,DT_SERIES,&token,UNSET_INT); 
+                dmod->series_dt = sseries_read_allocate(fp,NULL,NULL,DT_SERIES,&token,UNSET_INT); 
+                //dmod->series_dt = sseries_read_allocate(NULL,NULL,DT_SERIES,&token,UNSET_INT); 
             } else if (strcmp(token,"WRITE") == 0) {
                 
 #ifdef _MESSG
@@ -109,7 +110,8 @@ void smodel_design_read(SMODEL_DESIGN *dmod, char *filename) {
 #else
                 tag();
 #endif
-                dmod->series_out = sseries_read_allocate(NULL,NULL,OUTPUT_SERIES,&token,UNSET_INT); 
+                //dmod->series_out = sseries_read_allocate(NULL,NULL,OUTPUT_SERIES,&token,UNSET_INT); 
+                dmod->series_out = sseries_read_allocate(fp,NULL,NULL,OUTPUT_SERIES,&token,UNSET_INT); 
 #ifdef _MESSG
                 tag(dmod->grid->smpi->ADH_COMM);
 #else

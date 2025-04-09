@@ -100,24 +100,24 @@ void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no) {
         ip    = &(sm->ivar_pos);
         ivars = sm->ivars;
         
-        for (int ivar=0; ivar<N_IVARS_TOTAL; ivar++) {
+        for (int ivar=0; ivar<adh_def.n_ivars; ivar++) {
             if (ip->var[ivar] != UNSET_INT) {
-                printf(">>> writing XDMF: var_name: %s || var_ndim: %d\n",IVAR_NAME[ivar],IVAR_DIM[ivar]);
-                if (IVAR_DIM[ivar] == 1) {
+                printf(">>> writing XDMF: var_name: %s || var_ndim: %d\n",adh_def.ivar[ivar].name,adh_def.ivar[ivar].dim);
+                if (adh_def.ivar[ivar].dim == 1) {
                     data_extract(sol,ivars,ip->var[ivar],n,data);
-                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, IVAR_NAME[ivar], 1, dm->ts.nt, true);
-                    hdf5_write_data(g, dm->filebase, IVAR_NAME[ivar], data, 1, true, dm->ts.nt);
+                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, adh_def.ivar[ivar].name, 1, dm->ts.nt, true);
+                    hdf5_write_data(g, dm->filebase, adh_def.ivar[ivar].name, data, 1, true, dm->ts.nt);
                     sarray_init_dbl(data,3*n);
-                } else if (IVAR_DIM[ivar] == 2) {
+                } else if (adh_def.ivar[ivar].dim == 2) {
                     data_extract_vec2d(sol,ivars,ip->var[ivar],ip->var[ivar+1],n,data);
-                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, IVAR_NAME[ivar], 2, dm->ts.nt, true);
-                    hdf5_write_data(g, dm->filebase, IVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, adh_def.ivar[ivar].name, 2, dm->ts.nt, true);
+                    hdf5_write_data(g, dm->filebase, adh_def.ivar[ivar].name, data, 3, true, dm->ts.nt);
                     sarray_init_dbl(data,3*n);
                     ivar += 1;
-                } else if (IVAR_DIM[ivar] == 3) {
+                } else if (adh_def.ivar[ivar].dim == 3) {
                     data_extract_vec3d(sol,ivars,ip->var[ivar],ip->var[ivar+1],ip->var[ivar+2],n,data);
-                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, IVAR_NAME[ivar], 3, dm->ts.nt, true);
-                    hdf5_write_data(g, dm->filebase, IVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                    xmf_write_ts_attribute(g, dm->xmf, dm->filebase, adh_def.ivar[ivar].name, 3, dm->ts.nt, true);
+                    hdf5_write_data(g, dm->filebase, adh_def.ivar[ivar].name, data, 3, true, dm->ts.nt);
                     sarray_init_dbl(data,3*n);
                     ivar += 2;
                 }
@@ -127,25 +127,25 @@ void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no) {
         // write dependent nodal variables
         SDVAR_POSITION *dp = &sm->dvars.sdvar_pos_node;
         if (sm->dvars.n_dvar > 0) { 
-            for (int ivar=0; ivar<N_DVARS; ivar++) {
+            for (int ivar=0; ivar<adh_def.n_dvars; ivar++) {
                 // cjt - need to add print flags here to let user choose what dep-variables are written
                 if (dp->var[ivar] != UNSET_INT) {
-                    printf(">>> writing XDMF: var_name: %s || var_ndim: %d\n",DVAR_NAME[ivar],DVAR_DIM[ivar]);
-                    if (DVAR_DIM[ivar] == 1) {
+                    printf(">>> writing XDMF: var_name: %s || var_ndim: %d\n",adh_def.dvar[ivar].name,adh_def.dvar[ivar].dim);
+                    if (adh_def.dvar[ivar].dim == 1) {
                         data_stack(sm->dvars.nodal_dvar,dp->var[ivar],1,n,data);
-                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, DVAR_NAME[ivar],1,dm->ts.nt,true);
-                        hdf5_write_data(g, dm->filebase, DVAR_NAME[ivar], data, 1, true, dm->ts.nt);
+                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, adh_def.dvar[ivar].name,1,dm->ts.nt,true);
+                        hdf5_write_data(g, dm->filebase, adh_def.dvar[ivar].name, data, 1, true, dm->ts.nt);
                         sarray_init_dbl(data,3*n);
-                    } else if (DVAR_DIM[ivar] == 2) {
+                    } else if (adh_def.dvar[ivar].dim == 2) {
                         data_stack(sm->dvars.nodal_dvar,dp->var[ivar],2,n,data);
-                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, DVAR_NAME[ivar],2,dm->ts.nt,true);
-                        hdf5_write_data(g, dm->filebase, DVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, adh_def.dvar[ivar].name,2,dm->ts.nt,true);
+                        hdf5_write_data(g, dm->filebase, adh_def.dvar[ivar].name, data, 3, true, dm->ts.nt);
                         sarray_init_dbl(data,3*n);
                         ivar += 1;
-                    } else if (DVAR_DIM[ivar] == 3) {
+                    } else if (adh_def.dvar[ivar].dim == 3) {
                         data_stack(sm->dvars.nodal_dvar,dp->var[ivar],3,n,data);
-                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, DVAR_NAME[ivar],3,dm->ts.nt,true);
-                        hdf5_write_data(g, dm->filebase, DVAR_NAME[ivar], data, 3, true, dm->ts.nt);
+                        xmf_write_ts_attribute(g, dm->xmf, dm->filebase, adh_def.dvar[ivar].name,3,dm->ts.nt,true);
+                        hdf5_write_data(g, dm->filebase, adh_def.dvar[ivar].name, data, 3, true, dm->ts.nt);
                         sarray_init_dbl(data,3*n);
                         ivar += 2;
                     }

@@ -31,7 +31,7 @@ void print_build_info();
 
 
 
-#include "vars.h"
+//#include "vars.h"
 #include "define.h"
 #include "macro.h"
 #include "model_codes.h"
@@ -60,7 +60,6 @@ void print_build_info();
 #include "selem_2d.h"
 #include "selem_3d.h"
 #include "squad.h"
-#include "smodel.h"
 #include "slist_items.h"
 #include "smpi.h"
 #include "smeteor.h"
@@ -81,8 +80,9 @@ void print_build_info();
 #include "ssw.h"
 #include "sfile.h"
 #include "sseries.h"
-#include "smodel.h"
+//#include "smodel.h"
 #include "smodel_super.h"
+#include "sadh_def.h"
 #include "smodel_design.h"
 
 #include "messg.h"
@@ -118,7 +118,7 @@ void print_build_info();
 #include "test.h"
 
 //Adding function pointers that will always be needed
-int (*adh_resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int);
-int (*adh_init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *);
+//int (*adh_resid_routines[N_RESID_ROUTINES])(SMODEL_SUPER *, double *, int, double, int, int, int, int);
+//int (*adh_init_routines[N_INIT_ROUTINES])(SMODEL_SUPER *);
 int (*adh_time_stepper[N_TIME_STEPPERS]) (SMODEL_SUPER*);
 //#endif

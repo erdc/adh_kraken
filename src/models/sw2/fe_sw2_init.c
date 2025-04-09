@@ -31,9 +31,9 @@ int fe_sw2_init(SMODEL_SUPER *sm) {
     //how are mappings going to look??
     //this should work for now
     int i,temp,tempu,tempv;
-    int h_loc = sm->ivar_pos.var[_H];
-    int u_loc = sm->ivar_pos.var[_UDA];
-    int v_loc = sm->ivar_pos.var[_VDA];
+    int h_loc = sm->ivar_pos.var[adh_def._H];
+    int u_loc = sm->ivar_pos.var[adh_def._UDA];
+    int v_loc = sm->ivar_pos.var[adh_def._VDA];
     //only want to loop over active nodes here not all nodes!!!! Will lead to bug
     for (i=0; i<sm->grid->nnodes; i++) {
         //will only work for CG, will need to generalize

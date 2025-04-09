@@ -268,19 +268,10 @@ void sstr_value_set_physics(STR_VALUE *str, int nstring, SFLAGS flag) {
     int istring = UNSET_INT;
     for (istring = 0; istring < nstring; istring++) {
         if (str[istring].phys_flag != OFF && str[istring].string_type != STR_MID) {
-            if (flag.SW2_FLOW == ON){
-                str[istring].phys_flag = SW2_FLAG;
-                if (flag.DIFFUSIVE_WAVE == ON){
-                    str[istring].phys_flag = OL_FLAG;
+            for (int i=0; i<adh_def.nmodels; i++) {
+                if (flag.model[i] == 1) {
+                    str[istring].phys_flag = i;
                 }
-            } else if (flag.SW3_FLOW == ON){
-                str[istring].phys_flag = SW3_FLAG;
-            } else if (flag.GW_FLOW == ON){
-                str[istring].phys_flag = GW_FLAG;
-            } else if (flag.DIFFUSIVE_WAVE == ON){
-                str[istring].phys_flag = OL_FLAG;
-            } else if (flag.NS_FLOW == ON){
-                str[istring].phys_flag = NS_FLAG;
             }
         }
     }

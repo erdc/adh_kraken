@@ -5,9 +5,9 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
 
 typedef struct {
-    int n;                      // the number of active dependent variables
-    int  var[N_DVARS];           // position in array form
-    bool print_flag[N_DVARS];    // true if the variable is output
+    int n;            // the number of active dependent variables
+    int  *var;        // position in array form
+    bool *print_flag; // true if the variable is output
 } SDVAR_POSITION;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
@@ -40,6 +40,7 @@ typedef struct {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++/
 
 void sdvar_position_init(SDVAR_POSITION *dp);
+void sdvar_position_free(SDVAR_POSITION *dp);
 void sdvar_position_printScreen(SDVAR_POSITION *dp);
 void sdvar_alloc_init(SDVAR *sdvar, int nnode, int n_dvar, int n_dvar_elem_dbl, int n_dvar_elem_int, int nnode_dvar, int nelem_dvar);
 #endif

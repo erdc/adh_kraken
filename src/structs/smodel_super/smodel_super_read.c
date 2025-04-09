@@ -50,16 +50,19 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         if (strcmp(token, "SERIES") == 0) {
             get_next_token(&token);
             if (strcmp(token, "WIND") == 0) {
-                sseries_read_allocate(sm->series_wind_head,sm->series_wind_curr,WIND_SERIES,&token,UNSET_INT);
+                sseries_read_allocate(fp, sm->series_wind_head,sm->series_wind_curr,WIND_SERIES,&token,UNSET_INT);
             } else if (strcmp(token, "WAVE") == 0) {
-                sseries_read_allocate(sm->series_wave_head,sm->series_wave_curr,WAVE_SERIES,&token,UNSET_INT);
+                sseries_read_allocate(fp, sm->series_wave_head,sm->series_wave_curr,WAVE_SERIES,&token,UNSET_INT);
             } else if (strcmp(token, "GWCONSTITUENT") == 0) {
                 //sseries_read_allocate(sm->series_gw_psk_head,sm->series_gw_psk_curr,GWCONSTITUENT_SERIES,&token,UNSET_INT);
+            } else if (strcmp(token, "BC") == 0) {
+                sseries_read_allocate(fp, &sm->series_head,&sm->series_curr,TIME_SERIES,&token,UNSET_INT);
             } else {
                 tl_error("Series not recognized.\n");
             }
         }
     }
+    if (DEBUG) {sseries_printScreen_list(ON, sm->series_head);}
     rewind(fp);
     
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -68,41 +71,25 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     if (DEBUG) {
         printf(">reading bc file for model extraction\n");
     }
-    char **codes = allocate_dptr_char(50,10);
-    for (i=0; i<50; i++) {strcpy(codes[i],"0000");}
-    read_bc_MODEL(sm,fp,codes);
-    if (DEBUG) {
-        printf("Element Material Info:\n");
-        printf("-- Number of physics materials found: %d\n",sm->nmat_physics);
-        for (i=0; i<sm->nmat_physics; i++) {
-            printf("-- physics code[%d]: %s\n",i,codes[i]);
-        }
-    }
-    smat_physics_alloc_init_array(&(sm->mat_physics_elem),sm->nmat_physics,codes);
-    rewind(fp);
-    if (DEBUG) {
-        for (i=0; i<sm->nmat_physics; i++) {smat_physics_printScreen(&sm->mat_physics_elem[i]);}
-    }
-    free_dptr_char(codes,50,10);
-
+    //char **codes = allocate_dptr_char(50,10);
+    //for (i=0; i<50; i++) {strcpy(codes[i],"0000");}
+    //read_bc_MODEL(sm,fp,codes);
+    read_bc_MODEL(sm,fp);
+    
+    //smat_physics_alloc_init_array(&(sm->mat_physics_elem),sm->nmat_physics,codes);
+    //rewind(fp);
+    //if (DEBUG) {
+    //    for (i=0; i<sm->nmat_physics; i++) {smat_physics_printScreen(&sm->mat_physics_elem[i]);}
+    //}
+    //free_dptr_char(codes,50,10);
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
     //tl_check_all_pickets(__FILE__,__LINE__);//exit(-1);
     if (DEBUG) {
-        printf(">reading bc file for string extraction\n");
+        printf(">reading bc file for node strings\n");
     }
-    while ( (read = getline(&line, &len, fp)) != -1) {
-        get_token(line,&token);
-        if (token == NULL) continue;
-        if (strcmp(token, "NDS") == 0 ||
-            strcmp(token, "EGS") == 0 ||
-            strcmp(token, "MDS") == 0 ||
-            strcmp(token, "MTS") == 0) {
-            //read_bc_STRINGS(sm,&token);
-        }
-    }
+    read_bc_NDS(sm,fp);
     rewind(fp);
-    
     
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -125,9 +112,6 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         //  else if (strcmp(token, "OP") == 0) {read_bc_OP(sm,&token);}
     }
     rewind(fp);
-    
-    //++++++++++++++++++++++++++++++++++++++++++++++
-    //++++++++++++++++++++++++++++++++++++++++++++++
     fclose(fp);
     
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -230,7 +214,7 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     if (DEBUG) {
         printf(">creating ivar_pos\n");
     }
-    int FLAGS[N_IVARS_TOTAL];
+    int FLAGS[adh_def.n_ivars];
     sivar_position_init(&(sm->ivar_pos));
     smat_physics_position_flag(sm->mat_physics_node,grid->nnodes,FLAGS); 
     sivar_position_map(&(sm->ivar_pos),FLAGS);

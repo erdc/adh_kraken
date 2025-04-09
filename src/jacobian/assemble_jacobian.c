@@ -65,7 +65,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         sarray_init_dbl(vals_off_diag, nnz_off_diag);
     }
 
-    int mat_id, nvars_elem, nphysics_models;
+    int mat_id, nvars_elem, npdes;
     int elem_vars[sm->ivar_pos.n];
 
     //loop through all nelem3d
@@ -75,7 +75,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         nnodes = grid->elem3d[j].nnodes;
         mat_id = sm->elem3d_physics_mat[j];
         nvars_elem =  sm->mat_physics_elem[mat_id].n;
-        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
+        npdes = sm->mat_physics_elem[mat_id].npdes;
         ndofs_ele = nvars_elem*nnodes;
 
 
@@ -87,7 +87,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
             //use var code like PERTURB_H ,. ...
             //maybe get this from mat instead too!
             var_code = sm->mat_physics_elem[mat_id].ivar_loc[k];
-            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem3d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].pde, j, nnodes, nvars_elem, elem_vars,var_code, npdes, k, grid->elem3d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -105,7 +105,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         nnodes = grid->elem2d[j].nnodes;
         mat_id = sm->elem2d_physics_mat[j];
         nvars_elem =  sm->mat_physics_elem[mat_id].n;
-        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
+        npdes = sm->mat_physics_elem[mat_id].npdes;
         ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
         sarray_init_double_2d(elem_mat,max_elem_dof, max_elem_dof);
@@ -113,7 +113,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         for (k=0;k<nvars_elem;k++){
 
             var_code = sm->mat_physics_elem[mat_id].ivar_loc[k];
-            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem2d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].pde, j, nnodes, nvars_elem, elem_vars,var_code, npdes, k, grid->elem2d[j].nodes, DEBUG);
             //printf("perturb var called\n");
         }
         //store in global using 2 mappings
@@ -130,7 +130,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         nnodes = grid->elem1d[j].nnodes;
         mat_id = sm->elem1d_physics_mat[j];
         nvars_elem =  sm->mat_physics_elem[mat_id].n;
-        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
+        npdes = sm->mat_physics_elem[mat_id].npdes;
         ndofs_ele = nvars_elem*nnodes;
         //needs to be for 2d matrix
         sarray_init_double_2d(elem_mat,max_elem_dof, max_elem_dof);
@@ -138,7 +138,7 @@ void assemble_jacobian(SMODEL_SUPER *sm) {
         for (k=0;k<nvars_elem;k++){
 
             var_code = sm->mat_physics_elem[mat_id].ivar_loc[k];
-            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].model, j, nnodes, nvars_elem, elem_vars,var_code, nphysics_models, k, grid->elem1d[j].nodes, DEBUG);
+            perturb_var(elem_mat, sm, sm->mat_physics_elem[mat_id].pde, j, nnodes, nvars_elem, elem_vars,var_code, npdes, k, grid->elem1d[j].nodes, DEBUG);
         }
         //store in global using 2 mappings
         //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
@@ -318,8 +318,8 @@ void load_global_mat_CSR(double *vals, int *indptr, int *indices, double **elem_
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model, 
-    int ie, int nodes_on_element, int nvar_ele, int *elem_vars ,int perturb_var_code, int nsubModels, int ele_var_no, int *NodeIDs, int DEBUG) {
+void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SPDE *pde, 
+    int ie, int nodes_on_element, int nvar_ele, int *elem_vars ,int perturb_var_code, int npdes, int ele_var_no, int *NodeIDs, int DEBUG) {
     
     
     int i,j, NodeID = UNSET_INT;
@@ -342,7 +342,8 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
     double temp_sol;
     int resid_index;
 
- 
+    int elem_nvars = 5;
+    int eq_vars[] = {1,2,3};
     int mat_id, k;
  
     for (i=0; i<nodes_on_element; i++) {
@@ -352,7 +353,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
         sarray_init_dbl(elem_rhs_P,max_elem_dof);
         sarray_init_dbl(elem_rhs_M,max_elem_dof);
         //safe assumption that all submodels on an element depend on all of the variables?
-        for (j=0;j<nsubModels;j++){ 
+        for (j=0;j<npdes;j++){ 
             sarray_init_dbl(temp_P,max_elem_dof);
             sarray_init_dbl(temp_M,max_elem_dof);        
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -362,26 +363,32 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SMODEL *model,
 #endif
 
             //this will give a local residual, in temp and will give code for model vars
-            nvar_pde = model[j].nvar;
-            resid_index = model[j].physics;
-            sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, model[j].physics_vars,nvar_pde);
-            //eq_var_code = model[j].fe_resid(sm,temp_P,ie, epsilon,i, perturb_var_code, +1, DEBUG);
-            //eq_var_code = smodel_super_resid(sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG, fe_resid[model[j].physics]);
-            //eq_var_code = sm->fe_resid[mat_id+k](sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG);
-            eq_var_code = adh_resid_routines[resid_index](sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG);
-            add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
+            nvar_pde = adh_def.model[pde[j].imod].nivars;
+
+            //replaced:
+            //resid_index = model[j].physics;
+            //sarray_init_int(physics_vars, nvar_pde);
+            //sarray_copy_int(physics_vars, model[j].physics_vars,nvar_pde);
+            //eq_var_code = adh_resid_routines[resid_index](sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG);
+            //add_replace_elem_rhs(elem_rhs_P,temp_P,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
+
+            //with:
+            eq_var_code = pde[j].resid(sm,temp_P,ie, epsilon, i, perturb_var_code, +1, DEBUG);
+            //need to look
+            //add_replace_elem_rhs(elem_rhs_P,temp_P,pde[j].imod,nodes_on_element, 1);
+            add_replace_elem_rhs(elem_rhs_P, temp_P, elem_nvars,  pde[j].imod, eq_vars, nodes_on_element, 1.0);
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // (-) body perturbation of depth ++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef _DEBUG
             if (DEBUG) printf("\nload :: body pertubing -h for element %d :: perturbation: %20.10e\n",ie,epsilon);
 #endif
-            //fe_sw2_body_resid(mod,elem_rhs_h_M,ie,epsilon,i,PERTURB_H,-1,DEBUG);
-            //should always be same as var_code
-            //eq_var_code2 = smodel_super_resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG, fe_resid[model[j].physics]);
-            //eq_var_code2 = sm->fe_resid[mat_id+k](sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG);
-            eq_var_code2 = adh_resid_routines[resid_index](sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG);
-            add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
+            //replaced:
+            //eq_var_code2 = adh_resid_routines[resid_index](sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG);
+            //add_replace_elem_rhs(elem_rhs_M,temp_M,nvar_ele,nvar_pde,physics_vars,nodes_on_element, 1);
+            //with:
+            eq_var_code2 = pde[j].resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG);
+            //add_replace_elem_rhs(elem_rhs_M,temp_M,pde[j].imod,nodes_on_element, 1);
+            add_replace_elem_rhs(elem_rhs_M, temp_M, elem_nvars,  pde[j].imod, eq_vars, nodes_on_element, -1.0);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         }

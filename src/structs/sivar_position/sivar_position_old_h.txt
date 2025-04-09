@@ -1,6 +1,9 @@
 #ifndef H_SIVAR_POS_
 #define H_SIVAR_POS_
 
+#define MAX_VARS 10 // add to this if you add independent variables
+#define MAX_TRNS_VARS 20 // maximum # of transport independent variables. Can be increased.
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*!
@@ -11,9 +14,39 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 typedef struct {
     
+    char h[MAXLINE];
+    char u[MAXLINE];
+    char v[MAXLINE];
+    char w[MAXLINE];
+    char uda[MAXLINE];
+    char vda[MAXLINE];
+    char dpl[MAXLINE];
+    char prs[MAXLINE];
+    char heat[MAXLINE];
+    char sal[MAXLINE];
+    char con[MAX_TRNS_VARS][MAXLINE];
+    
+} SNAMES;
+
+typedef struct {
+    
     int n;     // total # of independent variables active (includes transport)
     int ntrns; // total # of transport variables active only
-    int *var;  // position in array form of length adh_def.n_ivars
+    
+    // independent variable order!
+    int h;
+    int u;
+    int v;
+    int w;
+    int uda;
+    int vda;
+    int dpl;
+    int prs;
+    int heat;
+    int sal;
+    int con[MAX_TRNS_VARS];
+
+    SNAMES name;
     
 } SIVAR_POSITION;   
 
@@ -21,17 +54,14 @@ typedef struct {
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 // Methods
 void sivar_position_init(SIVAR_POSITION *ip);
-void sivar_position_free(SIVAR_POSITION *ip);
 void sivar_position_printScreen(SIVAR_POSITION *ip);
 void sivar_position_map(SIVAR_POSITION *ip, int *FLAGS);
-int  sivar_position_build_dof_map(SIVAR_POSITION *ip, int nnodes,  SIVAR_POSITION *ipNode, int ***ivars);
+int sivar_position_build_dof_map(SIVAR_POSITION *ip, int nnodes,  SIVAR_POSITION *ipNode, int ***ivars);
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #endif
-
-
 
 
 

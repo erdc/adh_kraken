@@ -1,6 +1,56 @@
 /*! \file  assemble_residual.c This file has functions responsible for assembling the global residual vector */
 #include "adh.h"
 static int DEBUG = OFF;
+void load_pdes(SMODEL_SUPER *sm, SGRID *grid, int elem_nnodes, int *nodeIDs, int mat_id, int elem_id) {
+    
+    int i, imod = UNSET_INT;
+    int var_code;
+    int max_elem_dof = sm->ivar_pos.n*MAX_NNODE;
+    int dofs[max_elem_dof];
+    double elem_rhs[max_elem_dof];
+    double eq_rhs[max_elem_dof];
+    sarray_init_dbl(elem_rhs,max_elem_dof);
+    SMAT_PHYSICS *mat = &(sm->mat_physics_elem[mat_id]); // alias
+    int elem_nvars = 0; //NEED TOFIX
+    int eq_vars[] = {1,2,3} ;
+    for (int k=0;k<mat->npdes;k++){
+        sarray_init_dbl(eq_rhs,max_elem_dof);
+        //convention for filling temp will be:
+        // for i in node (for j in nvar temp[nnode*i + j] = result)
+        var_code = mat->pde[k].resid(sm,eq_rhs, elem_id, 0.0, UNSET_INT, UNSET_INT, 0, DEBUG);
+        //add eq_rhs to elem_rhs
+        //in order to do this we will need elemental vars and info about fe_resid routine
+        //add_replace_elem_rhs(elem_rhs,eq_rhs,mat->pde[k].imod,elem_nnodes,-1.0);
+        //Need to fix this, MARK, where are elem_nvars and elem_vars
+        //what is relative position of equation variables??
+        add_replace_elem_rhs(elem_rhs, eq_rhs, elem_nvars, mat->pde[k].imod, eq_vars, elem_nnodes, -1.0);
+    }
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //for residual we only need dof numbers local to process (including ghost nodes)
+    //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
+    //usually would take the local cell number and compute the associated dofs
+    //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    get_cell_dofs_ivars(dofs, sm->ivars, elem_nnodes, nodeIDs, mat->n, mat->ivar_loc);
+
+    //puts elem_rhs into global residual, applies Dirichlet conditions too?
+    load_global_resid(sm->lin_sys->residual, elem_rhs, elem_nnodes, mat->n, dofs);
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*!
+ *  \brief     This function assembles the global residual vector using elemental resid routines
+ *  \author    Count Corey J. Trahan
+ *  \author    Mark Loveland
+ *  \bug       none
+ *  \warning   none
+ *  \copyright AdH
+ *  @param[in,out] sm (SMODEL_SUPER*) - the super model where the residual resides
+ *  @param[in] grid (SGRID*) - the grid over which the monolithic residual resides
+ */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -27,125 +77,17 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
 
     sarray_init_dbl(sm->lin_sys->residual, (sm->ndofs));
 
-    int max_elem_dof = sm->ivar_pos.n*MAX_NNODE;
-    double elem_rhs[max_elem_dof];
-    double eq_rhs[max_elem_dof];
-    int dofs[max_elem_dof];
-    int nnodes;
-    int physics_vars[sm->ivar_pos.n];
-    int var_code;
-    int resid_index;
-    int nvars_elem, nphysics_models, mat_id, nvar_pde;
-    int **ivars = sm->ivars;
+    int max_elem_dof = sm->ivar_pos.n * MAX_NNODE;
 
-    //loop through and assemble residual
     for (j=0;j<grid->nelems3d;j++){
-        sarray_init_dbl(elem_rhs,max_elem_dof);
-
-        nnodes = grid->elem3d[j].nnodes;
-        mat_id = sm->elem3d_physics_mat[j];
-        nvars_elem =  sm->mat_physics_elem[mat_id].n;
-        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
-
-
-        for (k=0;k<nphysics_models;k++){
-            sarray_init_dbl(eq_rhs,max_elem_dof);
-            
-            nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
-            resid_index = sm->mat_physics_elem[mat_id].model[k].physics;
-            sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
-            //convention for filling temp will be:
-            // for i in node (for j in nvar temp[nnode*i + j] = result)
-            var_code = adh_resid_routines[resid_index](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            //add eq_rhs to elem_rhs
-            //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,nvar_pde,physics_vars,nnodes,-1.0);
-        }
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        //for residual we only need dof numbers local to process (including ghost nodes)
-        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
-        //usually would take the local cell number and compute the associated dofs
-        //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem3d[j].nodes, nvars_elem, sm->mat_physics_elem[mat_id].ivar_loc);
-
-        //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);
+        load_pdes(sm,grid,grid->elem3d[j].nnodes,grid->elem3d[j].nodes,sm->elem3d_physics_mat[j],j);
     }
-
     for (j=0;j<grid->nelems2d;j++){
-
-        sarray_init_dbl(elem_rhs,max_elem_dof);
-        nnodes = grid->elem2d[j].nnodes;
-        mat_id = sm->elem2d_physics_mat[j];
-        nvars_elem =  sm->mat_physics_elem[mat_id].n;
-        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
-
-
-        for (k=0;k<nphysics_models;k++){
-
-            sarray_init_dbl(eq_rhs,max_elem_dof);
-            
-            nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
-            resid_index = sm->mat_physics_elem[mat_id].model[k].physics;
-            sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
-            //convention for filling temp will be:
-            // for i in node (for j in nvar temp[nnode*i + j] = result)
-            var_code = adh_resid_routines[resid_index](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,nvar_pde,physics_vars,nnodes,-1.0);
-        }
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        //for residual we only need dof numbers local to process (including ghost nodes)
-        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
-        //usually would take the local cell number and compute the associated dofs
-        //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem2d[j].nodes, nvars_elem, sm->mat_physics_elem[mat_id].ivar_loc);
-        //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);
+        load_pdes(sm,grid,grid->elem2d[j].nnodes,grid->elem2d[j].nodes,sm->elem2d_physics_mat[j],j);
     }
-
     for (j=0;j<grid->nelems1d;j++){
-
-        sarray_init_dbl(elem_rhs,max_elem_dof);
-        nnodes = grid->elem1d[j].nnodes;
-        mat_id = sm->elem1d_physics_mat[j];
-        nvars_elem =  sm->mat_physics_elem[mat_id].n;
-        nphysics_models = sm->mat_physics_elem[mat_id].nSubmodels;
-
-
-        for (k=0;k<nphysics_models;k++){
-            sarray_init_dbl(eq_rhs,max_elem_dof);
-            resid_index = sm->mat_physics_elem[mat_id].model[k].physics;
-            nvar_pde = sm->mat_physics_elem[mat_id].model[k].nvar;
-            sarray_init_int(physics_vars, nvar_pde);
-            sarray_copy_int(physics_vars, sm->mat_physics_elem[mat_id].model[k].physics_vars,nvar_pde);
-            //convention for filling temp will be:
-            // for i in node (for j in nvar temp[nnode*i + j] = result)
-            var_code = adh_resid_routines[resid_index](sm,eq_rhs,j, 0.0, UNSET_INT, PERTURB_NONE, 0, DEBUG);
-            //add eq_rhs to elem_rhs
-            //in order to do this we will need elemental vars and info about fe_resid routine
-            add_replace_elem_rhs(elem_rhs,eq_rhs,nvars_elem,nvar_pde,physics_vars,nnodes,-1.0);
-        }
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        //for residual we only need dof numbers local to process (including ghost nodes)
-        //this is a complicated map but maybe we can simplify in simpler cases by replacing different routine
-        //usually would take the local cell number and compute the associated dofs
-        //but this has expanded arguments so it will work for elem1d,elem2d as well, cell # is implicit
-        //++++++++++++++++++++++++++++++++++++++++++++++
-        get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem1d[j].nodes, nvars_elem, sm->mat_physics_elem[mat_id].ivar_loc);
-
-        //puts elem_rhs into global residual, applies Dirichlet conditions too?
-        load_global_resid(sm->lin_sys->residual, elem_rhs, nnodes, nvars_elem, dofs);
+        load_pdes(sm,grid,grid->elem1d[j].nnodes,grid->elem1d[j].nodes,sm->elem1d_physics_mat[j],j);
     }
-
-   
 }
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -169,28 +111,30 @@ void assemble_residual(SMODEL_SUPER *sm, SGRID *grid) {
  *  \note 
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars, int eq_nvars, int *eq_vars, int nnodes, double scale){
+//void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars, int eq_nvars, int *eq_vars, int nnodes, double scale);
+void add_replace_elem_rhs(double *elem_rhs, double *eq_rhs, int elem_nvars,  int imod, int *eq_vars, int nnodes, double scale){
 
     //for each node, place the rhs entries of a specific pde residual routine in the correct slots of an elemental rhs
 
     int inode,eq_var; //eq_nvars;
     int current_var;
-    bool notFound = TRUE;
-    int k,save_k;
     //number of digits in eq_vars will be the number of variables in this residual
     //eq_nvars = count_digits(eq_vars);
+    int neq_vars = adh_def.model[imod].nivars;
 
     for (inode=0;inode<nnodes;inode++){
 
-        for (eq_var=0;eq_var<eq_nvars;eq_var++){
+        for (eq_var=0;eq_var<neq_vars;eq_var++){
 
             //get var index within elem vars
-            current_var = eq_vars[eq_var];
+            //current_var = eq_vars[eq_var];
+            //get var index within elem vars
+            current_var = adh_def.model[imod].var[eq_var];
 
             //maps the current var from the residual to the correct var number in elem_vars
 
             //now we know what the current_var is in the whole element, put those entries into the elem_rhs
-            elem_rhs[inode*elem_nvars + current_var] += scale*eq_rhs[inode*eq_nvars+eq_var];
+            elem_rhs[inode*elem_nvars + current_var] += scale*eq_rhs[inode*neq_vars+eq_var];
 
         }
     

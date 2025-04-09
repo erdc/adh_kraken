@@ -21,9 +21,9 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smat_physics_position_flag(SMAT_PHYSICS **mat_node, int nnodes, int *FLAG) {
-    sarray_init_int(FLAG,N_IVARS_TOTAL);
+    sarray_init_int(FLAG,adh_def.n_ivars);
     for (int i=0; i<nnodes; i++) {
-        for (int ivar=0; ivar<N_IVARS_TOTAL; ivar++) {
+        for (int ivar=0; ivar<adh_def.n_ivars; ivar++) {
             //printf("mat_node[%d]->ivars.var[ivar=%d]: %d\n",i,ivar,mat_node[i]->ivars.var[ivar]);
             if (mat_node[i]->ivar_pos.var[ivar] != UNSET_INT) FLAG[ivar] = 1;
         }

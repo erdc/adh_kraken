@@ -38,6 +38,8 @@ $(wildcard $(MASTER_SRC_DIR)/friction) \
 $(wildcard $(MASTER_SRC_DIR)/xdmf) \
 $(wildcard $(MASTER_SRC_DIR)/dofmaps) \
 $(wildcard $(MASTER_SRC_DIR)/tokens) \
+$(wildcard $(MASTER_SRC_DIR)/structs/sadh_def) \
+$(wildcard $(MASTER_SRC_DIR)/structs/sbc) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sfile) \
 $(wildcard $(MASTER_SRC_DIR)/structs/sdvar) \
 $(wildcard $(MASTER_SRC_DIR)/structs/svect) \
@@ -87,6 +89,8 @@ $(MASTER_SRC_DIR)/friction \
 $(MASTER_SRC_DIR)/xdmf \
 $(MASTER_SRC_DIR)/dofmaps \
 $(MASTER_SRC_DIR)/tokens \
+$(MASTER_SRC_DIR)/structs/sadh_def \
+$(MASTER_SRC_DIR)/structs/sbc \
 $(MASTER_SRC_DIR)/structs/sdt \
 $(MASTER_SRC_DIR)/structs/sdvar \
 $(MASTER_SRC_DIR)/structs/sfile \

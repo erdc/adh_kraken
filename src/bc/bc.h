@@ -22,7 +22,9 @@
 // void read_bc_TC(SMODEL_SUPER *mod, char **token);
 // void read_bc_TEST(SMODEL_SUPER *mod, char **token);
 // void read_bc_prep(SMODEL_SUPER *mod);
-void read_bc_MODEL(SMODEL_SUPER *sm, FILE *fp, char **codes);
+void read_bc_MODEL(SMODEL_SUPER *sm, FILE *fp);
+void read_bc_BC(SMODEL_SUPER *sm, FILE *fp);
+void read_bc_NDS(SMODEL_SUPER *sm, FILE *fp);
 
 
 #endif

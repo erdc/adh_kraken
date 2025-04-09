@@ -7,14 +7,7 @@
 typedef struct {
     
     /* Model Flags */
-    bool NS_FLOW;              /* if TRUE then run Navier-Stokes */
-    bool NS2_FLOW;             /* if TRUE then run 2D Navier-Stokes */
-    bool NS3_FLOW;             /* if TRUE then run 3D Navier-Stokes */
-    bool GW_FLOW;              /* if TRUE then run ground water flow */
-    bool SW_FLOW;              /* if TRUE then run 2D or 3D shallow water */
-    bool SW2_FLOW;             /* if TRUE then run 2D shallow water */
-    bool SW3_FLOW;             /* if TRUE then run 3D shallow water */
-    bool DIFFUSIVE_WAVE;       /* if TRUE then run the 2D overland flow */
+    int *model;    // which models are in this superModel
     
     /* moving grid */
     bool MG;

@@ -89,10 +89,10 @@ void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase) {
             // Independent Variables Read
             // Stores into solution array
             // +++++++++++++++++++++++++++
-            for (ivar=0; ivar<N_IVARS_TOTAL; ivar++) { //printf("var_name: %s\n",ivar_pos->var_name[ivar]);
+            for (ivar=0; ivar<adh_def.n_ivars; ivar++) { //printf("var_name: %s\n",ivar_pos->var_name[ivar]);
                 //printf("name: %s || IVAR_NAME[ivar]: %s\n",name,IVAR_NAME[ivar]);
-                if (strcmp(name,IVAR_NAME[ivar]) == 0) {
-                    if (DEBUG) printf("---- initializing: %s %s\n",preName,IVAR_NAME[ivar]);
+                if (strcmp(name,adh_def.ivar[ivar].name) == 0) {
+                    if (DEBUG) printf("---- initializing: %s %s\n",preName,adh_def.ivar[ivar].name);
                     
                     for (i=0; i<3; i++) {max[i] = -99999999.; min[i] = 99999999.;}
                     for (inode=0; inode<nnodes; inode++) {
@@ -124,9 +124,9 @@ void smodel_super_read_init(SMODEL_SUPER *sm, char *filebase) {
             // Dependent Variables Read
             // Stores into dvar matrix
             // +++++++++++++++++++++++++++
-            for (ivar=0; ivar<N_DVARS; ivar++) { //printf("var_name: %s\n",ivar_pos->var_name[ivar]);
-                if (strcmp(name,DVAR_NAME[ivar]) == 0) {
-                    if (DEBUG) printf("---- initializing: %s %s\n",preName,DVAR_NAME[ivar]);
+            for (ivar=0; ivar<adh_def.n_dvars; ivar++) { //printf("var_name: %s\n",ivar_pos->var_name[ivar]);
+                if (strcmp(name,adh_def.dvar[ivar].name) == 0) {
+                    if (DEBUG) printf("---- initializing: %s %s\n",preName,adh_def.dvar[ivar].name);
                     
                     for (i=0; i<3; i++) {max[i] = -99999999.; min[i] = 99999999.;}
                     for (inode=0; inode<nnodes; inode++) {

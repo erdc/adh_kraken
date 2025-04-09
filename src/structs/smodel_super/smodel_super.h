@@ -4,7 +4,7 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-typedef struct {
+typedef struct SMODEL_SUPER{
 
     int myid, npes; // multi-core ID and ncpus
     SFLAGS flags;   // flags associated with superModel
@@ -84,6 +84,11 @@ typedef struct {
     SSERIES *series_wave_head,   *series_wave_curr;
     SSERIES *series_gw_psk_head, *series_gw_psk_curr;   
 
+    // Boundary Conditions
+    //int nbcs;
+    //SBC *bc;
+    int *node_strings_bc;
+    // int *node_strings_print; // etc, etc.
     int *bc_mask;
     double *dirichlet_data;
 

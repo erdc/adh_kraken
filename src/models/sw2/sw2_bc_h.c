@@ -96,16 +96,18 @@ int fe_sw2_bc_h(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     double elem_head[nnodes];
     SVECT2D elem_vel[nnodes];
-    global_to_local_dbl_ivars(elem_head, elem1d.nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
-    global_to_local_SVECT2D_ivars(elem_vel, elem1d.nodes, nnodes, mod->ivars, mod->ivar_pos.var[_UDA] , mod->ivar_pos.var[_VDA], mod->sol);
-    if (perturb_var == PERTURB_NONE){ 
+    //global_to_local_dbl_ivars(elem_head, elem1d.nodes, nnodes, mod->ivars[mod->ivar_pos.var[_H]], mod->sol);
+    //global_to_local_SVECT2D_ivars(elem_vel, elem1d.nodes, nnodes, mod->ivars, mod->ivar_pos.var[_UDA] , mod->ivar_pos.var[_VDA], mod->sol);
+    global_to_local_dbl_ivars(elem_head, elem1d.nodes, nnodes, mod->ivars[mod->ivar_pos.var[adh_def._H]], mod->sol);
+    global_to_local_SVECT2D_ivars(elem_vel, elem1d.nodes, nnodes, mod->ivars, mod->ivar_pos.var[adh_def._UDA] , mod->ivar_pos.var[adh_def._VDA], mod->sol);
+    if (perturb_var == UNSET_INT){ 
         perturb_sign = 0;
-    }else if(perturb_var == mod->ivar_pos.var[_H]){
+    }else if(perturb_var == adh_def._H){
         elem_head[perturb_node] += perturb_sign * perturbation;
-    }else if (perturb_var == mod->ivar_pos.var[_UDA]) {
+    }else if (perturb_var == adh_def._UDA) {
         elem_vel[perturb_node].x += perturb_sign * perturbation;
         PRESSURE_FLAG = OFF;
-    }else if (perturb_var == mod->ivar_pos.var[_VDA]) {
+    }else if (perturb_var == adh_def._VDA) {
         elem_vel[perturb_node].y += perturb_sign * perturbation;
         PRESSURE_FLAG = OFF;
     }
@@ -123,11 +125,11 @@ int fe_sw2_bc_h(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation
 #ifdef _DEBUG
     if (DEBUG == ON || DEBUG_LOCAL == ON) {
         printf("SW-2D 1D ELEM RESID :: ie: %d \t dt: %20.10f \t djac: %20.10f nrml: {%10.5e, %10.5e}\n",ie,dt,djac,nrml.x,nrml.y);
-        if (perturb_var == PERTURB_H) {
+        if (perturb_var == adh_def._H) {
             printf("\t perturbing H || node: %d || perturbation: %20.10e\n",elem1d.nodes[perturb_node],perturb_sign*perturbation);
-        } else if (perturb_var == PERTURB_U) {
+        } else if (perturb_var == adh_def._UDA) {
             printf("\t perturbing U || node: %d || perturbation: %20.10e\n",elem1d.nodes[perturb_node],perturb_sign*perturbation);
-        } else if (perturb_var == PERTURB_V) {
+        } else if (perturb_var == adh_def._VDA) {
             printf("\t perturbing V || node: %d || perturbation: %20.10e\n",elem1d.nodes[perturb_node],perturb_sign*perturbation);
         }
         printf("\n--------------------------------------------------------- \n");
@@ -151,7 +153,7 @@ int fe_sw2_bc_h(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbation
         double h_data = 0.;
         double elem_depth[2] = { 0., 0. };  
         //int isers = str_values[string].ol_flow.isigma;
-        int isers = mod->mat_physics_elem[string].bc_ids[0];
+        int isers = 0;//mod->mat_physics_elem[string].bc_ids[0];
         h_data = sseries_get_value(isers, mod->series_head,0);
         elem_depth[0] = h_data;
         elem_depth[1] = h_data;

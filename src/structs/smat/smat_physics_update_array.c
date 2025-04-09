@@ -33,7 +33,7 @@ void smat_physics_update_array(SMAT_PHYSICS *m, int nmat_physics, SIVAR_POSITION
 
 		//temporary variable, copy pointer
 		mat = &(m[imat]);
-        for (int var= 0 ; var<N_IVARS_TOTAL; var++){
+        for (int var= 0 ; var<adh_def.n_ivars; var++){
             //if variable is active on element, get its position in **ivars
             if (mat->ivar_pos.var[var]    != UNSET_INT) {mat->ivar_loc[ctr] = ivar_pos->var[var]; ctr++;}
         }
