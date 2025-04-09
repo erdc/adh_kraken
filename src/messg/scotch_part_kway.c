@@ -17,7 +17,8 @@
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int scotch_partkway(int local_nnode, int *xadj, int *adjncy, int *vwgt, int *adjwgt, 
-	int stratflag, int numflag, int npes, int balance_ratio, int *part, MPI_Comm *comm){
+	int stratflag, int myid, int npes, int balance_ratio, int *part,
+	int **newadjncy, MPI_Comm *comm){
 	int ierr = 0;
 #ifdef _MESSG
 #ifdef _SCOTCH
@@ -28,11 +29,13 @@ int scotch_partkway(int local_nnode, int *xadj, int *adjncy, int *vwgt, int *adj
 	//create a SCOTCH distributed graph
 	SCOTCH_Dgraph grafdat;
 
+	
+
 	ierr = SCOTCH_dgraphInit(&grafdat, *comm);
 	if (ierr!=0){return -1;}
 
 	//build the distributed graph
-	SCOTCH_Num baseval = numflag;
+	SCOTCH_Num baseval = 0;//numflag;
 	assert(baseval == 0); //should always be 0 based
 	SCOTCH_Num vertlocnbr = local_nnode;
 	SCOTCH_Num edgelocnbr = xadj[vertlocnbr] - baseval;
@@ -40,6 +43,10 @@ int scotch_partkway(int local_nnode, int *xadj, int *adjncy, int *vwgt, int *adj
 	ierr = SCOTCH_dgraphBuild(&grafdat, baseval, vertlocnbr, vertlocnbr,
 		xadj, xadj+1, vwgt, NULL, edgelocnbr, edgelocnbr, adjncy, NULL, adjwgt);
 	if (ierr!=0){return ierr;}
+
+#ifdef _DEBUG
+	assert(SCOTCH_dgraphCheck(&grafdat)==0);
+#endif
 		
 	ierr = SCOTCH_stratInit(&stradat);
 	if (ierr!=0){return ierr;}
@@ -55,6 +62,31 @@ int scotch_partkway(int local_nnode, int *xadj, int *adjncy, int *vwgt, int *adj
 	//ierr = SCOTCH_archCmplt(&archdat, npes);
 	//ierr = SCOTCH_dgraphMap(&grafdat, &archdat &stradat, part);
 	//ierr = SCOTCH_archExit(&archdat);
+
+	//communicate ghost info
+	//need to call SCOTCH_dgraphGhst first?
+	// NOTE: WILL ALWAYS PUT GHOST NODES IN ASCENDING ORDER
+	// OF GLOBAL ID NUMBERS
+	ierr = SCOTCH_dgraphHalo(&grafdat, part, MPI_INT);
+	// Get SCOTCH's locally indexed graph
+	int *vertloctab;
+	int *edgeloctab;
+	int baseptr, vertglbptr, vertlocptr, vertlocptz, vertgstptr, edgeglbptr, edgelocptr;
+	int edgelocptz;
+	//seeing what is in here
+	SCOTCH_dgraphData(&grafdat, &baseptr, &vertglbptr, &vertlocptr, 
+					  &vertlocptz, &vertgstptr, &vertloctab, NULL, 
+					  NULL, NULL, &edgeglbptr, &edgelocptr,
+                      &edgelocptz, &edgeloctab, newadjncy, NULL, comm);
+	
+//	SCOTCH_dgraphData(&grafdat, NULL, NULL, NULL, NULL, NULL,
+//                      NULL, NULL, NULL, NULL, NULL, NULL,
+//                      NULL, NULL, &newadjncy, NULL, &comm);
+
+
+	printf("SCOTCH nedge_total %d\n", edgelocptr); //matches our n2n_edge_tab
+	printf("SCOTCH nnode = %d\n",vertgstptr);
+
 	
 	SCOTCH_stratExit(&stradat);
 	SCOTCH_dgraphExit(&grafdat);

@@ -149,7 +149,8 @@ DEPS                = $(foreach dir,    $(INCLUDE_DIR), $(wildcard  $(dir)/*.h))
 OPT                 =
 IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
-CFLAGS              += -g -pedantic -std=c99 -O3 -Wno-incompatible-pointer-types-discards-qualifiers
+#PETSC related flags it appears, but appear to be unnecessary now
+#CFLAGS              += -g -pedantic -std=c99 -O3 -Wno-incompatible-pointer-types-discards-qualifiers
 CFLAGS              += -D_PETSC
 #CFLAGS              += -D_MESSG
 CFLAGS              += -D_HDF5 -D_DEBUG #-D_MPI

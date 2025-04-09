@@ -41,6 +41,7 @@ int sgrid_repartition(SGRID *g) {
     
     // Count the number of owned nodes
     int local_nnode = g->my_nnodes;
+    int nnode = g->nnodes;
     if (column_flag) {
     	//this may need to be changed, not quite surface anymore
         local_nnode = g->my_nnodes_sur;
@@ -109,8 +110,10 @@ int sgrid_repartition(SGRID *g) {
     
     // partitioning
     int nparts = npes;
-    int *part = (int *) tl_alloc(sizeof(int), local_nnode); // the partition returned from metis/scotch
-    
+    //overallocate to see if ghost info is helpful
+    int *part = (int *) tl_alloc(sizeof(int), nnode);
+    //int *part = (int *) tl_alloc(sizeof(int), local_nnode); // the partition returned from metis/scotch
+    int *newadjncy; //experimenting
 
     int edgecut;                       // number of edge cuts (returned)
     int numflag = 0;                   // flag to indicate numbering scheme
@@ -125,14 +128,40 @@ int sgrid_repartition(SGRID *g) {
 #endif
     }else if (PART_OPTION == 1){
 #ifdef _SCOTCH
-    	ierr = scotch_partkway(local_nnode, xadj, adjncy, vwgt, adjwgt, stratflag, numflag, npes, IMBALANCE_RATIO, part, &g->smpi->ADH_COMM);
+    	ierr = scotch_partkway(local_nnode, xadj, adjncy, vwgt, adjwgt, stratflag, myid, npes, IMBALANCE_RATIO, part, &newadjncy, &g->smpi->ADH_COMM);
+        printf("Finished print\n");
 #endif
     }else{
     	assert(ierr==-1);
     }
     
+
+    //MARK TODO:
+    // The scotch graph returns the adjacency list with ghosts ordered according to global id
+    // (doesnt care about processor number etc), our code may have stuff out of order
+    // question is, how do we want to handle this?
+    // the scotch routine hands back the partition numbers for each node and then
+    // we have to do stuff next
+
+    printf("nedge_total %d, nnode = %d\n", nedge_total,nnode);
+
+    for (int i = 0 ; i<nedge_total ; i++){
+            //printf("Rank %d newadjncy [%d] = %d vs %d \n",myid, i, newadjncy[i], g->n2n_edge_tab[i]);
+        if(newadjncy[i] != g->n2n_edge_tab[i]){
+            printf("Rank %d newadjncy [%d] = %d vs %d \n",myid, i, newadjncy[i], g->n2n_edge_tab[i]);
+        }
+    }
+
+    for(int i = local_nnode; i<nnode; i++){
+        printf("Rank %d ghost node gid [%d] = %d, id = %d \n",myid, i, g->node[i].gid, g->node[i].id);
+    }
+
+    for(int i = local_nnode; i<nnode; i++){
+        printf("Rank %d ghost node gid [%d] = %d, id = %d, part = %d \n",myid, i, g->node[i].gid, g->node[i].id, part[i]);
+    }
     
-    
+    //mactech
+    //Pf@ppl3Adm1n-0324
     // cast the metis partition into part
 //    int k=0, nd=UNSET_INT;
 //    ID_LIST_ITEM *ptr;
@@ -152,13 +181,8 @@ int sgrid_repartition(SGRID *g) {
 //            if( g->smpi->partition_info[i] != g->smpi->myid) {k++;}
 //        }
 //    }
-
-    for (int i = 0 ; i<local_nnode ; i++){
-            printf("Rank %d part array [%d] = %d\n",myid, i, part[i]);
-    }
-   
     
-    part = (int *) tl_free(sizeof(int), local_nnode, part);
+    part = (int *) tl_free(sizeof(int), nnode, part);
     nnode_pe =     (int *) tl_free(sizeof(int), npes, nnode_pe);
     vtxdist =    (int *) tl_free(sizeof(int), npes + 1, vtxdist);
     adjncy =     (int *) tl_free(sizeof(int), nedge_total, adjncy);

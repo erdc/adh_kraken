@@ -27,8 +27,8 @@ if (DEBUG) {
 }
 
 #ifdef _MESSG
-        //all_err = test_comm_update(P2P);
-        //all_err += test_comm_update(NEIGHBOR);
+        all_err = test_comm_update(P2P);
+        all_err += test_comm_update(NEIGHBOR);
         all_err += test_grid_partition(NEIGHBOR);
 #else
 if (DEBUG) {
