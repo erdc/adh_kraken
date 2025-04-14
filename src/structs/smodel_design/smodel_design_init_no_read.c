@@ -21,7 +21,8 @@ static int DEBUG = ON;
  */
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init, double t_final,
-    int nSuperModels, int nphysics_mats[], char ***elemVarCode, int **coverage_arrays) {
+    int nSuperModels, int nphysics_mats[], int **npdes, int **modelvsbc, char ***model_strings, 
+    char ***bc_phystype, char ***bc_type, char ***bc_vartype, int **bc_iseries, int **coverage_arrays) {
 
     int i,j;
     int isSimple=0;
@@ -93,7 +94,10 @@ void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init
         //with read
         //smodel_super_read(&(dmod->superModel[imono]));
         //without read replace with
-        smodel_super_no_read(&(dmod->superModel[imono]), elemVarCode[imono], nphysics_mats[imono], coverage_arrays[imono]);
+        printf("attempting to call super model no read once\n");
+        smodel_super_no_read(&(dmod->superModel[imono]), nphysics_mats[imono], npdes[imono], modelvsbc[imono],
+        model_strings[imono], bc_phystype[imono], bc_type[imono], bc_vartype[imono], bc_iseries[imono],
+        coverage_arrays[imono]);
         //how to do this properly?
         dmod->superModel[imono].ts = &(dmod->ts);
         //exit(-1);

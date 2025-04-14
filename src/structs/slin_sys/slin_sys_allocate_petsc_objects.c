@@ -51,11 +51,16 @@ void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys){
     //vals should update by reference
     if (lin_sys->indptr_off_diag == NULL){
         MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, local_size, local_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, &(lin_sys->A));
+        ierr = VecCreateSeqWithArray(PETSC_COMM_WORLD, 1, local_size, lin_sys->residual, &(lin_sys->B));
+        ierr = VecCreateSeqWithArray(PETSC_COMM_WORLD, 1, local_size, lin_sys->residual, &(lin_sys->X));
 #ifdef _DEBUG
         printf("PETSC Mat created with sequential array\n");
 #endif
     }else{
         MatCreateMPIAIJWithSplitArrays(PETSC_COMM_WORLD, local_size, local_size, global_size, global_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, lin_sys->indptr_off_diag, lin_sys->cols_off_diag, lin_sys->vals_off_diag, &(lin_sys->A));
+        ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, local_size, global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->residual, &(lin_sys->B));
+        ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, local_size, global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->dsol, &(lin_sys->X));
+
 #ifdef _DEBUG        
         printf("PETSC Mat created with split arrays\n");
 #endif
@@ -100,8 +105,7 @@ void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys){
     //ierr = VecSetSizes(sm->X, sm->my_ndofs, PETSC_DETERMINE);
     //ierr = VecSetFromOptions(sm->sol);
     //ierr = VecSetUp(sm->sol);
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, local_size, global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->residual, &(lin_sys->B));
-    ierr = VecCreateGhostWithArray(PETSC_COMM_WORLD, local_size, global_size, lin_sys->nghost, lin_sys->ghosts, lin_sys->dsol, &(lin_sys->X));
+
 
 
     /*Maybe need to revisit for ghosts but skip for now

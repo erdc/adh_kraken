@@ -171,41 +171,9 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         printf(">creating mat_physics_node\n");
     }
     sm->mat_physics_node = (SMAT_PHYSICS **) tl_alloc(sizeof(SMAT_PHYSICS *),grid->nnodes);
-    int node_nvars[grid->nnodes]; sarray_init_int(node_nvars,grid->nnodes);
-    
-    int ie,imat,nd;
-    for (ie=0; ie<grid->nelems1d; ie++) {
-        if (grid->elem1d[ie].bflag != BODY) continue;
-        imat = sm->elem1d_physics_mat[ie];
-        for (i=0; i<grid->elem1d[ie].nnodes; i++) {
-            nd = grid->elem1d[ie].nodes[i];
-            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivar_pos.n) {
-                node_nvars[nd] = sm->mat_physics_elem[imat].ivar_pos.n;
-                sm->mat_physics_node[nd] =  &(sm->mat_physics_elem[sm->elem1d_physics_mat[ie]]); // point to the elemental material
-            }
-        }
-    }
-    for (ie=0; ie<grid->nelems2d; ie++) {
-        if (grid->elem2d[ie].bflag != BODY) continue;
-        imat = sm->elem2d_physics_mat[ie];
-        for (i=0; i<grid->elem2d[ie].nnodes; i++) {
-            nd = grid->elem2d[ie].nodes[i];
-            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivar_pos.n) {
-                node_nvars[nd] = sm->mat_physics_elem[imat].ivar_pos.n;
-                sm->mat_physics_node[nd] =  &(sm->mat_physics_elem[sm->elem2d_physics_mat[ie]]); // point to the elemental material
-            }
-        }
-    }
-    for (ie=0; ie<grid->nelems3d; ie++) {
-        imat = sm->elem3d_physics_mat[ie];
-        for (i=0; i<grid->elem3d[ie].nnodes; i++) {
-            nd = grid->elem3d[ie].nodes[i];
-            if (node_nvars[nd] < sm->mat_physics_elem[imat].ivar_pos.n) {
-                node_nvars[nd] = sm->mat_physics_elem[imat].ivar_pos.n;
-                sm->mat_physics_node[nd] =  &(sm->mat_physics_elem[sm->elem3d_physics_mat[ie]]); // point to the elemental material
-            }
-        }
-    }
+    smat_physics_set_nodal_pointers(sm->mat_physics_node, grid, sm->elem1d_physics_mat,
+    sm->elem2d_physics_mat, sm->elem3d_physics_mat, sm->mat_physics_elem);
+
     
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -224,23 +192,16 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         printf("Variable Position Info:\n");
         sivar_position_printScreen(&sm->ivar_pos);
     }
-    
-    //++++++++++++++++++++++++++++++++++++++++++++++
-    //++++++++++++++++++++++++++++++++++++++++++++++
-    // Use this to update ivar pos in mat physics
-    //++++++++++++++++++++++++++++++++++++++++++++++
-    smat_physics_update_array(sm->mat_physics_elem,sm->nmat_physics,&(sm->ivar_pos));
 
     //++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++
     // Allocate the map from the independent variables 
     // to their position in the solution vector
+    // using the sivar position that has been filled out
     //++++++++++++++++++++++++++++++++++++++++++++++
     if (DEBUG) {
         printf(">allocating solution variables\n");
     }
-    //this wont scale, need to dynammically allocate
-    //SIVAR_POSITION ip[grid->nnodes];
     SIVAR_POSITION *ip;
     ip = (SIVAR_POSITION *) tl_alloc(sizeof(SIVAR_POSITION), grid->nnodes);
     for (i=0; i<grid->nnodes; i++) {ip[i] = sm->mat_physics_node[i]->ivar_pos;}
@@ -248,6 +209,12 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     if (DEBUG) {
         printf(">total ndofs: %d\n",sm->ndofs);
     }
+
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    // Use this to update ivar pos in each mat physics
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    smat_physics_set_ivar_loc_array(sm->mat_physics_elem,sm->nmat_physics,&(sm->ivar_pos));
 
     //FORNOW JUST WORKS IN SERIAL
     #ifndef _MESSG

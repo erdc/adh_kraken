@@ -25,6 +25,7 @@
 void read_bc_MODEL(SMODEL_SUPER *sm, FILE *fp);
 void read_bc_BC(SMODEL_SUPER *sm, FILE *fp);
 void read_bc_NDS(SMODEL_SUPER *sm, FILE *fp);
+void model_flag_switch(char *model, int *flags);
 
 
 #endif

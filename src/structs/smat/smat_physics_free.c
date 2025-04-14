@@ -23,7 +23,7 @@ void smat_physics_free_array(SMAT_PHYSICS *mat, int nmat) {
     
     for (int imat=0; imat<nmat; imat++) {
         if (mat[imat].ivar_loc != NULL){
-            mat[imat].ivar_loc = (int *) tl_free(sizeof(int), mat[imat].n, mat[imat].ivar_loc);
+            mat[imat].ivar_loc = (int *) tl_free(sizeof(int), mat[imat].ivar_pos.n, mat[imat].ivar_loc);
         }
         if (mat[imat].pde != NULL){
             mat[imat].pde = (SPDE *) tl_free(sizeof(SPDE), mat[imat].npdes, mat[imat].pde);

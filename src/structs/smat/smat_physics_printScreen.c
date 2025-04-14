@@ -21,7 +21,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void smat_physics_printScreen(SMAT_PHYSICS *m) {
     printf("----------------------------------------\n");
-    printf("SMAT #%d || n: %d || ntrns: %d || npdes: %d\n",m->id+1,m->n,m->ntrns,m->npdes);
+    printf("SMAT #%d || n: %d || ntrns: %d || npdes: %d\n",m->id+1,m->ivar_pos.n,m->ivar_pos.ntrns,m->npdes);
     printf("----------------------------------------\n");
     sivar_position_printScreen(&m->ivar_pos);
     for (int ipde=0; ipde<m->npdes; ipde++) {

@@ -57,8 +57,8 @@ void smat_physics_alloc_init_array(SMAT_PHYSICS **mat_physics, int nmat) {
 void smat_physics_alloc_init(SMAT_PHYSICS *mat) {
 
     sivar_position_init(&mat->ivar_pos);
-    mat->n = 0;
-    mat->ntrns = 0;
+    //mat->n = 0;
+    //mat->ntrns = 0;
     mat->ivar_loc = NULL;
     mat->npdes = 0;
     mat->pde = NULL;

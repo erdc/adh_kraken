@@ -116,7 +116,9 @@ void smodel_super_printScreen(SMODEL_SUPER *smod);
 int smodel_super_forward_step(SMODEL_SUPER* sm, int (*ts_fnctn)(SMODEL_SUPER*));
 void smodel_super_update_dirichlet_data(SMODEL_SUPER *sm);
 void smodel_super_prep_sol(SMODEL_SUPER *sm);
-void smodel_super_no_read(SMODEL_SUPER *sm, char** codes, int nmat_physics, int *mat_ids);
+void smodel_super_no_read(SMODEL_SUPER *sm, int nmat_physics, int *npdes, int *modelvsbc,
+    char **model_strings, char **bc_phystype, char **bc_type, char **bc_vartype, int *bc_iseries,
+    int *mat_ids);
 void smodel_super_build_dvars(SMODEL_SUPER *sm);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

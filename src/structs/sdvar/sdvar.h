@@ -19,6 +19,7 @@ typedef struct {
     int nnode_dvar; // number of active nodes
     SDVAR_POSITION sdvar_pos_node; // variable positions in matrix
     double **nodal_dvar; // [n_dvar][nnode_dvar]
+    //could add nodal integers too but dont see any necessity yet
 
     // element-based surface water variables
     int n_dvar_elem_dbl;

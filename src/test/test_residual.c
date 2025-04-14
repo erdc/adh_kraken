@@ -67,21 +67,68 @@ int test_residual(int npx, int npy, double xmin, double xmax, double ymin, doubl
 	double t0 = 0.0;
 	double tf = 1.0;
 	int nSuperModels = 1;
-	int *nphysics_mats;
-	nphysics_mats = (int*) tl_alloc(sizeof(int), nSuperModels);
+	int *nphysics_mats = (int*) tl_alloc(sizeof(int), nSuperModels);
 	nphysics_mats[0] = 1;
-	//elemVarCode in general is triple pointer, nSuperModels x nphyics_mat[i] x 10
-	char ***elemVarCode;
-	elemVarCode = (char ***) tl_alloc(sizeof(char**),nSuperModels);
-	for (int i = 0; i< nSuperModels; i ++){
-		elemVarCode[i] = (char **) tl_alloc(sizeof(char *), nphysics_mats[i]);
-		for (int j = 0; j< nphysics_mats[i]; j++){
-			elemVarCode[i][j] = (char *) tl_alloc(sizeof(char), 10);
+
+	//need to allocate the npdes argument, this will be a double pointer
+	// which will be nSuperModels x nphysics_mat[i]
+	// each entry is number of pdes per physics material
+	int **npdes = (int**) tl_alloc(sizeof(int*), nSuperModels);
+	int *npdes_total = (int *) tl_alloc(sizeof(int), nSuperModels);
+	sarray_init_int(npdes_total, nSuperModels);
+	for(int i = 0 ; i < nSuperModels ; i++){
+		npdes[i] = (int*) tl_alloc(sizeof(int), nphysics_mats[i]);
+		for(int j = 0; j < nphysics_mats[i]; j++){
+			//this case just one pde on each material within each super model
+			npdes[i][j] = 1;
+			npdes_total[i] += npdes[i][j];
 		}
 	}
-	strcpy(&elemVarCode[0][0][0],"9"); // POISSON
-	strcpy(&elemVarCode[0][0][1],"0"); // GW
-	strcpy(&elemVarCode[0][0][2],"0"); // Transport
+
+	//use this to create modelvsbc double pointer
+	//this is an array that is nSuperModels x npdes_total[i]
+	//where npdes_total[i] = sum_j(npdes[i][j])
+	int **modelvsbc = (int**) tl_alloc(sizeof(int*), nSuperModels);
+	int *nmodel = (int*) tl_alloc(sizeof(int), nSuperModels);
+	sarray_init_int(nmodel, nSuperModels);
+	for (int i = 0; i < nSuperModels; i++){
+		modelvsbc[i] = tl_alloc(sizeof(int), npdes_total[i]);
+		for (int j = 0 ; j < npdes_total[i]; j++){
+			//1 for model, 0 for bc
+			//this test no bc integrals, only models
+			modelvsbc[i][j] = 1;
+			nmodel[i]+=modelvsbc[i][j];
+		}
+	}
+
+	//Now save strings to be read, this will determine pdes to be active
+	//first do model strings
+	//model_strings in general is triple pointer, nSuperModels x nmodel[i] x max_char
+	// where nmodel[i] = sum_j(modelvsbc[i][j])
+	// the models are assumed to be in order that materials are ordered
+	// so if mat 1 has 2 pdes and mat 2 has 1 pde
+	// model_strings[0] and model_strings[1] will be assigned to mat 1
+	// and model_strings[2] will be assigned to mat 2
+
+	int max_char = 30;
+	char ***model_strings = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	char ***bc_phystype = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	char ***bc_type = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	char ***bc_vartype = (char ***) tl_alloc(sizeof(char**),nSuperModels);
+	int **bc_iseries = (int **) tl_alloc(sizeof(int*), nSuperModels);
+
+	for (int i = 0; i< nSuperModels; i ++){
+		model_strings[i] = (char **) tl_alloc(sizeof(char *), nmodel[i]);
+		bc_phystype[i] = NULL;
+		bc_type[i] = NULL;
+		bc_vartype[i] = NULL;
+		bc_iseries[i] = NULL;
+		for (int j = 0; j< nmodel[j]; j++){
+			model_strings[i][j] = (char *) tl_alloc(sizeof(char), max_char);
+		}
+	}
+	//this particular test case is only 1 super model and 1 material that is POISSON2D
+	strcpy(model_strings[0][0],"POISSON2D"); // POISSON
 
 
 	//mat ids
@@ -93,7 +140,9 @@ int test_residual(int npx, int npy, double xmin, double xmax, double ymin, doubl
 		sarray_init_int(mat_ids[i],nelems);
 	}
 
-    smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
+    
+    smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, npdes, modelvsbc,
+    	model_strings, bc_phystype, bc_type, bc_vartype, bc_iseries, mat_ids);
     
     sarray_init_dbl(dm.superModel[0].sol, dm.superModel[0].ndofs);
     dm.superModel[0].LINEAR_PROBLEM = YES;

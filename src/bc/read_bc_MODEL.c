@@ -145,32 +145,9 @@ void read_bc_MODEL(SMODEL_SUPER *sm, FILE *fp) {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Finished Reading
+    // Use pde info to build up the physics materials
+    // maps contained in mat->ivar_pos
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    
-    int varID = UNSET_INT;
-    for (i=0; i<sm->nmat_physics; i++) {
-        mat = &(sm->mat_physics_elem[i]);
-        ip = &mat->ivar_pos;
-        
-        
-        for (ipde=0; ipde<mat->npdes; ipde++) {
-            imod = mat->pde[ipde].imod;  // alias
-            for (ivar=0; ivar<adh_def.model[imod].nivars; ivar++) {
-                varID = adh_def.model[imod].var[ivar];
-                // only add if variable hasn't been used in another subModel
-                if (ip->var[varID] == UNSET_INT) {
-                    ip->var[varID] = ip->n;
-                    ip->n++;
-                }
-            }
-            //sivar_position_printScreen(ip);
-        }
-        
-        //Mark adding n, this is same as before - can consolidate later
-        mat->n = ip->n;
-        mat->ivar_loc = (int *) tl_alloc(sizeof(int), mat->n);
-        sarray_init_value_int(mat->ivar_loc, mat->n, UNSET_INT);
-        
-        //if (DEBUG) {printf("mat: %);}
-    }
+    smat_physics_set_ivar_pos(sm->mat_physics_elem, sm->nmat_physics);
+
 }

@@ -1,7 +1,6 @@
 #include "adh.h"
 static int **temp_cols_diag = NULL;
 static int **temp_cols_off_diag = NULL;
-static int max_elem_dofs = MAX_NVAR*MAX_NNODE; 
 static int *nnz_rows_diag = NULL;
 static int *nnz_rows_off_diag = NULL;
 static int *nnz_rows_diag_no_duplicate = NULL;
@@ -50,8 +49,8 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     int nvars_elem;
     int ndofs_ele;
     int i,j,k,l, mat_id;
-    int elem_vars[MAX_NVAR];
-    int dofs[max_elem_dofs],global_dofs[max_elem_dofs];
+    int elem_vars[adh_def.n_ivars];
+    int dofs[adh_def.n_ivars*MAX_NNODE],global_dofs[adh_def.n_ivars*MAX_NNODE];
     int isize_prev;
     int NNZ_diag = 0;
     int nnz_row_diag;
@@ -132,7 +131,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         mat_id = elem3d_physics_mat_id[j];
 
         // Get stuff from physics mat
-        nvars_elem = elem_physics_mat[mat_id].n;
+        nvars_elem = elem_physics_mat[mat_id].ivar_pos.n;
 
         ndofs_ele = nnodes*nvars_elem;
 
@@ -146,7 +145,6 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         // cell # is implicit
         //++++++++++++++++++++++++++++++++++++++++++++++
         get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem3d[j].nodes, nvars_elem, elem_physics_mat[mat_id].ivar_loc);
-
         //this gets global dofs from local dofs, and fmapglobal is this best way to do it?
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
     
@@ -179,7 +177,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         mat_id = elem2d_physics_mat_id[j];
 
         // Get stuff from physics mat
-        nvars_elem = elem_physics_mat[mat_id].n;
+        nvars_elem = elem_physics_mat[mat_id].ivar_pos.n;
 
         ndofs_ele = nnodes*nvars_elem;
 
@@ -226,7 +224,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
         mat_id = elem1d_physics_mat_id[j];
 
         // Get stuff from physics mat
-        nvars_elem = elem_physics_mat[mat_id].n;
+        nvars_elem = elem_physics_mat[mat_id].ivar_pos.n;
 
         ndofs_ele = nnodes*nvars_elem;
 
@@ -304,7 +302,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     for (j=0;j<grid->nelems3d;j++){
         nnodes = grid->elem3d[j].nnodes;
         mat_id = elem3d_physics_mat_id[j];
-        nvars_elem = elem_physics_mat[mat_id].n;
+        nvars_elem = elem_physics_mat[mat_id].ivar_pos.n;
         ndofs_ele = nnodes*nvars_elem;
         get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem3d[j].nodes, nvars_elem, elem_physics_mat[mat_id].ivar_loc);
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -337,7 +335,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     for (j=0;j<grid->nelems2d;j++){
         nnodes = grid->elem2d[j].nnodes;
         mat_id = elem2d_physics_mat_id[j];
-        nvars_elem = elem_physics_mat[mat_id].n;
+        nvars_elem = elem_physics_mat[mat_id].ivar_pos.n;
         ndofs_ele = nnodes*nvars_elem;
         get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem2d[j].nodes, nvars_elem, elem_physics_mat[mat_id].ivar_loc);
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);
@@ -370,7 +368,7 @@ void slin_sys_init_sparsity_mono(SLIN_SYS *lin_sys, int *elem3d_physics_mat_id,
     for (j=0;j<grid->nelems1d;j++){
         nnodes = grid->elem1d[j].nnodes;
         mat_id = elem1d_physics_mat_id[j];
-        nvars_elem = elem_physics_mat[mat_id].n;
+        nvars_elem = elem_physics_mat[mat_id].ivar_pos.n;
         ndofs_ele = nnodes*nvars_elem;
         get_cell_dofs_ivars(dofs, ivars, nnodes, grid->elem1d[j].nodes, nvars_elem, elem_physics_mat[mat_id].ivar_loc);
         local_dofs_to_global_dofs(global_dofs,ndofs_ele,dofs,local_range,ghosts);

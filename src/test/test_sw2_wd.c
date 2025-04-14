@@ -102,7 +102,7 @@ int test_sw2_wd(int npx, int npy, int nt) {
 		sarray_init_int(mat_ids[i],nelems);
 	}
 
-    smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
+    //smodel_design_init_no_read(&dm, dt, t0, tf, nSuperModels, nphysics_mats, elemVarCode, mat_ids);
     
 
 

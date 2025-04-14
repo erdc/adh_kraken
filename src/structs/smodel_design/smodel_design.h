@@ -64,7 +64,8 @@ int smodel_design_init(SMODEL_DESIGN *dmod, char *filename, bool input_check);
 #endif
 void smodel_design_read(SMODEL_DESIGN *dmod, char *filename);
 void smodel_design_init_no_read(SMODEL_DESIGN *dmod, double dt_in, double t_init, double t_final,
-    int nSuperModels, int nphysics_mats[], char ***elemVarCode, int **coverage_arrays);
+    int nSuperModels, int nphysics_mats[], int **npdes, int **modelvsbc, char ***model_strings, 
+    char ***bc_phystype, char ***bc_type, char ***bc_vartype, int **bc_iseries, int **coverage_arrays);
 void smodel_design_xmf_init(SMODEL_DESIGN *dm, char *filename, char *domain_name);
 void smodel_design_xmf_write(SMODEL_DESIGN *dm, int mesh_no);
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

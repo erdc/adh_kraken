@@ -13,7 +13,20 @@ typedef struct {
     
     int n;     // total # of independent variables active (includes transport)
     int ntrns; // total # of transport variables active only
-    int *var;  // position in array form of length adh_def.n_ivars
+    int *var;  // position in array form of length adh_def.n_ivars ( intended
+               // to be used as map that takes in index of adh_def and produces index number
+               // in the relevant structure (mat_physics or super model))
+    int *var_code;  //array of ivar_pos.n who's entries are location of independent variables
+                    // in adh_defs (Not supermodel), used in assemble_jacobian
+                    // should/do we need it in SIVAR_POSITION (remember there is a member in 
+                    // smat physics and smodel_super, in smodel_super this array would tell
+                    // us the location of indpendent variables in adh_defs for all active variabses
+                    // in the supermodel)
+                    //NOTE: can easilt construct this by looping through ivar_pos.var and
+                    //putting any non UNSET_INTs in contiguous entries
+                    //This is the reverse of the map in *var, takes in local variable number
+                    // (whether in physics mat or super model) and gives variable number
+                    // in adh_def
     
 } SIVAR_POSITION;   
 

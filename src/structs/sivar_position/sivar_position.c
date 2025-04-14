@@ -23,6 +23,8 @@ void sivar_position_init(SIVAR_POSITION *ip) {
     ip->ntrns = 0;
     ip->var = (int *) tl_alloc(sizeof(int),adh_def.n_ivars);
     sarray_init_value_int(ip->var,adh_def.n_ivars,UNSET_INT);
+    ip->var_code = (int *) tl_alloc(sizeof(int),adh_def.n_ivars);
+    sarray_init_value_int(ip->var_code,adh_def.n_ivars,UNSET_INT);
 }
 
 void sivar_position_free(SIVAR_POSITION *ip) {
@@ -36,10 +38,12 @@ void sivar_position_map(SIVAR_POSITION *ip, int *FLAG) {
     for (int i=0; i<adh_def.n_ivars; i++) {
         if (FLAG[i] == 1) {
             ip->var[i] = ip->n;
+            ip->var_code[ip->n] = i;
             ip->n++;
             if (i > adh_def.n_ivars - 1) {ip->ntrns++;}
         }
     }
+    ip->var_code = (int *) tl_realloc(sizeof(int), ip->n, adh_def.n_ivars, ip->var_code);
 }
 
 void sivar_position_printScreen(SIVAR_POSITION *ip) {
