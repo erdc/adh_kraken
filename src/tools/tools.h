@@ -2,6 +2,7 @@
 #define H_STOOLS_
 
 
+bool isPointOnLine(SVECT p1, SVECT p2, SVECT pointCheck);
 int is_my_node(int global_id, SGRID *g);
 
 // strings.c

@@ -120,6 +120,15 @@ void smodel_super_no_read(SMODEL_SUPER *sm, int nmat_physics, int *npdes, int *m
     char **model_strings, char **bc_phystype, char **bc_type, char **bc_vartype, int *bc_iseries,
     int *mat_ids);
 void smodel_super_build_dvars(SMODEL_SUPER *sm);
+
+
+double get_node_uda(SMODEL_SUPER *sm, int inode);
+double get_node_vda(SMODEL_SUPER *sm, int inode);
+double get_node_h(SMODEL_SUPER *sm, int inode);
+void put_node_uda(SMODEL_SUPER *sm, int inode, double value);
+void put_node_vda(SMODEL_SUPER *sm, int inode, double value);
+void put_node_h(SMODEL_SUPER *sm, int inode, double value);
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

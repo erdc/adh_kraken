@@ -84,6 +84,7 @@ void print_build_info();
 #include "smodel_super.h"
 #include "sadh_def.h"
 #include "smodel_design.h"
+#include "stestcase.h"
 
 #include "messg.h"
 

@@ -66,6 +66,7 @@ $(wildcard $(MASTER_SRC_DIR)/structs/scoverage) \
 $(wildcard $(MASTER_SRC_DIR)/structs/ssw) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smodel_super) \
 $(wildcard $(MASTER_SRC_DIR)/structs/smodel_design) \
+$(wildcard $(MASTER_SRC_DIR)/structs/stestcase) \
 $(wildcard $(MASTER_SRC_DIR)/models/heat) \
 $(wildcard $(MASTER_SRC_DIR)/models/poisson) \
 $(wildcard $(MASTER_SRC_DIR)/models/sw2) \
@@ -116,6 +117,7 @@ $(MASTER_SRC_DIR)/structs/slin_sys \
 $(MASTER_SRC_DIR)/structs/ssw \
 $(MASTER_SRC_DIR)/structs/smodel_super \
 $(MASTER_SRC_DIR)/structs/smodel_design \
+$(MASTER_SRC_DIR)/structs/stestcase \
 $(MASTER_SRC_DIR)/models/heat \
 $(MASTER_SRC_DIR)/models/poisson \
 $(MASTER_SRC_DIR)/models/sw2 \
