@@ -44,8 +44,6 @@ void read_bc_TESTCASE(SMODEL_SUPER *sm, FILE *fp) {
 
         }
     }
-
-
     rewind(fp);
 }
 

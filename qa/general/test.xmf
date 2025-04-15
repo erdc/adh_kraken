@@ -1,0 +1,49 @@
+<Xdmf Version="3.0">
+	 <Domain Name="adh sim">
+		<Grid Name="test" GridType="Collection" CollectionType="Temporal">
+			<Grid Name="test0">
+			<Time Value="0.000000" />
+				<Geometry GeometryType="XYZ">
+					<DataItem Dimensions="561 3" Format="HDF">
+						test.h5:/Mesh/XY/0
+					</DataItem>
+				</Geometry>
+				<Topology TopologyType="Mixed" NumberOfElements="1120">
+					<DataItem Dimensions="4000" Format="HDF">
+						test.h5:/Mesh/Elements/0
+					</DataItem>
+				</Topology>
+				<Attribute Name="DEPTH" AttributeType="Scalar" Center="Node">
+					<DataItem Dimensions="561" Format="HDF">
+						test.h5:/Data/DEPTH/0
+					</DataItem>
+				</Attribute>
+				<Attribute Name="DA_VELOCITY" AttributeType="Vector" Center="Node">
+					<DataItem Dimensions="561 2" Format="HDF">
+						test.h5:/Data/DA_VELOCITY/0
+					</DataItem>
+				</Attribute>
+				<Attribute Name="DENSITY" AttributeType="Scalar" Center="Node">
+					<DataItem Dimensions="561" Format="HDF">
+						test.h5:/Data/DENSITY/0
+					</DataItem>
+				</Attribute>
+				<Attribute Name="PRESSURE" AttributeType="Scalar" Center="Node">
+					<DataItem Dimensions="561" Format="HDF">
+						test.h5:/Data/PRESSURE/0
+					</DataItem>
+				</Attribute>
+				<Attribute Name="ERROR" AttributeType="Scalar" Center="Node">
+					<DataItem Dimensions="561" Format="HDF">
+						test.h5:/Data/ERROR/0
+					</DataItem>
+				</Attribute>
+				<Attribute Name="CON0" AttributeType="Scalar" Center="Node">
+					<DataItem Dimensions="561" Format="HDF">
+						test.h5:/Data/CON0/0
+					</DataItem>
+				</Attribute>
+			</Grid>
+		</Grid>
+	</Domain>
+</Xdmf>

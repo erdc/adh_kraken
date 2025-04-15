@@ -1,0 +1,4 @@
+rm *.h5* *.vtk* *.geo* *.physics* *xmf* *cover* *init* *params*
+rm *design* *png*
+rm -r a.out.dSYM
+

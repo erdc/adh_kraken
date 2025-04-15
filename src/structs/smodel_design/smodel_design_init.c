@@ -101,6 +101,7 @@ int smodel_design_init(SMODEL_DESIGN *dmod, char *filebase, bool input_check
                 printf("------------------------------------------------------\n");
             }
             dmod->superModel[imono].testcase->init(&(dmod->superModel[imono]));
+            dmod->superModel[imono].testcase->write(&(dmod->superModel[imono]));
         }
 
     }
