@@ -243,6 +243,9 @@ residual_ptr select_resid_func(char *model, int *imod, int trns_id) {
     } else if (strcmp(model,"TRNS") == 0) {
         *imod = adh_def._TRNS2D[trns_id];
         return NULL;
+    } else if (strcmp(model, "HEAT2D") == 0){
+        *imod = adh_def._HEAT2D;
+        return heat_residual;
     } else {
         *imod = UNSET_INT;
         return NULL;

@@ -352,7 +352,7 @@ void perturb_var(double **elem_mat, SMODEL_SUPER *sm, SPDE *pde,
             //with:
             eq_var_code2 = pde[j].resid(sm,temp_M,ie, epsilon, i, perturb_var_code, -1, DEBUG);
             //add_replace_elem_rhs(elem_rhs_M,temp_M,pde[j].imod,nodes_on_element, 1);
-            add_replace_elem_rhs(elem_rhs_M, temp_M, nvar_ele, elem_var_map, pde[j].imod, nodes_on_element, -1.0);
+            add_replace_elem_rhs(elem_rhs_M, temp_M, nvar_ele, elem_var_map, pde[j].imod, nodes_on_element, 1.0);
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         }

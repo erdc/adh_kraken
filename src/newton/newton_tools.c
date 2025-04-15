@@ -46,6 +46,7 @@ void initialize_system(SMODEL_SUPER *sm) {
             //call wrapper for init function
             //as long as it is not unset
             if (sm->mat_physics_elem[i].pde[j].init != NULL){
+                printf("CALLING INITROUTINE!!!!\n\n");
                 sm->mat_physics_elem[i].pde[j].init(sm);
             }
         }

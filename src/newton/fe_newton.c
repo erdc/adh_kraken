@@ -240,9 +240,7 @@ int fe_newton(SMODEL_SUPER* sm)
     //(*residual_fnctn) (sm,isuperModel);
     //elemental loops are now part of call
     assemble_residual(sm,sm->grid);
-//    for (int i=0;i<sm->ndofs;i++){
-//        printf("resid before assembly[%d] = %f\n",i,sm->residual[i]);
-//    }
+    //sarray_printScreen_dbl(sm->lin_sys->residual, sm->ndofs, "residual before loop");
     // Should we keep as is or calculate on fly?
     // this is for surface water calculations to ignore dry nodes
 
@@ -349,10 +347,9 @@ int fe_newton(SMODEL_SUPER* sm)
 #endif
         //loads global sparse system of equations
         //(*load_fnctn) (sm,isuperModel);
+
         assemble_jacobian(sm);
-
-
-        
+        //slin_sys_CSR_printScreen(lin_sys);        
 //        double temp1 = l_infty_norm(sm->nnz_diag, sm->vals_diag);
 //        double temp2 = l2_norm(sm->vals_diag, sm->nnz_diag);
 //        double temp3 = l2_norm(sm->residual,sm->ndofs);

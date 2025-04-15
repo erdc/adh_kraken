@@ -155,7 +155,7 @@ IFLAGS              += $(foreach dir,    $(INCLUDE_DIR), -I$(dir))
 LFLAGS              +=
 #PETSC related flags it appears, but appear to be unnecessary now
 #CFLAGS              += -g -pedantic -std=c99 -O3 -Wno-incompatible-pointer-types-discards-qualifiers
-CFLAGS              += -D_PETSC
+#CFLAGS              += -D_PETSC
 #CFLAGS              += -D_MESSG
 CFLAGS              += -D_HDF5 -D_DEBUG #-D_MPI
 #CFLAGS              += -D_SCOTCH -lptscotch
