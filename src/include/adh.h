@@ -81,10 +81,12 @@ void print_build_info();
 #include "sfile.h"
 #include "sseries.h"
 //#include "smodel.h"
+#include "stestcase.h"
 #include "smodel_super.h"
 #include "sadh_def.h"
 #include "smodel_design.h"
-#include "stestcase.h"
+#include "testcases.h"
+
 
 #include "messg.h"
 

@@ -104,6 +104,8 @@ void smodel_super_alloc_init(SMODEL_SUPER **superModel, int nSuperModels) {
         sm->series_gw_psk_head = NULL;
         sm->series_gw_psk_curr = NULL;
 
+        sm->testcase = NULL;
+
     }   
 }
 

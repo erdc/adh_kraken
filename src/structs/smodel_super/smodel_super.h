@@ -102,6 +102,8 @@ typedef struct SMODEL_SUPER{
     //just to build without bug
     STR_VALUE *str_values;
 
+    STESTCASE *testcase;
+
 } SMODEL_SUPER;
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

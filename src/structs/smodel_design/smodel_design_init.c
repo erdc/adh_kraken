@@ -93,6 +93,16 @@ int smodel_design_init(SMODEL_DESIGN *dmod, char *filebase, bool input_check
             printf("------------------------------------------------------\n");
         }
         smodel_super_read_init(&(dmod->superModel[imono]),dmod->superModel[imono].filebase);
+    
+        if (dmod->superModel[imono].testcase != NULL) {
+            if (DEBUG) {
+                printf("------------------------------------------------------\n");
+                printf("SuperModel '%s' Test Case Being Used - Could Re-initialize\n",dmod->superModel[imono].filebase);
+                printf("------------------------------------------------------\n");
+            }
+            dmod->superModel[imono].testcase->init(&(dmod->superModel[imono]));
+        }
+
     }
 
     //++++++++++++++++++++++++++++++++++++++++++++++

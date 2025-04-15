@@ -112,6 +112,15 @@ void smodel_super_read(SMODEL_SUPER *sm) {
         //  else if (strcmp(token, "OP") == 0) {read_bc_OP(sm,&token);}
     }
     rewind(fp);
+    
+    
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    // Read to Check for TestCases
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    read_bc_TESTCASE(sm,fp);
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++
+    
     fclose(fp);
     
     //++++++++++++++++++++++++++++++++++++++++++++++
@@ -216,7 +225,7 @@ void smodel_super_read(SMODEL_SUPER *sm) {
     //++++++++++++++++++++++++++++++++++++++++++++++
     smat_physics_set_ivar_loc_array(sm->mat_physics_elem,sm->nmat_physics,&(sm->ivar_pos));
 
-    //FORNOW JUST WORKS IN SERIAL
+    //FOR NOW JUST WORKS IN SERIAL
     #ifndef _MESSG
         sm->my_ndofs = sm->ndofs;
     #endif
