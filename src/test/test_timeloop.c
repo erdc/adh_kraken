@@ -154,6 +154,7 @@ int test_timeloop(int npx, int npy, int nt) {
 
  	SMODEL_SUPER *sm;
 	sm = &(dm.superModel[0]);
+	sm->LINEAR_PROBLEM = YES;
 
 	printf("SETTING UP BCMASK\n");
 

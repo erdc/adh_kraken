@@ -52,7 +52,7 @@ void slin_sys_allocate_petsc_objects(SLIN_SYS *lin_sys){
     if (lin_sys->indptr_off_diag == NULL){
         MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, local_size, local_size, lin_sys->indptr_diag, lin_sys->cols_diag, lin_sys->vals_diag, &(lin_sys->A));
         ierr = VecCreateSeqWithArray(PETSC_COMM_WORLD, 1, local_size, lin_sys->residual, &(lin_sys->B));
-        ierr = VecCreateSeqWithArray(PETSC_COMM_WORLD, 1, local_size, lin_sys->residual, &(lin_sys->X));
+        ierr = VecCreateSeqWithArray(PETSC_COMM_WORLD, 1, local_size, lin_sys->dsol, &(lin_sys->X));
 #ifdef _DEBUG
         printf("PETSC Mat created with sequential array\n");
 #endif

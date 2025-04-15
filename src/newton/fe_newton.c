@@ -451,7 +451,7 @@ int fe_newton(SMODEL_SUPER* sm)
         //KSPSetUp(lin_sys->ksp);
         //KSPView(lin_sys->ksp, PETSC_VIEWER_DEFAULT );
         //solve
-        KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);
+        status = KSPSolve(lin_sys->ksp,lin_sys->B,lin_sys->X);
         //scatter forward appears to update array as we need
         //forward sends owned dofs -> ghosts
         //VecGhostUpdateBegin(sm->X,INSERT_VALUES,SCATTER_FORWARD);
@@ -801,7 +801,7 @@ int fe_newton(SMODEL_SUPER* sm)
         } else {
             check = OFF;
         }
-        //printf("CHECK VAL %d\n",check);
+        
         if (resid_max_norm < 1.0E+20) {
             check *= YES;
         } else check = OFF;
@@ -812,12 +812,14 @@ int fe_newton(SMODEL_SUPER* sm)
 	       //printf("fe_newton UMFail_max != FALSE\n");
 	       check = OFF;
         }
+
         //Mark, need to figure this out
         //if (solver->LINEAR_PROBLEM == TRUE) {
         //    if (sm->tol_nonlin > SMALL && resid_max_norm > sm->tol_nonlin) {
         //        check *= TRUE;
         //    } else check = OFF;
         //} else {
+
         if (resid_max_norm > sm->tol_nonlin && inc_max_norm > sm->inc_nonlin) {
                 check *= YES;
         } else {
@@ -825,7 +827,7 @@ int fe_newton(SMODEL_SUPER* sm)
         }
         //check=OFF;
 
-
+        
 #ifdef _MESSG  // make sure that if one subdomain fails, they all do (cjt)
         MPI_Allreduce(&check, &keep_chugging, 1, MPI_INT, MPI_MAX, smpi->ADH_COMM);
 #else

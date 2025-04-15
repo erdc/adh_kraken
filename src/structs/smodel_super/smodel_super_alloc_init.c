@@ -59,8 +59,8 @@ void smodel_super_alloc_init(SMODEL_SUPER **superModel, int nSuperModels) {
         //++++++++++++++++++++++++++++++++++++++++
         sm->lin_sys = NULL;
         sm->perturbation  = sqrt(SMALL);
-        sm->inc_nonlin = 1e-8;
-        sm->tol_nonlin = 1e-10;
+        sm->inc_nonlin = 1e-6;
+        sm->tol_nonlin = 1e-8;
         sm->max_nonlin_linesearch_cuts = 5;
         sm->max_nonlin_it = 10;
         sm->it_count_nonlin = 0;
