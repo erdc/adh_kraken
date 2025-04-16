@@ -49,7 +49,7 @@ typedef struct SMODEL_SUPER{
     double *sol_older;
 
     // physics modules
-    SSW  *sw;           // surface water storage
+    //SSW  *sw;           // surface water storage
     //SCON *con;          // transport constituent storage
     //SSED *sed;          // sediment constituent storage
     //SGW  *gw;           // groundwater storage
@@ -92,6 +92,12 @@ typedef struct SMODEL_SUPER{
     int *bc_mask;
     double *dirichlet_data;
 
+    // General variables, these are params!!!!
+    // contains any integers or doubles
+    // relevant to super model
+    // should this replace flags???
+    //SPARAM params;
+    //double *params;
     // General variables
     double gravity;
     double density;

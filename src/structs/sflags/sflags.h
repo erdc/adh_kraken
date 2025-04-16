@@ -9,6 +9,9 @@ typedef struct {
     /* Model Flags */
     int *model;    // which models are in this superModel
     
+    int *params;  // which params are in this superModel
+
+    int *dvars; // which dvars are in this superModel
     /* moving grid */
     bool MG;
     

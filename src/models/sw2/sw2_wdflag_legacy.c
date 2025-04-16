@@ -38,12 +38,11 @@ void fe_sw2_wdflag_legacy(SMODEL_SUPER *sm) {
     int e_wet;
     int isize_prev;
     SGRID *grid = sm->grid;
-    SSW *sw2d = sm->sw;
-    int nnode_sw2 = sw2d->dvar.nnode_dvar;
+    int nnode_sw2 = sm->dvars.nnode_dvar;
     //if nnode!=nnode_sw2, do something more complicated
     int nnode = sm->grid->nnodes;
     //old way
-    int *wd_flag = sw2d->dvar.elem_flags[sw2d->WD_FLAG];
+    int *wd_flag = sm->dvars.elem_flags[adh_def._WDFLAG];
     //new
     //int *wdflag_ind = g_hash_table_lookup(sw2d->elemental_flag_hash, "WD_FLAG");
     //int *wd_flag = sw2d->dvar.elem_flags[*(wdflag_ind)];

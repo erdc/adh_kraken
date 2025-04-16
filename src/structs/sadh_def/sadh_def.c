@@ -23,7 +23,7 @@ void sadh_def_init(void) {
     // ADH INDEPENDENT VARIABLES
     // ++++++++++++++++++++++++++++++++++
     k=0;
-    adh_def.n_ivars = 10 + MAX_TRNS;
+    adh_def.n_ivars = MAX_IVARS + MAX_TRNS;
     adh_def.ivar = (SVAR *) tl_alloc(sizeof(SVAR),adh_def.n_ivars);
     adh_def._H     = k; strcpy(adh_def.ivar[k].name,"DEPTH");       strcpy(adh_def.ivar[k].subname,"");  adh_def.ivar[k].dim = 1; k++;
     adh_def._U     = k; strcpy(adh_def.ivar[k].name,"VELOCITY");    strcpy(adh_def.ivar[k].subname,"X"); adh_def.ivar[k].dim = 3; k++;
@@ -41,10 +41,10 @@ void sadh_def_init(void) {
     assert(k == adh_def.n_ivars);
     
     // ++++++++++++++++++++++++++++++++++
-    // ADH INDEPENDENT VARIABLES
+    // ADH DEPENDENT VARIABLES
     // ++++++++++++++++++++++++++++++++++
     k=0;
-    adh_def.n_dvars = 19;
+    adh_def.n_dvars = MAX_NDVARS;
     adh_def.dvar = (SVAR *) tl_alloc(sizeof(SVAR),adh_def.n_dvars);
     adh_def._WIND_SX    = k; strcpy(adh_def.dvar[k].name,"WIND_STRESS");       strcpy(adh_def.dvar[k].subname,"X");   adh_def.dvar[k].dim = 2; k++;
     adh_def._WIND_SY    = k; strcpy(adh_def.dvar[k].name,"WIND_STRESS");       strcpy(adh_def.dvar[k].subname,"Y");   adh_def.dvar[k].dim = 2; k++;
@@ -56,17 +56,41 @@ void sadh_def_init(void) {
     adh_def._WAVE_YY    = k; strcpy(adh_def.dvar[k].name,"WAVE_RADS");         strcpy(adh_def.dvar[k].subname,"YY");  adh_def.dvar[k].dim = 4; k++;
     adh_def._DENSITY    = k; strcpy(adh_def.dvar[k].name,"DENSITY");           strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._BED_DPL    = k; strcpy(adh_def.dvar[k].name,"BED_DISPLACEMENT");  strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._BED_DPL_OLD= k; strcpy(adh_def.dvar[k].name,"BED_DISPLACEMENT_OLD");strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._BED_ELE    = k; strcpy(adh_def.dvar[k].name,"BED_ELEVATION");     strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._GS         = k; strcpy(adh_def.dvar[k].name,"GRID_SPEED");        strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._GS_OLD     = k; strcpy(adh_def.dvar[k].name,"GRID_SPEED_OLD");    strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._DPRS       = k; strcpy(adh_def.dvar[k].name,"PRESSURE");          strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._DPRS_PLUS  = k; strcpy(adh_def.dvar[k].name,"PRS_PLUS");          strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._DPRS_MINUS = k; strcpy(adh_def.dvar[k].name,"PRS_MINUS");         strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._DPL_PERTURBATION = k; strcpy(adh_def.dvar[k].name,"DPL_PERTURBATION");strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._CONT_ERROR = k; strcpy(adh_def.dvar[k].name,"CONT_ERROR");        strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._HYD_VISCOSITY= k; strcpy(adh_def.dvar[k].name,"HYD_VISCOSITY");   strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._TRN        = k; strcpy(adh_def.dvar[k].name,"TRN");               strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._GRAD_BED_X = k; strcpy(adh_def.dvar[k].name,"GRAD_BED_X");        strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._GRAD_BED_Y = k; strcpy(adh_def.dvar[k].name,"GRAD_BED_Y");        strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._TAN_VEC_X  = k; strcpy(adh_def.dvar[k].name,"TAN_VEC_X");         strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._TAN_VEC_Y  = k; strcpy(adh_def.dvar[k].name,"TAN_VEC_Y");         strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._SURFACE_VEL_X = k; strcpy(adh_def.dvar[k].name,"SURFACE_VEL_X");  strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._SURFACE_VEL_Y = k; strcpy(adh_def.dvar[k].name,"SURFACE_VEL_Y");  strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._BOTTOM_VEL_X = k; strcpy(adh_def.dvar[k].name,"BOTTOM_VEL_X");    strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._BOTTOM_VEL_Y = k; strcpy(adh_def.dvar[k].name,"BOTTOM_VEL_Y");    strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._VNODE_FLUX = k; strcpy(adh_def.dvar[k].name,"VERTICLE_NODE_FLUX");strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._WDFLAG     = k; strcpy(adh_def.dvar[k].name,"WET_DRY_FLAG");      strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
     adh_def._ERROR      = k; strcpy(adh_def.dvar[k].name,"ERROR");             strcpy(adh_def.dvar[k].subname,"");    adh_def.dvar[k].dim = 1; k++;
+    adh_def._ELEM_RHS_SUPG_DACONT = k; strcpy(adh_def.dvar[k].name,"ELEM_RHS_SUPG_DACONT"); strcpy(adh_def.dvar[k].subname,""); adh_def.dvar[k].dim = 1; k++;
+    adh_def._ELEM_RHS_SUPG_CONT = k; strcpy(adh_def.dvar[k].name,"ELEM_RHS_SUPG_CONT"); strcpy(adh_def.dvar[k].subname,""); adh_def.dvar[k].dim = 1; k++;
+    adh_def._ELEM_RHS_DACONT_EXTRA_TERMS = k; strcpy(adh_def.dvar[k].name,"ELEM_RHS_DACONT_EXTRA_TERMS"); strcpy(adh_def.dvar[k].subname,""); adh_def.dvar[k].dim = 1; k++;
     assert(k == adh_def.n_dvars);
     
+    // ++++++++++++++++++++++++++++++++++
+    // ADH PARAMETERS
+    // ++++++++++++++++++++++++++++++++++
+    k=0;
+    adh_def.n_params = MAX_NPARAMS;
+    adh_def.param = (SVAR *) tl_alloc(sizeof(SVAR),adh_def.n_params);
+    adh_def._WD_L_LIMIT = k; strcpy(adh_def.param[k].name,"WD_LOWER_LIMIT"); strcpy(adh_def.dvar[k].subname,""); adh_def.dvar[k].dim = 1; k++;
+
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // ADH MODEL DEFINITIONS

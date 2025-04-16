@@ -77,7 +77,7 @@ void print_build_info();
 #include "slin_sys.h"
 #include "dofmaps.h"
 #include "sdvar.h"
-#include "ssw.h"
+//#include "ssw.h"
 #include "sfile.h"
 #include "sseries.h"
 //#include "smodel.h"

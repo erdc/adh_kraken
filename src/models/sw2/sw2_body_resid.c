@@ -72,7 +72,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     int PRESSURE_FLAG = ON;
     double t1, t2, t3, t4, t5;   
     // aliases for convenience
-    SSW *sw2 = mod->sw;
+    //SSW *sw2 = mod->sw;
     SGRID *grid = mod->grid;
     SELEM_2D *elem2d = &(grid->elem2d[ie]); // be careful not to shallow copy here
     SVECT2D *grad_shp = elem2d->grad_shp;
@@ -82,10 +82,10 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double dt = mod->ts->dt/(mod->nsubsteps); //maybe save this instead of computing every time but it can change
     double djac = elem2d->djac;
     double g = mod->gravity; //where to put this
-    double drying_lower_limit = sw2->drying_lower_limit;
+    double drying_lower_limit = 1e-6;//NEED TO UPDATE sw2->drying_lower_limit;
     int imat = mod->elem2d_physics_mat[ie]; // this will need to be mod->coverage->coverage_2d[SW2_INDEX][ie]
     STR_VALUE str_values = mod->str_values[elem2d->string]; //still in use?
-    int wd_flag = sw2->dvar.elem_flags[sw2->WD_FLAG][ie]; //WARNING, ie is not always correct, could be sw2->dvar.dvar_elem_map[ie] need to use Coreys map eventually? how to avoid conditional. a function pointer?
+    int wd_flag = mod->dvars.elem_flags[adh_def._WDFLAG][ie]; //WARNING, ie is not always correct, could be sw2->dvar.dvar_elem_map[ie] need to use Coreys map eventually? how to avoid conditional. a function pointer?
     //printf("g: %f, alpha: %f, dt: %f, drying lower: %f, wd_flag: %d, imat: %d\n ", g,alpha,dt,drying_lower_limit,wd_flag,imat);
     //only make for quadrilateral elements?
     SQUAD *quad = grid->quad_rect; // for quadrilateral quadrature calculations
@@ -141,7 +141,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     if (FALSE){//(mod->flag.BAROCLINIC == 1) { //where to put this?
         //global_to_local_dbl(sw2->nd, elem_density, elem2d->nodes, nnodes);
         //use array mapping
-        global_to_local_dbl_ivars(elem_density, elem2d->nodes, nnodes, sw2->dvar.dvar_node_map, sw2->dvar.nodal_dvar[sw2->DENSITY]);
+        //global_to_local_dbl_ivars(elem_density, elem2d->nodes, nnodes, sw2->dvar.dvar_node_map, sw2->dvar.nodal_dvar[sw2->DENSITY]);
         for (i=0; i<nnodes; i++) {
             if (elem_head[i] < 0) elem_density[i] = 0;
            }
@@ -337,10 +337,10 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
     double vars[2]; // for passing doubles through wet-dry routine  
     // this is used to store later for transport
     //NEED TO REINCORPORATE
-    for (i=0; i<nnodes; i++) {
+    //for (i=0; i<nnodes; i++) {
         //should be
-        sw2->elem_rhs_dacont_extra_terms[ie][i] = 0.;
-    }    
+        //sw2->elem_rhs_dacont_extra_terms[ie][i] = 0.;
+    //}    
    /*!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      *                                 SHOCK CAPTURING CONTRIBUTION
      *-------------------------------------------------------------------------------------------
@@ -355,19 +355,22 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             double elem_wse_grad_mag = svect2d_mag_safe(elem_grad_wse); //warning, this adds an epsilon to avoid 0
             double elem_u_grad_mag   = svect2d_mag_safe(elem_grad_u);
             double elem_v_grad_mag   = svect2d_mag_safe(elem_grad_v);            
-            double sh_cap_coef_u = one_2 * sw2->drying_upper_limit * djac * elem_u_grad_mag;
-            double sh_cap_coef_v = one_2 * sw2->drying_upper_limit * djac * elem_v_grad_mag;            
-            double shock_avg_depth = sw2->drying_upper_limit;
-            if (shock_avg_depth < sw2->drying_upper_limit) shock_avg_depth = sw2->drying_upper_limit;
-            double temp = (elem_vel_avg_mag / sqrt(g * sw2->drying_upper_limit)); 
+            double sh_cap_coef_u = 0.0;//one_2 * sw2->drying_upper_limit * djac * elem_u_grad_mag;
+            double sh_cap_coef_v = 0.0; //one_2 * sw2->drying_upper_limit * djac * elem_v_grad_mag;            
+            double shock_avg_depth = 0.0; //sw2->drying_upper_limit;
+            //if (shock_avg_depth < sw2->drying_upper_limit) shock_avg_depth = sw2->drying_upper_limit;
+            //double temp = (elem_vel_avg_mag / sqrt(g * sw2->drying_upper_limit));
+            double temp = 0.0;
             if (temp > 1) temp = 1.;            
-            double sh_cap_coef = one_2 * elem_vel_avg_mag * djac * sw2->drying_upper_limit * elem_wse_grad_mag / (shock_avg_depth * shock_avg_depth + SMALL);            
+            //double sh_cap_coef = one_2 * elem_vel_avg_mag * djac * sw2->drying_upper_limit * elem_wse_grad_mag / (shock_avg_depth * shock_avg_depth + SMALL);            
+            double sh_cap_coef = 0.0;
             SVECT2D grad_unorm, grad_vnorm, norm;
             grad_unorm.x = elem_grad_u.x / elem_u_grad_mag;  grad_unorm.y = elem_grad_u.y / elem_u_grad_mag;
             grad_vnorm.x = elem_grad_v.x / elem_v_grad_mag;  grad_vnorm.y = elem_grad_v.y / elem_v_grad_mag;            
             for (i=0; i<nnodes; i++) {
                 // mass contributions, every 3rd equation is continuity
-                rhs[i*3] = dt * one_2 * g * djac * ((sw2->drying_lower_limit * elem_grad_wse.x) * grad_shp[i].x + (sw2->drying_lower_limit * elem_grad_wse.y) * grad_shp[i].y);        
+                //rhs[i*3] = dt * one_2 * g * djac * ((sw2->drying_lower_limit * elem_grad_wse.x) * grad_shp[i].x + (sw2->drying_lower_limit * elem_grad_wse.y) * grad_shp[i].y);        
+                rhs[i*3] = 0.0;
                 // momentum contribution
                 norm.x = svect2d_dotp(grad_unorm, elem_grad_u);
                 norm.y = svect2d_dotp(grad_vnorm, elem_grad_v);
@@ -378,7 +381,7 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
             }            
             for (i=0; i<nnodes; i++) {
                 //NEED TO FIX!!!
-                sw2->elem_rhs_dacont_extra_terms[ie][i] += rhs[i*3]; // cjt :: store
+                //sw2->elem_rhs_dacont_extra_terms[ie][i] += rhs[i*3]; // cjt :: store
                 elem_rhs[i*3] += rhs[i*3];
                 elem_rhs[i*3+1] += rhs[i*3+1];
                 elem_rhs[i*3+2] += rhs[i*3+2];
@@ -471,8 +474,9 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
      *********************************************************************************************/    
     // get elementally averaged depth
     double temp = elem_h_wd_avg;
-    if (elem_h_wd_avg < sw2->drying_upper_limit) {
-        temp = sw2->drying_upper_limit;
+    //NEED TO CHANGE!!!!
+    if (elem_h_wd_avg < 0. ){ //sw2->drying_upper_limit) {
+        temp = 0.0; //sw2->drying_upper_limit;
     }    
     sarray_init_dbl(rhs_x_eq,nnodes);
     sarray_init_dbl(rhs_y_eq,nnodes);    
@@ -925,7 +929,9 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
         double grad_shp_x[nnodes]; for (i=0; i<nnodes; i++) {grad_shp_x[i] = grad_shp[i].x;}
         double grad_shp_y[nnodes]; for (i=0; i<nnodes; i++) {grad_shp_y[i] = grad_shp[i].y;}
         double elem_h_wd_avg_denom = MAX(elem_h_wd_avg, NOT_QUITE_SMALL);
-        double tau = fe_get_supg_tau_sw(nnodes, elem_nds, g_factor, elem_h_wd_avg_denom, elem_vel_wd_avg.x, elem_vel_wd_avg.y,0.,grad_shp_x,grad_shp_y,NULL,area * factor_old, sw2->tau_pg, 2, 2, 2);//need to figure out         
+        //MARK CHANGE THIS LINE
+        //tau_pg instead of 0.5 !!!!!!!
+        double tau = fe_get_supg_tau_sw(nnodes, elem_nds, g_factor, elem_h_wd_avg_denom, elem_vel_wd_avg.x, elem_vel_wd_avg.y,0.,grad_shp_x,grad_shp_y,NULL,area * factor_old, 0.5, 2, 2, 2);//need to figure out         
         // calculate constant strong equation set. This may mean elementally averaging each term.
         if (isTriangle == TRUE) {
             //replaced            
@@ -1114,7 +1120,8 @@ int fe_sw2_body_resid(SMODEL_SUPER *mod, double *elem_rhs, int ie, double pertur
         }
         for (i=0; i<nnodes; i++) {
             //NEED TO ADD BACK IN
-            sw2->elem_rhs_dacont_extra_terms[ie][i] += rhs_c_eq[i];
+            //this will be in dvar now!!!!
+            //sw2->elem_rhs_dacont_extra_terms[ie][i] += rhs_c_eq[i];
             elem_rhs[i*3] += rhs_c_eq[i];
             elem_rhs[i*3+1] += rhs_x_eq[i];
             elem_rhs[i*3+2] += rhs_y_eq[i];

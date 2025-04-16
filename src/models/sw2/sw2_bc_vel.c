@@ -68,7 +68,7 @@ int fe_sw2_bc_vel(SMODEL_SUPER *mod, double *elem_rhs, int ie, double perturbati
     time_t time1;  time(&time1);
 #endif
     // aliases
-    SSW *sw2 = mod->sw;
+    //SSW *sw2 = mod->sw;
     SELEM_1D elem1d = mod->grid->elem1d[ie];
     // instead of string, this will come from physics mat or other coverage?
     //regardless this will always be in mat1d

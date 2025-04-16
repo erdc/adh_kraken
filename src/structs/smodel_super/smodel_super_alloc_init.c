@@ -49,7 +49,7 @@ void smodel_super_alloc_init(SMODEL_SUPER **superModel, int nSuperModels) {
         //Eventually need to hook into front end
         //but only FE_NEWTON time step available right now
         sm->forward_step = FE_NEWTON;
-        sm->sw = NULL;
+        //sm->sw = NULL;
         // sm->con = NULL;
         // sm->sed = NULL;
         // sm->gw = NULL;
